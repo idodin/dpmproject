@@ -104,17 +104,15 @@ public class Odometer extends OdometerData implements Runnable {
 	 * This method is where the logic for the odometer will run. Use the methods
 	 * provided from the OdometerData class to implement the odometer.
 	 */
-	// run method (required for Thread)
 	public void run() {
 		long updateStart, updateEnd;
 
 		while (true) {
-//			theta = Math.toRadians(odo.getXYT()[2]);
 			theta = odo.getXYT()[2];
 			updateStart = System.currentTimeMillis();
 			
-			FinalProject.gyroAngle.fetchSample(FinalProject.gyroBuffer, 0);
-			newTheta = ((FinalProject.gyroBuffer[0] % 360) + 360) % 360;
+			FinalProject.gyroAngle.fetchSample(FinalProject.getGyroBuffer(), 0);
+			newTheta = ((FinalProject.getGyroBuffer()[0] % 360) + 360) % 360;
 
 			leftMotorTachoCount = leftMotor.getTachoCount();
 			rightMotorTachoCount = rightMotor.getTachoCount();
@@ -128,28 +126,13 @@ public class Odometer extends OdometerData implements Runnable {
 
 			
 			deltaD = (distL + distR) * 0.5;
-//			deltaT = (distL - distR) / TRACK;
 			deltaT = newTheta - theta;
-			
 
-//			theta += deltaT;
-
-
-//			dX = deltaD * Math.sin(theta);
-//			dY = deltaD * Math.cos(theta);
 			
 			dX = deltaD * Math.sin(Math.toRadians(newTheta));
 			dY = deltaD * Math.cos(Math.toRadians(newTheta));
 			
-			
-//			odo.update(dX, dY, 180 * deltaT / Math.PI); // Convert back to degrees.
 			odo.update(dX, dY, deltaT);
-			
-//			FinalProject.gyroAngle.fetchSample(FinalProject.gyroBuffer, 0);
-//			FinalProject.odometer.setTheta((double) FinalProject.gyroBuffer[0]);
-
-//			odo.update(dX, dY, 0);
-//			odo.setTheta(FinalProject.angle);
 			
 			
 			// this ensures that the odometer only runs once every period

@@ -29,12 +29,12 @@ import lejos.robotics.filter.MeanFilter;
 public class FinalProject {
 
 	// Motor Objects, and Robot related parameters
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
+	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
 	// Configuration Objects
-	public static final double WHEEL_RAD = 2.09;
+	private static final double WHEEL_RAD = 2.09;
 	private static final double TRACK = 15.80;
 	private static final Port usPort = LocalEV3.get().getPort("S3");
 	private static final Port colorPortBack = LocalEV3.get().getPort("S1");
@@ -48,10 +48,7 @@ public class FinalProject {
 	private static float[] usData = new float[usAverage.sampleSize()];
 	private static SampleProvider colorBack = new EV3ColorSensor(colorPortBack).getMode("ColorID");
 	private static float[] colorBufferBack = new float[colorBack.sampleSize()];
-
-
-	// make private later
-	public static float[] gyroBuffer = new float[gyroAngle.sampleSize()];
+	private static float[] gyroBuffer = new float[gyroAngle.sampleSize()];
 
 	public static Odometer odo;
 	public static Navigator navigator;
@@ -129,5 +126,31 @@ public class FinalProject {
 		return colorBufferBack;
 	}
 
+	/**
+	 * Return the left motor
+	 * 
+	 * @return
+	 */
+	public static EV3LargeRegulatedMotor getLeftmotor() {
+		return leftMotor;
+	}
+
+	/**
+	 * Return right motor
+	 * 
+	 * @return
+	 */
+	public static EV3LargeRegulatedMotor getRightmotor() {
+		return rightMotor;
+	}
+	
+	/**
+	 * Return gyro buffer
+	 * 
+	 * @return
+	 */
+	public static float[] getGyroBuffer() {
+		return gyroBuffer;
+	}
 
 }

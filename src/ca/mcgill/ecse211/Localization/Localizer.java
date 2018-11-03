@@ -24,8 +24,8 @@ public class Localizer {
 	private static final int FORWARD_ACCELERATION = 2000;
 	private static final int TURN_ACCELERATION = 2000;
 
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.leftMotor;
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.rightMotor;
+	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static SampleProvider usAverage = FinalProject.getUSAverage();

@@ -24,8 +24,8 @@ public class Navigator {
 	private static final int FORWARD_SPEED = 200;
 	private static final double TILE_SIZE = 30.48;
 	private static final int TURN_ERROR = 3;
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.leftMotor;
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.rightMotor;
+	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static boolean isNavigating;
