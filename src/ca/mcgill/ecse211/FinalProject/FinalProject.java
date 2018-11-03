@@ -155,6 +155,11 @@ public class FinalProject {
 		return gyroBuffer;
 	}
 
+	/**
+	 * Return tile size
+	 * 
+	 * @return
+	 */
 	public static double getTileSize() {
 		return TILE_SIZE;
 	}

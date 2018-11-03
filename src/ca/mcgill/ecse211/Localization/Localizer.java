@@ -38,15 +38,22 @@ public class Localizer {
 	private static int rfalling = 30;
 
 	/**
-	 * Run Falling Edge Localization with the Ultrasonic Sensor.
+	 * Falling Edge Localization with the Ultrasonic Sensor.
+	 * 
+	 * Turn until first falling edge is met, record angle.
+	 * then turn clockwise until second falling edge is met, record angle.
+	 * 
+	 * Calculations done to determine where the 0 degrees heading is.
+	 * Turn to 0 degrees
+	 * 
 	 * @throws OdometerExceptions
 	 */
 	public static void localizeFE() throws OdometerExceptions {
 		// Initialize variables
-		double a1, a2, b1, b2, a, b, correction;
-		a1 = a2 = b1 = b2 = a = b = 0;
-		boolean a1set, a2set, b1set, b2set;
-		a1set = a2set = b1set = b2set = false;
+		double a, b, correction;
+		a = b = 0;
+//		boolean a1set, a2set, b1set, b2set;
+//		a1set = a2set = b1set = b2set = false;
 		int dist, lastdist;
 		dist = lastdist = Integer.MAX_VALUE;
 
@@ -75,21 +82,23 @@ public class Localizer {
 		while (true) {
 			usAverage.fetchSample(usData, 0);
 			dist = (int) (usData[0] * 100.00);
-//			if (dist > 3 && dist <= d + 15 + k && lastdist <= d + 15 + k && !a1set) {
-			if (dist > 3 && dist <= d + 5 + k && lastdist <= d + 5 + k && !a1set) {
+			
+			if (dist > 3 && dist <= d + 5 + k && lastdist <= d + 5 + k) {
 				Sound.beep();
-				a1 = odo.getXYT()[2];
-				a1set = true;
-			}
-			if (dist > 3 && dist <= d + 10 - k && lastdist <= d + 10- k && a1set && !a2set) {
-				Sound.beep();
-				a2 = odo.getXYT()[2];
-				a2set = true;
-			}
-			if (a1set && a2set) {
-				a = (a1 + a2) / 2;
+				a = odo.getXYT()[2];
 				break;
 			}
+			
+//			if (dist > 3 && dist <= d + 10 - k && lastdist <= d + 10- k && a1set && !a2set) {
+//				Sound.beep();
+//				a2 = odo.getXYT()[2];
+//				a2set = true;
+//			}
+//			if (a1set && a2set) {
+//				a = (a1 + a2) / 2;
+//				break;
+//			}
+			
 			lastdist = dist;
 		}
 
@@ -105,20 +114,20 @@ public class Localizer {
 		while (true) {
 			usAverage.fetchSample(usData, 0);
 			dist = (int) (usData[0] * 100.00);
-			if (dist > 4 && dist < 35 && dist <= d + k -1 && lastdist <= d + k && !b1set) {
+			if (dist > 4 && dist < 35 && dist <= d + k -1 && lastdist <= d + k) {
 				Sound.beep();
-				b1 = odo.getXYT()[2];
-				b1set = true;
-			}
-			if (dist > 3 && dist <= d - k && lastdist <= d + k && b1set && !b2set) {
-				Sound.beep();
-				b2 = odo.getXYT()[2];
-				b2set = true;
-			}
-			if (b1set && b2set) {
-				b = (b1 + b2) / 2;
+				b = odo.getXYT()[2];
 				break;
 			}
+//			if (dist > 3 && dist <= d - k && lastdist <= d + k && b1set && !b2set) {
+//				Sound.beep();
+//				b2 = odo.getXYT()[2];
+//				b2set = true;
+//			}
+//			if (b1set && b2set) {
+//				b = (b1 + b2) / 2;
+//				break;
+//			}
 			lastdist = dist;
 		}
 
