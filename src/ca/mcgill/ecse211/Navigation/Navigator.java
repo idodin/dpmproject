@@ -1,9 +1,8 @@
-package ca.mcgill.ecse211.navigation;
-
+package ca.mcgill.ecse211.Navigation;
 
 import ca.mcgill.ecse211.FinalProject.FinalProject;
 import ca.mcgill.ecse211.odometer.Odometer;
-
+import ca.mcgill.ecse211.odometer.OdometerCorrections;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 //import ca.mcgill.ecse211.odometer.Odometer;
 //import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -24,14 +23,14 @@ public class Navigator {
 
 	private static final int FORWARD_SPEED = 200;
 	private static final double TILE_SIZE = 30.48;
-	private static final int TURN_ERROR = 1;
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.leftMotor;
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.rightMotor;
+	private static final int TURN_ERROR = 3;
+	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static boolean isNavigating;
-//	private static SampleProvider usDistance = FinalProject.getUSDistance();
-//	private static float[] usData = FinalProject.getUSData();
+	private static SampleProvider usDistance = FinalProject.getUSDistance();
+	private static float[] usData = FinalProject.getUSData();
 
 	/**
 	 * This method makes the robot travel to the specified way point
@@ -42,8 +41,8 @@ public class Navigator {
 	 *            y-coordinate of the specified waypoint.
 	 */
 	public static void travelTo(double x, double y) {
-		
-//		OdometerCorrections.correction = false;
+
+		OdometerCorrections.correction = false;
 
 		try {
 			odo = Odometer.getOdometer();
@@ -79,8 +78,8 @@ public class Navigator {
 		while (isNavigating) {
 			i++;
 
-//			usDistance.fetchSample(usData, 0); // acquire data
-//			int obstDistance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
+			usDistance.fetchSample(usData, 0); // acquire data
+			int obstDistance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
 
 			currentPosition = odo.getXYT();
 
@@ -105,8 +104,10 @@ public class Navigator {
 		}
 	}
 
+	
 	public static void orientateTravel(double x, double y) {
-		
+
+		OdometerCorrections.correction = false;
 
 		try {
 			odo = Odometer.getOdometer();
@@ -136,11 +137,9 @@ public class Navigator {
 
 			if (Math.abs(currentPosition[2] - (baseAngle + adjustAngle)) > 5)
 				turnTo(baseAngle + adjustAngle);
-				
-			// System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " +
-			// adjustAngle);
+
 		}
-//		OdometerCorrections.Correction = true;
+
 		return;
 	}
 
@@ -151,11 +150,9 @@ public class Navigator {
 	 *            Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
-	
 
+		OdometerCorrections.correction = false;
 
-
-		
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -166,8 +163,8 @@ public class Navigator {
 		leftMotor.setAcceleration(500);
 		rightMotor.setAcceleration(500);
 
-		leftMotor.setSpeed(150);
-		rightMotor.setSpeed(150);
+		leftMotor.setSpeed(60);
+		rightMotor.setSpeed(60);
 
 		currentPosition = odo.getXYT();
 
@@ -189,12 +186,12 @@ public class Navigator {
 			while (Math.abs(odo.getXYT()[2] - theta) > TURN_ERROR) {
 				// do nothing
 			}
-			
+
 			leftMotor.stop(true);
 			rightMotor.stop(false);
 		}
 
-//		OdometerCorrections.correction = true;
+		// OdometerCorrections.correction = true;
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
