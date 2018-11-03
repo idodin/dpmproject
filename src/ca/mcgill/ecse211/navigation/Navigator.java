@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.navigation;
+package ca.mcgill.ecse211.Navigation;
 
 import ca.mcgill.ecse211.FinalProject.FinalProject;
 import ca.mcgill.ecse211.odometer.Odometer;
