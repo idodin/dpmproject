@@ -41,7 +41,7 @@ public class Navigator {
 	 *            y-coordinate of the specified waypoint.
 	 */
 	public static void travelTo(double x, double y) {
-		
+
 		OdometerCorrections.correction = false;
 
 		try {
@@ -104,10 +104,11 @@ public class Navigator {
 		}
 	}
 
+	
 	public static void orientateTravel(double x, double y) {
-		
+
 		OdometerCorrections.correction = false;
-		
+
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -136,11 +137,9 @@ public class Navigator {
 
 			if (Math.abs(currentPosition[2] - (baseAngle + adjustAngle)) > 5)
 				turnTo(baseAngle + adjustAngle);
-				
-			// System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " +
-			// adjustAngle);
+
 		}
-//		OdometerCorrections.Correction = true;
+
 		return;
 	}
 
@@ -151,11 +150,9 @@ public class Navigator {
 	 *            Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
-	
 
 		OdometerCorrections.correction = false;
 
-		
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -189,12 +186,12 @@ public class Navigator {
 			while (Math.abs(odo.getXYT()[2] - theta) > TURN_ERROR) {
 				// do nothing
 			}
-			
+
 			leftMotor.stop(true);
 			rightMotor.stop(false);
 		}
 
-//		OdometerCorrections.correction = true;
+		// OdometerCorrections.correction = true;
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);

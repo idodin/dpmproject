@@ -2,17 +2,14 @@ package ca.mcgill.ecse211.FinalProject;
 
 import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
+import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
-import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
-import lejos.hardware.Button;
-import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;

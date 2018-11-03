@@ -39,7 +39,7 @@ public class Localizer {
 	private static int rfalling = 30;
 
 	/**
-	 * Run Falling Edge Localization with the Ultrasonic Sesnor.
+	 * Run Falling Edge Localization with the Ultrasonic Sensor.
 	 * @throws OdometerExceptions
 	 */
 	public static void localizeFE() throws OdometerExceptions {
