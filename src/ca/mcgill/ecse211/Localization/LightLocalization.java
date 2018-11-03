@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.Localization;
 import ca.mcgill.ecse211.FinalProject.FinalProject;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
+import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3GyroSensor;
@@ -27,6 +28,7 @@ public class LightLocalization {
 	private static SampleProvider SColor = FinalProject.getColorBack();
 	private static float[] data = FinalProject.getColorBufferBack();
 	public static EV3GyroSensor gyro = FinalProject.gyro;
+	public static Odometer odo;
 
 	
 	/**
