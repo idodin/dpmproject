@@ -1,6 +1,10 @@
 package ca.mcgill.ecse211.FinalProject;
 
-import ca.mcgill.ecse211.Navigation.Navigator;
+import ca.mcgill.ecse211.Localization.LightLocalization;
+import ca.mcgill.ecse211.Localization.Localizer;
+import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
+import ca.mcgill.ecse211.RingRetrieval.RingSearch;
+import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
@@ -53,7 +57,12 @@ public class FinalProject {
 	public static float[] gyroBuffer = new float[gyroAngle.sampleSize()];
 
 	public static Odometer odo;
-
+	public static Navigator navigator;
+	public static RingGrasp grasping;
+	public static RingSearch searching;
+	public static LightLocalization lightLocalization;
+	public static Localizer localizer;
+	public static Display display;
 	// public static double angle;
 
 	public static void main(String[] args) throws OdometerExceptions {

@@ -2,7 +2,7 @@ package ca.mcgill.ecse211.Localization;
 
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.FinalProject.FinalProject;
-import ca.mcgill.ecse211.Navigation.Navigator;
+import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -65,10 +65,8 @@ public class LightLocalization {
 
 			SColor.fetchSample(data, 0);
 			color = data[0] * 1000;
-
 			// System.out.println(color);
 			if (color - lastColor > 5) {
-
 			//	Sound.beep();
 				temp = FinalProject.odo.getXYT()[2];
 				System.out.println(temp);
