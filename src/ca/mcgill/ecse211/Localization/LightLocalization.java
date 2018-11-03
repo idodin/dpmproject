@@ -9,6 +9,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 
+/**
+ * This is the constructor, it's used to localize
+ *  when the robot is at an intersection, 
+ * using the light sensor.
+ */
 public class LightLocalization {
 	private static double sensorOffset = -13.0;
 	private static int counter = 1;
@@ -101,7 +106,7 @@ public class LightLocalization {
 		odo.setY(yOrigin);
 
 		if (!positionOnly) {
-			Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2);
+			Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
 			gyro.reset();
 		}
 

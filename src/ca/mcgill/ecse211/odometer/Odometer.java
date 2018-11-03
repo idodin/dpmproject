@@ -13,6 +13,11 @@ package ca.mcgill.ecse211.odometer;
 import ca.mcgill.ecse211.FinalProject.FinalProject;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * This class uses the motors' tacho counts 
+ * to keep track of its position. It extends a thread.
+ *
+ */
 public class Odometer extends OdometerData implements Runnable {
 
 	private OdometerData odoData;
@@ -103,6 +108,9 @@ public class Odometer extends OdometerData implements Runnable {
 	/**
 	 * This method is where the logic for the odometer will run. Use the methods
 	 * provided from the OdometerData class to implement the odometer.
+	 * 
+	 * Use gyroscope to detect the current heading.
+	 * Using the tacho count to know the wheels rotation distance and the gyroscope angle we can calculate the current position.
 	 */
 	public void run() {
 		long updateStart, updateEnd;

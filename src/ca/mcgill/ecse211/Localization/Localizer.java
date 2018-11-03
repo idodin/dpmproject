@@ -38,15 +38,22 @@ public class Localizer {
 	private static int rfalling = 30;
 
 	/**
-	 * Run Falling Edge Localization with the Ultrasonic Sensor.
+	 * Falling Edge Localization with the Ultrasonic Sensor.
+	 * 
+	 * Turn until first falling edge is met, record angle.
+	 * then turn clockwise until second falling edge is met, record angle.
+	 * 
+	 * Calculations done to determine where the 0 degrees heading is.
+	 * Turn to 0 degrees
+	 * 
 	 * @throws OdometerExceptions
 	 */
 	public static void localizeFE() throws OdometerExceptions {
 		// Initialize variables
-		double a1, a2, b1, b2, a, b, correction;
-		a1 = a2 = b1 = b2 = a = b = 0;
-		boolean a1set, a2set, b1set, b2set;
-		a1set = a2set = b1set = b2set = false;
+		double a, b, correction;
+		a = b = 0;
+//		boolean a1set, a2set, b1set, b2set;
+//		a1set = a2set = b1set = b2set = false;
 		int dist, lastdist;
 		dist = lastdist = Integer.MAX_VALUE;
 
@@ -58,7 +65,7 @@ public class Localizer {
 		}
 
 		// Start turning, this will be stopped when Falling Edges are detected.
-		turnBy(1000, true);
+		Navigator.turnBy(1000, true);
 
 		// Sample from Ultrasonic Sensor
 		usAverage.fetchSample(usData, 0);
@@ -75,26 +82,28 @@ public class Localizer {
 		while (true) {
 			usAverage.fetchSample(usData, 0);
 			dist = (int) (usData[0] * 100.00);
-//			if (dist > 3 && dist <= d + 15 + k && lastdist <= d + 15 + k && !a1set) {
-			if (dist > 3 && dist <= d + 5 + k && lastdist <= d + 5 + k && !a1set) {
+			
+			if (dist > 3 && dist <= d + 5 + k && lastdist <= d + 5 + k) {
 				Sound.beep();
-				a1 = odo.getXYT()[2];
-				a1set = true;
-			}
-			if (dist > 3 && dist <= d + 10 - k && lastdist <= d + 10- k && a1set && !a2set) {
-				Sound.beep();
-				a2 = odo.getXYT()[2];
-				a2set = true;
-			}
-			if (a1set && a2set) {
-				a = (a1 + a2) / 2;
+				a = odo.getXYT()[2];
 				break;
 			}
+			
+//			if (dist > 3 && dist <= d + 10 - k && lastdist <= d + 10- k && a1set && !a2set) {
+//				Sound.beep();
+//				a2 = odo.getXYT()[2];
+//				a2set = true;
+//			}
+//			if (a1set && a2set) {
+//				a = (a1 + a2) / 2;
+//				break;
+//			}
+			
 			lastdist = dist;
 		}
 
 		stopMotors();
-		turnBy(1000, false);
+		Navigator.turnBy(1000, false);
 
 		while (dist < d + k + rfalling || dist == 0) {
 			usAverage.fetchSample(usData, 0);
@@ -105,20 +114,20 @@ public class Localizer {
 		while (true) {
 			usAverage.fetchSample(usData, 0);
 			dist = (int) (usData[0] * 100.00);
-			if (dist > 4 && dist < 35 && dist <= d + k -1 && lastdist <= d + k && !b1set) {
+			if (dist > 4 && dist < 35 && dist <= d + k -1 && lastdist <= d + k) {
 				Sound.beep();
-				b1 = odo.getXYT()[2];
-				b1set = true;
-			}
-			if (dist > 3 && dist <= d - k && lastdist <= d + k && b1set && !b2set) {
-				Sound.beep();
-				b2 = odo.getXYT()[2];
-				b2set = true;
-			}
-			if (b1set && b2set) {
-				b = (b1 + b2) / 2;
+				b = odo.getXYT()[2];
 				break;
 			}
+//			if (dist > 3 && dist <= d - k && lastdist <= d + k && b1set && !b2set) {
+//				Sound.beep();
+//				b2 = odo.getXYT()[2];
+//				b2set = true;
+//			}
+//			if (b1set && b2set) {
+//				b = (b1 + b2) / 2;
+//				break;
+//			}
 			lastdist = dist;
 		}
 
@@ -130,8 +139,8 @@ public class Localizer {
 
 			// turnTo(180-(correction+odo.getXYT()[2]));
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
-			turnTo(0);
-			turnBy(4, true);
+			Navigator.turnTo(0);
+			Navigator.turnBy(4, true);
 			FinalProject.gyro.reset();
 			odo.setTheta(0);
 			Navigator.turnTo(0);
@@ -140,8 +149,8 @@ public class Localizer {
 		if (a >= b) {
 			correction = 225 - (a + b) / 2;
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
-			turnTo(0);
-			turnBy(4, true);
+			Navigator.turnTo(0);
+			Navigator.turnBy(4, true);
 			FinalProject.gyro.reset();
 			odo.setTheta(0);
 			Navigator.turnTo(0);
@@ -168,54 +177,5 @@ public class Localizer {
 			motor.setAcceleration(accel);
 			motor.setSpeed(speed);
 		}
-	}
-
-	/**
-	 * Make the Robot turn by the specified amount in the specified direction.
-	 * @param theta
-	 * @param clockwise - true if clockwise, false if anticlockwise
-	 */
-	public static void turnBy(double theta, boolean clockwise) {
-		setSpeedAccel(TURN_SPEED, TURN_ACCELERATION);
-
-		leftMotor.rotate((clockwise ? 1 : -1) * Navigator.convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
-		rightMotor.rotate((clockwise ? -1 : 1) * Navigator.convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
-
-	}
-
-	/**
-	 * This method makes the robot turn to the specified bearing.
-	 * 
-	 * @param theta Bearing for the robot to readjust its heading to.
-	 */
-	public static void turnTo(double theta) {
-
-		try {
-			odo = Odometer.getOdometer();
-		} catch (OdometerExceptions e) {
-			e.printStackTrace();
-			return;
-		}
-
-		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			motor.setAcceleration(TURN_ACCELERATION);
-			motor.setSpeed(TURN_SPEED);
-		}
-
-		currentPosition = odo.getXYT();
-
-		double deltaT = (((theta - currentPosition[2]) % 360) + 360) % 360;
-
-		if (deltaT < 180) {
-			leftMotor.rotate(Navigator.convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), deltaT), true);
-			rightMotor.rotate(-Navigator.convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), deltaT), false);
-		} else {
-			leftMotor.rotate(-Navigator.convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), 360 - deltaT), true);
-			rightMotor.rotate(Navigator.convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), 360 - deltaT), false);
-		}
-
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-
 	}
 }
