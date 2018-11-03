@@ -33,13 +33,16 @@ public class Navigator {
 	private static SampleProvider usDistance = FinalProject.getUSDistance();
 	private static float[] usData = FinalProject.getUSData();
 
+
 	/**
-	 * This method makes the robot travel to the specified way point
 	 * 
-	 * @param x
-	 *            x-coordinate of the specified waypoint.
-	 * @param y
-	 *            y-coordinate of the specified waypoint.
+	 * First calculate the angle needed to point toward the final destination, turn to that angle and move forward.
+	 * 
+	 * In a loop, calculate the distance between the current location and final destination, if it is under 2cm exit the loop.
+	 * Every 5000 loops, re-orient the heading using "orientateTravel" method.
+	 * 
+	 * @param x: X-coordinate of the arrival point
+	 * @param y: Y-coordinate of the arrival point
 	 */
 	public static void travelTo(double x, double y) {
 		
@@ -105,9 +108,15 @@ public class Navigator {
 		}
 	}
 
+	/**
+	 * Method called by "travelTo" method.
+	 * 
+	 * Re-orient the heading of the robot using the difference between current position and desired position
+	 * 
+	 * @param x: X-coordinate of the arrival point
+	 * @param y: Y-coordinate of the arrival point
+	 */
 	public static void orientateTravel(double x, double y) {
-
-
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -144,6 +153,9 @@ public class Navigator {
 
 	/**
 	 * This method makes the robot turn to the specified bearing.
+	 * 
+	 * In a loop, calculate the difference between current heading and desired heaing, 
+	 * if smaller than "turnError" stop turning and put motors back on forward.
 	 * 
 	 * @param theta
 	 *            Bearing for the robot to readjust its heading to.
@@ -195,6 +207,11 @@ public class Navigator {
 
 	}
 
+	/**
+	 * Turn by the specified angle theta, can be both positive or negative
+	 * 
+	 * @param theta: amount of degree the robot has to turn.
+	 */
 	public static void turnBy(double theta) {
 
 		leftMotor.setSpeed(FORWARD_SPEED);

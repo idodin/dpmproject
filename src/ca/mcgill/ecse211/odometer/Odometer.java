@@ -103,6 +103,9 @@ public class Odometer extends OdometerData implements Runnable {
 	/**
 	 * This method is where the logic for the odometer will run. Use the methods
 	 * provided from the OdometerData class to implement the odometer.
+	 * 
+	 * Use gyroscope to detect the current heading.
+	 * Using the tacho count to know the wheels rotation distance and the gyroscope angle we can calculate the current position.
 	 */
 	public void run() {
 		long updateStart, updateEnd;
