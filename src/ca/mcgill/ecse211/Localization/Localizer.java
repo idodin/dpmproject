@@ -3,7 +3,6 @@ package ca.mcgill.ecse211.Localization;
 import ca.mcgill.ecse211.FinalProject.FinalProject;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
-import ca.mcgill.ecse211.odometer.OdometerCorrections;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -190,7 +189,6 @@ public class Localizer {
 	 * @param theta Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
-		OdometerCorrections.correction = false;
 
 		try {
 			odo = Odometer.getOdometer();

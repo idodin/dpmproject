@@ -1,8 +1,9 @@
 package ca.mcgill.ecse211.Navigation;
 
 import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.odometer.Odometer;
-import ca.mcgill.ecse211.odometer.OdometerCorrections;
+
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 //import ca.mcgill.ecse211.odometer.Odometer;
 //import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -22,7 +23,7 @@ import lejos.robotics.SampleProvider;
 public class Navigator {
 
 	private static final int FORWARD_SPEED = 200;
-	private static final double TILE_SIZE = 30.48;
+	private static final double TILE_SIZE = FinalProject.getTileSize();
 	private static final int TURN_ERROR = 3;
 	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
@@ -41,9 +42,7 @@ public class Navigator {
 	 *            y-coordinate of the specified waypoint.
 	 */
 	public static void travelTo(double x, double y) {
-
-		OdometerCorrections.correction = false;
-
+		
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -55,6 +54,7 @@ public class Navigator {
 
 		double deltaX = x * TILE_SIZE - currentPosition[0];
 		double deltaY = y * TILE_SIZE - currentPosition[1];
+		double totalDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
 		isNavigating = true;
 
@@ -98,16 +98,15 @@ public class Navigator {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
+				LightLocalization.lightLocalize(x, y, true, totalDistance);
 				return;
 			}
 
 		}
 	}
 
-	
 	public static void orientateTravel(double x, double y) {
 
-		OdometerCorrections.correction = false;
 
 		try {
 			odo = Odometer.getOdometer();
@@ -150,8 +149,6 @@ public class Navigator {
 	 *            Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
-
-		OdometerCorrections.correction = false;
 
 		try {
 			odo = Odometer.getOdometer();
@@ -198,6 +195,15 @@ public class Navigator {
 
 	}
 
+	public static void turnBy(double theta) {
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
+		leftMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+		rightMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+
+	}
+
 	/**
 	 * This method allows the conversion of a distance to the total rotation of each
 	 * wheel need to cover that distance.
@@ -222,4 +228,5 @@ public class Navigator {
 	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
+
 }
