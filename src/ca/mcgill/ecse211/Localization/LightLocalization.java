@@ -31,12 +31,23 @@ public class LightLocalization {
 	static double tempDist;
 	private static double TRACK = FinalProject.getTrack();
 	private static double WHEEL_RAD = FinalProject.getWheelRad();
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.leftMotor;
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.rightMotor;
+	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
 	private static SampleProvider SColor = FinalProject.getColorBack();
 	static float[] data = FinalProject.getColorBufferBack();
 	public static Odometer odo;
 	
+	/**
+	 * Rotate on place until all 4 line are detected, calculations done to determine what is the current position.
+	 * Navigate to the line intersection and  rotate to the 4th line heading and reset the gyro, 
+	 * this has to be done to calculate where is the 0 degree heading.
+	 * 
+	 * Reset 2 times, ~4 sec to reset.
+	 * Would be nice to find a way to reset only once and not twice.
+	 * 
+	 * Requirement: Needs to be close enough to an intersection so that when the robot rotates on place it detects all 4 lines.
+	 * 				Needs to be in the lower left quadrant to correct angle, but does not have to be in the lower left quadrant to correct X and Y.
+	 */
 	public static void lightLocalize() {
 
 		try {
@@ -45,13 +56,9 @@ public class LightLocalization {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		// FinalProject.odo.setTheta(0);
-		// Button.waitForAnyPress();
+
 		rightMotor.setSpeed(150);
 		leftMotor.setSpeed(150);
-
-		// SampleProvider SColor = sensor.getMode("Red");
 
 		SColor.fetchSample(data, 0);
 		color = data[0] * 1000;
@@ -109,8 +116,6 @@ public class LightLocalization {
 //		System.out.println("y final:" + odo.getXYT()[1]);
 //		System.out.println("t final:" + odo.getXYT()[2]);
 
-		
-		
 		Button.waitForAnyPress();
 		System.exit(0);
 	}

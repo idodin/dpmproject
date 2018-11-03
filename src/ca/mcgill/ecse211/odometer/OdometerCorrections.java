@@ -1,6 +1,3 @@
-/*
- * OdometryCorrection.java
- */
 package ca.mcgill.ecse211.odometer;
 
 import ca.mcgill.ecse211.FinalProject.FinalProject;
@@ -38,7 +35,7 @@ public class OdometerCorrections implements Runnable {
   // run method (required for Thread)
   public void run() {
 	  try {
-		odometer = Odometer.getOdometer(FinalProject.leftMotor, FinalProject.rightMotor, TRACK, WHEEL_RAD);
+		odometer = Odometer.getOdometer(FinalProject.getLeftmotor(), FinalProject.getRightmotor(), TRACK, WHEEL_RAD);
 	} catch (OdometerExceptions e1) {
 		// TODO Auto-generated catch block
 		e1.printStackTrace();
