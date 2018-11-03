@@ -40,6 +40,7 @@ public class FinalProject {
 	private static final double TILE_SIZE = 30.48;
 	private static final Port usPort = LocalEV3.get().getPort("S3");
 	private static final Port colorPortBack = LocalEV3.get().getPort("S1");
+	private static final Port colorPortFront = LocalEV3.get().getPort("S2");
 	private static final Port gyroPort = LocalEV3.get().getPort("S3");
 
 	// Sensor Objects
@@ -51,6 +52,9 @@ public class FinalProject {
 	private static SampleProvider colorBack = new EV3ColorSensor(colorPortBack).getMode("ColorID");
 	private static float[] colorBufferBack = new float[colorBack.sampleSize()];
 	private static float[] gyroBuffer = new float[gyroAngle.sampleSize()];
+	private static SampleProvider colorFront = new EV3ColorSensor(colorPortBack).getMode("ColorID");
+	private static float[] colorBufferFront = new float[colorBack.sampleSize()];
+	
 
 	public static Odometer odo;
 	public static Navigator navigator;
@@ -162,6 +166,22 @@ public class FinalProject {
 	 */
 	public static double getTileSize() {
 		return TILE_SIZE;
+	}
+
+	public static SampleProvider getColorFront() {
+		return colorFront;
+	}
+
+	public static void setColorFront(SampleProvider colorFront) {
+		FinalProject.colorFront = colorFront;
+	}
+
+	public static float[] getColorBufferFront() {
+		return colorBufferFront;
+	}
+
+	public static void setColorBufferFront(float[] colorBufferFront) {
+		FinalProject.colorBufferFront = colorBufferFront;
 	}
 
 }
