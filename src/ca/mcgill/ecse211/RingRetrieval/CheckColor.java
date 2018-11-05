@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.RingRetrieval;
 
 import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Navigation.Navigator;
 
 /**
  * 
@@ -10,8 +11,10 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * Carefully check the colour of the ring
- * This class assumes that the robot reached the ring
+ * 
+ * Once the motor has reached the ring, this method uses
+ *  a computed gaussian distribution and the light sensor
+ *   to determine the ring color
  * @author Hieu Chau Nguyen
  *
  */
@@ -73,8 +76,13 @@ public class CheckColor{
 		return detect;
 	}
 	
-
-	//@Override
+	
+	/**
+	 * This method assumes the robot is close enough to the ring,
+	 * It makes the robot slightly move around to record multiple samples
+	 * using the fetchColor method.
+	 * It sets the variable detect to the value of the detected ring
+	 */
 	public static void colorDetection() {
 		
 		colorCount = new int[] {0, 0, 0, 0};
@@ -82,7 +90,6 @@ public class CheckColor{
 		// Collect environment's light data 
 		//to set the minimum color required
 		colorSample.fetchSample(colorBuffer, 0); 
-		// Warming up the light sensor.
 		try {
 			Thread.sleep(100);
 		} catch (Exception e) {}
@@ -101,12 +108,12 @@ public class CheckColor{
 			rightMotor.setSpeed(30);
 			
 			if(step >2) {
-				leftMotor.rotate (convertDistance(wheelrad, 1.0), true);
-				rightMotor.rotate(convertDistance(wheelrad, 1.0), false);
+				leftMotor.rotate (Navigator.convertDistance(wheelrad, 1.0), true);
+				rightMotor.rotate(Navigator.convertDistance(wheelrad, 1.0), false);
 			}
 			else {
-				leftMotor.rotate (-convertDistance(wheelrad, 1.0), true);
-				rightMotor.rotate(-convertDistance(wheelrad, 1.0), false);
+				leftMotor.rotate (-Navigator.convertDistance(wheelrad, 1.0), true);
+				rightMotor.rotate(-Navigator.convertDistance(wheelrad, 1.0), false);
 			}
 			
 			step--;
@@ -127,8 +134,10 @@ public class CheckColor{
 	
 	
 	/**
-	 * Collect 5 samples of the colour ring
+	 * This method records multiple samples, and implements a filter 
+	 * to ignore values too low caused by ambient lighting. 
 	 */
+	
 	private static void fetchColor() {
 		//Number of samples per fetch
 		int count = 5;
@@ -192,8 +201,5 @@ public class CheckColor{
 		}while(count > 0);
 		
 	}
-	
-	private static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
+
 }

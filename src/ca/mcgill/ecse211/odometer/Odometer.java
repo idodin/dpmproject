@@ -13,6 +13,11 @@ package ca.mcgill.ecse211.odometer;
 import ca.mcgill.ecse211.FinalProject.FinalProject;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * This class uses the motors' tacho counts 
+ * to keep track of its position. It extends a thread.
+ *
+ */
 public class Odometer extends OdometerData implements Runnable {
 
 	private OdometerData odoData;

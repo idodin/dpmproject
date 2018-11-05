@@ -1,5 +1,10 @@
 package ca.mcgill.ecse211.RingRetrieval;
 
+
+/**
+ * This is the class's constructor.
+ *
+ */
 public class RingSearch {
 	
    /** Assuming the robot is at the tree location, this method makes the robot turn around the tree 

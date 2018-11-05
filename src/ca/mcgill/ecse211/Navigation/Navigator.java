@@ -18,6 +18,7 @@ import lejos.robotics.SampleProvider;
  * 
  * @author Imad Dodin
  * @author An Khang Chau
+ * @author Chaimae Fahmi
  *
  */
 public class Navigator {
@@ -64,44 +65,43 @@ public class Navigator {
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			motor.stop();
-			motor.setAcceleration(3000);
+			motor.setAcceleration(500);
 		}
 
-		orientateTravel(x, y);
+//		orientateTravel(x, y);
 
-		currentPosition = odo.getXYT();
+		if (deltaX == 0 && deltaY != 0) {
+			turnTo(deltaY < 0 ? 180 : 0);
+		} else {
+			double baseAngle = deltaX > 0 ? 90 : 270;
+			double adjustAngle;
+			if ((deltaY > 0 && deltaX > 0) || (deltaY < 0 && deltaX < 0)) {
+				adjustAngle = -1 * Math.toDegrees(Math.atan(deltaY / deltaX));
+			} else {
+				adjustAngle = Math.toDegrees(Math.atan(Math.abs(deltaY) / Math.abs(deltaX)));
+			}
+
+			turnTo(baseAngle + adjustAngle);
+			//System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " + adjustAngle);
+		}
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 		leftMotor.forward();
 		rightMotor.forward();
 
-		int i = 0;
-
 		while (isNavigating) {
-			i++;
-
-			usDistance.fetchSample(usData, 0); // acquire data
-			int obstDistance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
-
 			currentPosition = odo.getXYT();
-
-			if (i > 5000) {
-				orientateTravel(x, y);
-				leftMotor.forward();
-				rightMotor.forward();
-				i = 0;
-			}
 
 			deltaX = x * TILE_SIZE - currentPosition[0];
 			deltaY = y * TILE_SIZE - currentPosition[1];
 			double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-			if (distance < 2.0) {
+			if (distance < 3.0) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
-				LightLocalization.lightLocalize(x, y, true, totalDistance);
+//				LightLocalization.lightLocalize(x, y, true, totalDistance);
 				return;
 			}
 
@@ -209,15 +209,25 @@ public class Navigator {
 
 	/**
 	 * Turn by the specified angle theta, can be both positive or negative
+	 * @param clockwise 
 	 * 
 	 * @param theta: amount of degree the robot has to turn.
 	 */
-	public static void turnBy(double theta) {
+	public static void turnBy(double theta, boolean clockwise) {
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
-		leftMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
-		rightMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+		if(clockwise == false)
+		{
+			leftMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+			rightMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+		}
+		else
+		{
+			leftMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+			rightMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+		}
+		
 
 	}
 
