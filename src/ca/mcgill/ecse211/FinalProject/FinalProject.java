@@ -88,7 +88,7 @@ public class FinalProject {
 		odoDisplayThread.start();
 
 		
-		Navigator.turnTo(360);
+		Navigator.travelTo(1, 1);
 		
 		
 		while(Button.waitForAnyPress() != Button.ID_ESCAPE);

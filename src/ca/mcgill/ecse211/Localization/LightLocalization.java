@@ -5,6 +5,7 @@ import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
@@ -37,7 +38,7 @@ public class LightLocalization {
 	public static EV3GyroSensor gyro = FinalProject.gyro;
 	public static Odometer odo;
 
-	private static double treshold = 2 * TILE_SIZE;
+	private static double treshold = 1 * TILE_SIZE;
 
 	/**
 	 * Rotate in place until all 4 line are detected, calculations done to determine
@@ -80,6 +81,7 @@ public class LightLocalization {
 			if (color - lastColor > 5) {
 				temp = FinalProject.odo.getXYT()[2];
 				System.out.println(temp);
+				Sound.beep();
 				if (counter == 1) {
 					yIntersectionminus = temp;
 				}
