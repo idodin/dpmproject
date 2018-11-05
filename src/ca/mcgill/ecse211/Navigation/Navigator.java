@@ -101,10 +101,9 @@ public class Navigator {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
-//				LightLocalization.lightLocalize(x, y, true, totalDistance);
+				LightLocalization.lightLocalize(x, y, true, totalDistance);
 				return;
 			}
-
 		}
 	}
 
