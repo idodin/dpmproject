@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.FinalProject;
+package ca.mcgill.ecse211.Ev3Boot;
 
 import ca.mcgill.ecse211.Localization.LightLocalization;
 
@@ -37,10 +37,14 @@ import lejos.robotics.filter.MeanFilter;
  *
  */
 
-public class FinalProject {
+public class Ev3Boot {
 
 	// ** Set these as appropriate for your team and current situation **
+<<<<<<< HEAD:src/ca/mcgill/ecse211/FinalProject/FinalProject.java
 	private static final String SERVER_IP = "192.168.2.35";
+=======
+	private static final String SERVER_IP = "192.168.2.13";
+>>>>>>> 0da1538... Refactored class names:src/ca/mcgill/ecse211/Ev3Boot/Ev3Boot.java
 	private static final int TEAM_NUMBER = 21;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -133,6 +137,7 @@ public class FinalProject {
 
 		// Connect to server and get the data, catching any errors that might occur
 		try {
+			
 			/*
 			 * getData() will connect to the server and wait until the user/TA presses the
 			 * "Start" button in the GUI on their laptop with the data filled in. Once it's
@@ -146,6 +151,7 @@ public class FinalProject {
 			 * invalid team number was specified and getData() will throw an exception
 			 * letting you know.
 			 */
+			
 			Map data = conn.getData();
 			
 			redTeam = ((Long) data.get("RedTeam")).intValue();

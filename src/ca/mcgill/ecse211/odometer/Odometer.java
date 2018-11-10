@@ -10,7 +10,7 @@
 
 package ca.mcgill.ecse211.odometer;
 
-import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
@@ -119,8 +119,8 @@ public class Odometer extends OdometerData implements Runnable {
 			theta = odo.getXYT()[2];
 			updateStart = System.currentTimeMillis();
 			
-			FinalProject.gyroAngle.fetchSample(FinalProject.getGyroBuffer(), 0);
-			newTheta = ((FinalProject.getGyroBuffer()[0] % 360) + 360) % 360;
+			Ev3Boot.gyroAngle.fetchSample(Ev3Boot.getGyroBuffer(), 0);
+			newTheta = ((Ev3Boot.getGyroBuffer()[0] % 360) + 360) % 360;
 
 			leftMotorTachoCount = leftMotor.getTachoCount();
 			rightMotorTachoCount = rightMotor.getTachoCount();

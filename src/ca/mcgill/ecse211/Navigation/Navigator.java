@@ -1,6 +1,6 @@
 package ca.mcgill.ecse211.Navigation;
 
-import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.odometer.Odometer;
 
@@ -25,16 +25,16 @@ import lejos.robotics.SampleProvider;
 public class Navigator {
 
 	private static final int FORWARD_SPEED = 200;
-	private static final double TILE_SIZE = FinalProject.getTileSize();
+	private static final double TILE_SIZE = Ev3Boot.getTileSize();
 	private static final int TURN_ERROR = 1;
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
+	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static double[] lastPosition;
 	private static boolean isNavigating;
-	private static SampleProvider usDistance = FinalProject.getUSDistance();
-	private static float[] usData = FinalProject.getUSData();
+	private static SampleProvider usDistance = Ev3Boot.getUSDistance();
+	private static float[] usData = Ev3Boot.getUSData();
 
 	private static double ReOrientDistance;
 	private static double distanceDifference;
@@ -124,7 +124,7 @@ public class Navigator {
 
 			lastPosition = currentPosition;
 
-			if (ReOrientDistance > FinalProject.getTileSize() * 1.5) {
+			if (ReOrientDistance > Ev3Boot.getTileSize() * 1.5) {
 				Sound.beep();
 				leftMotor.stop(true);
 				rightMotor.stop(false);
@@ -216,8 +216,8 @@ public class Navigator {
 
 		if (deltaT < 180) {
 
-			leftMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), 1000), true);
-			rightMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), 1000), true);
+			leftMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 1000), true);
+			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 1000), true);
 
 			while (Math.abs(odo.getXYT()[2] - theta) > TURN_ERROR) {
 				// do nothing
@@ -225,8 +225,8 @@ public class Navigator {
 			leftMotor.stop(true);
 			rightMotor.stop(false);
 		} else {
-			leftMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), 1000), true);
-			rightMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), 1000), true);
+			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 1000), true);
+			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 1000), true);
 			while (Math.abs(odo.getXYT()[2] - theta) > TURN_ERROR) {
 				// do nothing
 			}
@@ -255,11 +255,11 @@ public class Navigator {
 		leftMotor.setSpeed(FORWARD_SPEED/2);
 		rightMotor.setSpeed(FORWARD_SPEED/2);
 		if (clockwise == false) {
-			leftMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
-			rightMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
+			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
 		} else {
-			leftMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
-			rightMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
+			leftMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
+			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
 		}
 
 	}
