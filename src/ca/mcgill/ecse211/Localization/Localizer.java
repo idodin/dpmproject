@@ -1,6 +1,6 @@
 package ca.mcgill.ecse211.Localization;
 
-import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -23,14 +23,14 @@ public class Localizer {
 	private static final int FORWARD_ACCELERATION = 2000;
 	private static final int TURN_ACCELERATION = 2000;
 
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
+	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
 	private static Odometer odo;
 	private static double[] currentPosition;
-	private static SampleProvider usAverage = FinalProject.getUSAverage();
-	private static float[] usData = FinalProject.getUSData();
-	private static SampleProvider color = FinalProject.getColorBack();
-	private static float[] colorBuffer = FinalProject.getColorBufferBack();
+	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
+	private static float[] usData = Ev3Boot.getUSData();
+	private static SampleProvider color = Ev3Boot.getColorBack();
+	private static float[] colorBuffer = Ev3Boot.getColorBufferBack();
 
 	private static int d = 33;
 	private static double k = 3.5;
@@ -141,7 +141,7 @@ public class Localizer {
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
 			Navigator.turnTo(0);
 			Navigator.turnBy(4, true);
-			FinalProject.gyro.reset();
+			Ev3Boot.gyro.reset();
 			odo.setTheta(0);
 			Navigator.turnTo(0);
 
@@ -151,7 +151,7 @@ public class Localizer {
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
 			Navigator.turnTo(0);
 			Navigator.turnBy(4, true);
-			FinalProject.gyro.reset();
+			Ev3Boot.gyro.reset();
 			odo.setTheta(0);
 			Navigator.turnTo(0);
 			// odo.setTheta(odo.getXYT()[2] - (225 - (a+b)/2));

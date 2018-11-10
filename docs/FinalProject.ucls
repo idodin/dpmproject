@@ -19,16 +19,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="3" language="java" name="ca.mcgill.ecse211.odometer.OdometerCorrections" project="FinalProject" 
-    file="/FinalProject/src/ca/mcgill/ecse211/odometer/OdometerCorrections.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="635" y="123"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="4" language="java" name="ca.mcgill.ecse211.odometer.OdometerData" project="FinalProject" 
+  <class id="3" language="java" name="ca.mcgill.ecse211.odometer.OdometerData" project="FinalProject" 
     file="/FinalProject/src/ca/mcgill/ecse211/odometer/OdometerData.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="264" y="332"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -37,7 +28,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="5" language="java" name="ca.mcgill.ecse211.RingRetrieval.RingGrasp" project="FinalProject" 
+  <class id="4" language="java" name="ca.mcgill.ecse211.RingRetrieval.RingGrasp" project="FinalProject" 
     file="/FinalProject/src/ca/mcgill/ecse211/RingRetrieval/RingGrasp.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="472" y="633"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -46,7 +37,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="6" language="java" name="ca.mcgill.ecse211.RingRetrieval.RingSearch" project="FinalProject" 
+  <class id="5" language="java" name="ca.mcgill.ecse211.RingRetrieval.RingSearch" project="FinalProject" 
     file="/FinalProject/src/ca/mcgill/ecse211/RingRetrieval/RingSearch.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="694" y="628"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -55,25 +46,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="ca.mcgill.ecse211.navigation.Navigator" project="FinalProject" 
-    file="/FinalProject/src/ca/mcgill/ecse211/navigation/Navigator.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="828" y="321"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="8" language="java" name="ca.mcgill.ecse211.FinalProject.FinalProject" project="FinalProject" 
-    file="/FinalProject/src/ca/mcgill/ecse211/FinalProject/FinalProject.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="183" width="203" x="443" y="337"/>    
-    <display autosize="false" stereotype="true" package="true" initial-value="false" signature="true" 
-      sort-features="false" accessors="true" visibility="true">      
-      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <class id="9" language="java" name="ca.mcgill.ecse211.Localization.LightLocalization" project="FinalProject" 
+  <class id="6" language="java" name="ca.mcgill.ecse211.Localization.LightLocalization" project="FinalProject" 
     file="/FinalProject/src/ca/mcgill/ecse211/Localization/LightLocalization.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="820" y="490"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
@@ -82,8 +55,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="10" language="java" name="ca.mcgill.ecse211.FinalProject.Display" project="FinalProject" 
-    file="/FinalProject/src/ca/mcgill/ecse211/FinalProject/Display.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="7" language="java" name="ca.mcgill.ecse211.Ev3Boot.Display" project="FinalProject" 
+    file="/FinalProject/src/ca/mcgill/ecse211/Ev3Boot/Display.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="598" y="254"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -91,90 +64,34 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <association id="11">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="12" name="navigator"/>      
-      <multiplicity id="13" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="7" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="14">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="15" name="odo"/>      
-      <multiplicity id="16" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="17">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="18" name="searching"/>      
-      <multiplicity id="19" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="6" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="20">    
+  <association id="8">    
     <end type="SOURCE" refId="3" navigable="false">      
-      <attribute id="21" name="odometer"/>      
-      <multiplicity id="22" minimum="0" maximum="1"/>    
+      <attribute id="9" name="odoData">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="10" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="3" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="11">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="12" name="odo">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="13" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
     </end>    
     <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <generalization id="23">    
+  <generalization id="14">    
     <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="4"/>  
+    <end type="TARGET" refId="3"/>  
   </generalization>  
-  <association id="24">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="25" name="localizer"/>      
-      <multiplicity id="26" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="1" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="27">    
-    <end type="SOURCE" refId="4" navigable="false">      
-      <attribute id="28" name="odoData"/>      
-      <multiplicity id="29" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="4" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="30">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="31" name="lightLocalization"/>      
-      <multiplicity id="32" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="9" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="33">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="34" name="grasping"/>      
-      <multiplicity id="35" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="5" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="36">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="37" name="odo"/>      
-      <multiplicity id="38" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="2" navigable="true"/>    
-    <display labels="true" multiplicity="false"/>  
-  </association>  
-  <association id="39">    
-    <end type="SOURCE" refId="8" navigable="false">      
-      <attribute id="40" name="display"/>      
-      <multiplicity id="41" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="10" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     sort-features="false" accessors="true" visibility="true">    
     <attributes public="false" package="false" protected="false" private="false" static="false"/>    
