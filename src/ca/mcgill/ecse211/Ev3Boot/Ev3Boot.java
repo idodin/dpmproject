@@ -1,16 +1,13 @@
 package ca.mcgill.ecse211.Ev3Boot;
 
-import ca.mcgill.ecse211.Localization.LightLocalization;
-
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
-import lejos.hardware.Button;
-
+import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
-import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
+import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
@@ -81,8 +78,47 @@ public class Ev3Boot {
 	public static Display display;
 
 	// game values
-	private static int tunnel_LL_x;
-	private static int tunnel_LL_y;
+	private static int redTeam;
+	private static int greenTeam;
+	
+	private static int red_Corner;
+	private static int green_Corner;
+	
+	private static int red_Corner_LL_x;
+	private static int red_Corner_LL_y;
+	
+	private static int red_Corner_UR_x;
+	private static int red_Corner_UR_y;
+	
+	private static int green_Corner_LL_x;
+	private static int green_Corner_LL_y;
+	
+	private static int green_Corner_UR_x;
+	private static int green_Corner_UR_y;
+	
+	private static int island_LL_x;
+	private static int island_LL_y;
+	
+	private static int island_UR_x;
+	private static int island_UR_y;
+	
+	private static int red_Tunnel_LL_x;
+	private static int red_Tunnel_LL_y;
+	
+	private static int red_Tunnel_UR_x;
+	private static int red_Tunnel_UR_y;
+	
+	private static int green_Tunnel_LL_x;
+	private static int green_Tunnel_LL_y;
+	
+	private static int green_Tunnel_UR_x;
+	private static int green_Tunnel_UR_y;
+	
+	private static int red_Ring_Set_x;
+	private static int red_Ring_Set_y;
+
+	private static int green_Ring_Set_x;
+	private static int green_Ring_Set_y;
 
 	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
@@ -110,17 +146,49 @@ public class Ev3Boot {
 			 */
 			
 			Map data = conn.getData();
+			
+			redTeam = ((Long) data.get("RedTeam")).intValue();
+			greenTeam = ((Long) data.get("GreenTeam")).intValue();
+			
+			red_Corner = ((Long) data.get("RedCorner")).intValue();
+			green_Corner = ((Long) data.get("GreenCorner")).intValue();
+			
+			red_Corner_LL_x = ((Long) data.get("Red_LL_x")).intValue();
+			red_Corner_LL_y = ((Long) data.get("Red_LL_y")).intValue();
+			
+			red_Corner_UR_x = ((Long) data.get("Red_UR_x")).intValue();
+			red_Corner_UR_y = ((Long) data.get("Red_UR_y")).intValue();
+			
+			green_Corner_LL_x = ((Long) data.get("Green_LL_x")).intValue();
+			green_Corner_LL_y = ((Long) data.get("Green_LL_y")).intValue();
+			
+			green_Corner_UR_x = ((Long) data.get("Green_UR_x")).intValue();
+			green_Corner_UR_y = ((Long) data.get("Green_UR_y")).intValue();
+			
+			island_LL_x = ((Long) data.get("Island_LL_x")).intValue();
+			island_LL_y = ((Long) data.get("Island_LL_y")).intValue();
+			
+			island_UR_x = ((Long) data.get("Island_UR_x")).intValue();
+			island_UR_y = ((Long) data.get("Island_UR_y")).intValue();
+			
+			red_Tunnel_LL_x = ((Long) data.get("TNR_LL_x")).intValue();
+			red_Tunnel_LL_y = ((Long) data.get("TNR_LL_y")).intValue();
+			
+			red_Tunnel_UR_x = ((Long) data.get("TNR_UR_x")).intValue();
+			red_Tunnel_UR_y = ((Long) data.get("TNR_UR_y")).intValue();
+			
+			green_Tunnel_LL_x = ((Long) data.get("TNG_LL_x")).intValue();
+			green_Tunnel_LL_y = ((Long) data.get("TNG_LL_y")).intValue();
+			
+			green_Tunnel_UR_x = ((Long) data.get("TNG_UR_x")).intValue();
+			green_Tunnel_UR_y = ((Long) data.get("TNG_UR_y")).intValue();
+			
+			red_Ring_Set_x = ((Long) data.get("TR_x")).intValue();
+			red_Ring_Set_y = ((Long) data.get("TR_y")).intValue();
 
-			// Example 2 : Print out specific values
-			int redTeam = ((Long) data.get("RedTeam")).intValue();
-			System.out.println("Red Team: " + redTeam);
-
-			// game values
-			tunnel_LL_x = ((Long) data.get("TNR_LL_x")).intValue();
-			tunnel_LL_y = ((Long) data.get("TNR_LL_y")).intValue();
-
-			System.out.println("LL_x: " + tunnel_LL_x);
-			System.out.println("LL_y: " + tunnel_LL_y);
+			green_Ring_Set_x = ((Long) data.get("TG_x")).intValue();
+			green_Ring_Set_y = ((Long) data.get("TG_y")).intValue();
+			
 
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -143,7 +211,7 @@ public class Ev3Boot {
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
 
-		Navigator.travelTo(tunnel_LL_x, tunnel_LL_y, true);
+		Navigator.travelTo(red_Tunnel_LL_x, red_Tunnel_LL_y, true);
 		Navigator.travelTo(1, 3, true);
 		Navigator.travelTo(3, 1, true);
 		Navigator.travelTo(0, 0, true);

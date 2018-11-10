@@ -1,7 +1,7 @@
 package ca.mcgill.ecse211.Localization;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
-import ca.mcgill.ecse211.Navigation.Navigator;
+import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
@@ -60,10 +60,10 @@ public class LightLocalization {
 			e.printStackTrace();
 		}
 
-//		if (traveledDistance < treshold) {
-//			Sound.buzz();
-//			return;
-//		}
+		if (traveledDistance < treshold) {
+			Sound.buzz();
+			return;
+		}
 
 		SColor.fetchSample(data, 0);
 		color = data[0] * 1000;
@@ -109,8 +109,8 @@ public class LightLocalization {
 		}
 
 //		Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
-		
-		xOrigin = ((x * Ev3Boot.getTileSize()))
+		xOrigin = ((x * FinalProject.getTileSize()))
+
 				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+1);
 		yOrigin = (y * Ev3Boot.getTileSize())
 				+ (sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2));
