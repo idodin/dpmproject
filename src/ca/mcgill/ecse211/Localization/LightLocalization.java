@@ -59,11 +59,11 @@ public class LightLocalization {
 			e.printStackTrace();
 		}
 
+		if (traveledDistance < treshold) {
+			Sound.buzz();
+			return;
+		}
 
-//		if (traveledDistance < treshold) {
-//			Sound.buzz();
-//			return;
-//		}
 		SColor.fetchSample(data, 0);
 		color = data[0] * 1000;
 
@@ -108,7 +108,6 @@ public class LightLocalization {
 		}
 
 //		Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
-		
 		xOrigin = ((x * FinalProject.getTileSize()))
 				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+1);
 		yOrigin = (y * FinalProject.getTileSize())
