@@ -11,13 +11,12 @@ import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This is the constructor, it's used to localize
- *  when the robot is at an intersection, 
- * using the light sensor.
+ * This is the constructor, it's used to localize when the robot is at an
+ * intersection, using the light sensor.
  */
 public class LightLocalization {
-	private static double sensorOffset = -13.0;
-	private static int counter = 1;
+	private static double sensorOffset = -11.7;
+	private static int counter;
 	private static float color;
 	private static float lastColor;
 	private static double temp;
@@ -52,7 +51,6 @@ public class LightLocalization {
 	 * quadrant to correct angle, but does not have to be in the lower left quadrant
 	 * to correct X and Y.
 	 */
-
 	public static void lightLocalize(double x, double y, boolean positionOnly, double traveledDistance) {
 		try {
 			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
@@ -61,14 +59,23 @@ public class LightLocalization {
 			e.printStackTrace();
 		}
 
-		if (traveledDistance < treshold) {
-			return;
-		}
-		rightMotor.setSpeed(150);
-		leftMotor.setSpeed(150);
 
+//		if (traveledDistance < treshold) {
+//			Sound.buzz();
+//			return;
+//		}
 		SColor.fetchSample(data, 0);
 		color = data[0] * 1000;
+
+		counter = 1;
+
+		if (positionOnly) {
+			Navigator.turnTo(45);
+			Sound.beepSequence();
+		}
+
+		rightMotor.setSpeed(75);
+		leftMotor.setSpeed(75);
 
 		rightMotor.rotate(Navigator.convertAngle(WHEEL_RAD, TRACK, 450), true);
 		leftMotor.rotate(-Navigator.convertAngle(WHEEL_RAD, TRACK, 450), true);
@@ -80,52 +87,39 @@ public class LightLocalization {
 			color = data[0] * 1000;
 			if (color - lastColor > 5) {
 				temp = FinalProject.odo.getXYT()[2];
-//				System.out.println(temp);
-//				Sound.beep();
-				if (counter == 1) {
-					yIntersectionminus = temp;
-				}
-				if (counter == 2) {
-					xIntersectionplus = temp;
-				}
-				if (counter == 3) {
-					yIntersectionplus = temp;
-				}
+				// System.out.println(temp);
+				Sound.beep();
 				if (counter == 4) {
 					leftMotor.stop(true);
 					rightMotor.stop(false);
-
 					xIntersectionminus = temp;
+				}
+				else if (counter == 2) {
+					xIntersectionplus = temp;
+				}
+				else if (counter == 3) {
+					yIntersectionplus = temp;
+				}
+				else if (counter == 1) {
+					yIntersectionminus = temp;
 				}
 				counter++;
 			}
 		}
 
-		xOrigin = (x*FinalProject.getTileSize()) + (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2));
-		yOrigin = (y*FinalProject.getTileSize()) + (sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2));
+//		Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
 		
-		System.out.println("xOrigin: " + xOrigin);
-		System.out.println("yOrigin: " + yOrigin);
+		xOrigin = ((x * FinalProject.getTileSize()))
+				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+1);
+		yOrigin = (y * FinalProject.getTileSize())
+				+ (sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2));
 
 		odo.setX(xOrigin);
 		odo.setY(yOrigin);
 
-		if (!positionOnly) {
-			Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
-			gyro.reset();
-		}
-
-		
-		System.out.println("x: " + x);
-		System.out.println("y: " + y);
-		
-		System.out.println("odo-x: " + odo.getXYT()[0]);
-		System.out.println("odo-y: " + odo.getXYT()[1]);
-		
-		
-		Navigator.travelTo(x, y);
-		Button.waitForAnyPress();
-		System.exit(0);
+		Navigator.travelTo(x, y, false);
+		Navigator.turnTo((((xIntersectionplus+xIntersectionminus)/2)+181)%360);
+		gyro.reset();
 	}
 	
 }

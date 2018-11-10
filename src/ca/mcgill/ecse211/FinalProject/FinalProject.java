@@ -80,10 +80,10 @@ public class FinalProject {
 	public static Localizer localizer;
 	public static Display display;
 
-	//game values
+	// game values
 	private static int tunnel_LL_x;
 	private static int tunnel_LL_y;
-	
+
 	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
 
@@ -113,13 +113,13 @@ public class FinalProject {
 			int redTeam = ((Long) data.get("RedTeam")).intValue();
 			System.out.println("Red Team: " + redTeam);
 
-			//game values
-			tunnel_LL_x =  ((Long) data.get("TNR_LL_x")).intValue();
-			tunnel_LL_y =  ((Long) data.get("TNR_LL_y")).intValue();
-			
+			// game values
+			tunnel_LL_x = ((Long) data.get("TNR_LL_x")).intValue();
+			tunnel_LL_y = ((Long) data.get("TNR_LL_y")).intValue();
+
 			System.out.println("LL_x: " + tunnel_LL_x);
 			System.out.println("LL_y: " + tunnel_LL_y);
-			
+
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
@@ -141,9 +141,10 @@ public class FinalProject {
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
 
-		
-		
-		Navigator.travelTo(tunnel_LL_x, tunnel_LL_y);
+		Navigator.travelTo(tunnel_LL_x, tunnel_LL_y, true);
+		Navigator.travelTo(1, 3, true);
+		Navigator.travelTo(3, 1, true);
+		Navigator.travelTo(0, 0, true);
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
