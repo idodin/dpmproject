@@ -5,6 +5,7 @@ import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.odometer.Odometer;
 
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import lejos.hardware.Sound;
 //import ca.mcgill.ecse211.odometer.Odometer;
 //import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -25,28 +26,36 @@ public class Navigator {
 
 	private static final int FORWARD_SPEED = 200;
 	private static final double TILE_SIZE = FinalProject.getTileSize();
-	private static final int TURN_ERROR = 3;
+	private static final int TURN_ERROR = 1;
 	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
 	private static Odometer odo;
 	private static double[] currentPosition;
+	private static double[] lastPosition;
 	private static boolean isNavigating;
 	private static SampleProvider usDistance = FinalProject.getUSDistance();
 	private static float[] usData = FinalProject.getUSData();
 
+	private static double ReOrientDistance;
+	private static double distanceDifference;
+	private static double distance;
 
 	/**
 	 * 
-	 * First calculate the angle needed to point toward the final destination, turn to that angle and move forward.
+	 * First calculate the angle needed to point toward the final destination, turn
+	 * to that angle and move forward.
 	 * 
-	 * In a loop, calculate the distance between the current location and final destination, if it is under 2cm exit the loop.
-	 * Every 5000 loops, re-orient the heading using "orientateTravel" method.
+	 * In a loop, calculate the distance between the current location and final
+	 * destination, if it is under 2cm exit the loop. Every 5000 loops, re-orient
+	 * the heading using "orientateTravel" method.
 	 * 
-	 * @param x: X-coordinate of the arrival point
-	 * @param y: Y-coordinate of the arrival point
+	 * @param x:
+	 *            X-coordinate of the arrival point
+	 * @param y:
+	 *            Y-coordinate of the arrival point
 	 */
-	public static void travelTo(double x, double y) {
-		
+	public static void travelTo(double x, double y, boolean localizing) {
+
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -55,20 +64,20 @@ public class Navigator {
 		}
 
 		currentPosition = odo.getXYT();
+		lastPosition = odo.getXYT();
 
 		double deltaX = x * TILE_SIZE - currentPosition[0];
 		double deltaY = y * TILE_SIZE - currentPosition[1];
 		double totalDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
 		isNavigating = true;
+		ReOrientDistance = 0;
 
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			motor.stop();
 			motor.setAcceleration(500);
 		}
-
-//		orientateTravel(x, y);
 
 		if (deltaX == 0 && deltaY != 0) {
 			turnTo(deltaY < 0 ? 180 : 0);
@@ -82,7 +91,8 @@ public class Navigator {
 			}
 
 			turnTo(baseAngle + adjustAngle);
-			//System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " + adjustAngle);
+			// System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " +
+			// adjustAngle);
 		}
 
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -95,25 +105,50 @@ public class Navigator {
 
 			deltaX = x * TILE_SIZE - currentPosition[0];
 			deltaY = y * TILE_SIZE - currentPosition[1];
-			double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+			distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-			if (distance < 3.0) {
+			if (distance < 1.0) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
-				LightLocalization.lightLocalize(x, y, true, totalDistance);
+				Sound.beepSequence();
+				if (localizing) {
+					LightLocalization.lightLocalize(x, y, true, totalDistance);
+				}
 				return;
 			}
+
+			distanceDifference = Math.sqrt(Math.pow(currentPosition[0] - lastPosition[0], 2)
+					+ Math.pow(currentPosition[1] - lastPosition[1], 2));
+			ReOrientDistance += distanceDifference;
+
+			lastPosition = currentPosition;
+
+			if (ReOrientDistance > FinalProject.getTileSize() * 1.5) {
+				Sound.beep();
+				leftMotor.stop(true);
+				rightMotor.stop(false);
+				orientateTravel(x, y);
+				ReOrientDistance = 0;
+				leftMotor.setSpeed(FORWARD_SPEED);
+				rightMotor.setSpeed(FORWARD_SPEED);
+				leftMotor.forward();
+				rightMotor.forward();
+			}
+
 		}
 	}
 
 	/**
 	 * Method called by "travelTo" method.
 	 * 
-	 * Re-orient the heading of the robot using the difference between current position and desired position
+	 * Re-orient the heading of the robot using the difference between current
+	 * position and desired position
 	 * 
-	 * @param x: X-coordinate of the arrival point
-	 * @param y: Y-coordinate of the arrival point
+	 * @param x:
+	 *            X-coordinate of the arrival point
+	 * @param y:
+	 *            Y-coordinate of the arrival point
 	 */
 	public static void orientateTravel(double x, double y) {
 		try {
@@ -153,8 +188,9 @@ public class Navigator {
 	/**
 	 * This method makes the robot turn to the specified bearing.
 	 * 
-	 * In a loop, calculate the difference between current heading and desired heaing, 
-	 * if smaller than "turnError" stop turning and put motors back on forward.
+	 * In a loop, calculate the difference between current heading and desired
+	 * heaing, if smaller than "turnError" stop turning and put motors back on
+	 * forward.
 	 * 
 	 * @param theta
 	 *            Bearing for the robot to readjust its heading to.
@@ -208,25 +244,23 @@ public class Navigator {
 
 	/**
 	 * Turn by the specified angle theta, can be both positive or negative
-	 * @param clockwise 
 	 * 
-	 * @param theta: amount of degree the robot has to turn.
+	 * @param clockwise
+	 * 
+	 * @param theta:
+	 *            amount of degree the robot has to turn.
 	 */
 	public static void turnBy(double theta, boolean clockwise) {
 
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-		if(clockwise == false)
-		{
+		leftMotor.setSpeed(FORWARD_SPEED/2);
+		rightMotor.setSpeed(FORWARD_SPEED/2);
+		if (clockwise == false) {
 			leftMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
 			rightMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
-		}
-		else
-		{
+		} else {
 			leftMotor.rotate(convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
 			rightMotor.rotate(-convertAngle(FinalProject.getWheelRad(), FinalProject.getTrack(), theta), true);
 		}
-		
 
 	}
 
