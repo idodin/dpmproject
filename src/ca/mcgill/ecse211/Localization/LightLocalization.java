@@ -109,7 +109,7 @@ public class LightLocalization {
 		}
 
 //		Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
-		xOrigin = ((x * FinalProject.getTileSize()))
+		xOrigin = ((x * Ev3Boot.getTileSize()))
 
 				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+1);
 		yOrigin = (y * Ev3Boot.getTileSize())
