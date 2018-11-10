@@ -81,8 +81,8 @@ public class LightLocalization {
 			color = data[0] * 1000;
 			if (color - lastColor > 5) {
 				temp = FinalProject.odo.getXYT()[2];
-				System.out.println(temp);
-				Sound.beep();
+//				System.out.println(temp);
+//				Sound.beep();
 				if (counter == 1) {
 					yIntersectionminus = temp;
 				}
@@ -102,8 +102,11 @@ public class LightLocalization {
 			}
 		}
 
-		xOrigin = x + sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2);
-		yOrigin = y + sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2);
+		xOrigin = (x*FinalProject.getTileSize()) + (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2));
+		yOrigin = (y*FinalProject.getTileSize()) + (sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2));
+		
+		System.out.println("xOrigin: " + xOrigin);
+		System.out.println("yOrigin: " + yOrigin);
 
 		odo.setX(xOrigin);
 		odo.setY(yOrigin);
@@ -113,7 +116,14 @@ public class LightLocalization {
 			gyro.reset();
 		}
 		
-		Navigator.travelTo(0, 0);
+		System.out.println("x: " + x);
+		System.out.println("y: " + y);
+		
+		System.out.println("odo-x: " + odo.getXYT()[0]);
+		System.out.println("odo-y: " + odo.getXYT()[1]);
+		
+		
+		Navigator.travelTo(x, y);
 		Button.waitForAnyPress();
 		System.exit(0);
 	}
