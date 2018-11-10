@@ -1,6 +1,6 @@
 package ca.mcgill.ecse211.Localization;
 
-import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -26,14 +26,14 @@ public class LightLocalization {
 	private static double xIntersectionminus;
 	private static double xOrigin;
 	private static double yOrigin;
-	private static double TRACK = FinalProject.getTrack();
-	private static double WHEEL_RAD = FinalProject.getWheelRad();
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
-	private static SampleProvider SColor = FinalProject.getColorBack();
-	private static float[] data = FinalProject.getColorBufferBack();
-	private static final double TILE_SIZE = FinalProject.getTileSize();
-	public static EV3GyroSensor gyro = FinalProject.gyro;
+	private static double TRACK = Ev3Boot.getTrack();
+	private static double WHEEL_RAD = Ev3Boot.getWheelRad();
+	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
+	private static SampleProvider SColor = Ev3Boot.getColorBack();
+	private static float[] data = Ev3Boot.getColorBufferBack();
+	private static final double TILE_SIZE = Ev3Boot.getTileSize();
+	public static EV3GyroSensor gyro = Ev3Boot.gyro;
 	public static Odometer odo;
 
 	private static double treshold = 1 * TILE_SIZE;
@@ -87,7 +87,7 @@ public class LightLocalization {
 			SColor.fetchSample(data, 0);
 			color = data[0] * 1000;
 			if (color - lastColor > 5) {
-				temp = FinalProject.odo.getXYT()[2];
+				temp = Ev3Boot.odo.getXYT()[2];
 				// System.out.println(temp);
 				Sound.beep();
 				if (counter == 4) {
@@ -110,9 +110,9 @@ public class LightLocalization {
 
 //		Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
 		
-		xOrigin = ((x * FinalProject.getTileSize()))
+		xOrigin = ((x * Ev3Boot.getTileSize()))
 				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+1);
-		yOrigin = (y * FinalProject.getTileSize())
+		yOrigin = (y * Ev3Boot.getTileSize())
 				+ (sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2));
 
 		odo.setX(xOrigin);

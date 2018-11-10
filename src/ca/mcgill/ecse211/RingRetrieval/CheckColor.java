@@ -1,6 +1,6 @@
 package ca.mcgill.ecse211.RingRetrieval;
 
-import ca.mcgill.ecse211.FinalProject.FinalProject;
+import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Navigation.Navigator;
 
 /**
@@ -20,11 +20,11 @@ import lejos.robotics.SampleProvider;
  */
 public class CheckColor{
 
-	private static final EV3LargeRegulatedMotor leftMotor = FinalProject.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = FinalProject.getRightmotor();
-	private static double wheelrad= FinalProject.getWheelRad();
-	private static SampleProvider colorSample = FinalProject.getColorFront();
-	private static float[] colorBuffer = FinalProject.getColorBufferFront();
+	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
+	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
+	private static double wheelrad= Ev3Boot.getWheelRad();
+	private static SampleProvider colorSample = Ev3Boot.getColorFront();
+	private static float[] colorBuffer = Ev3Boot.getColorBufferFront();
 	
 	//How often a colour is detected? 
 	private static int[] colorCount;
