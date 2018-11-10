@@ -40,11 +40,8 @@ import lejos.robotics.filter.MeanFilter;
 public class Ev3Boot {
 
 	// ** Set these as appropriate for your team and current situation **
-<<<<<<< HEAD:src/ca/mcgill/ecse211/FinalProject/FinalProject.java
-	private static final String SERVER_IP = "192.168.2.35";
-=======
+
 	private static final String SERVER_IP = "192.168.2.13";
->>>>>>> 0da1538... Refactored class names:src/ca/mcgill/ecse211/Ev3Boot/Ev3Boot.java
 	private static final int TEAM_NUMBER = 21;
 
 	// Enable/disable printing of debug info from the WiFi class
