@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.FinalProject;
+package ca.mcgill.ecse211.Ev3Boot;
 
 import java.text.DecimalFormat;
 
