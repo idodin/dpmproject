@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.navigation;
+package ca.mcgill.ecse211.Navigation;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Localization.LightLocalization;
@@ -54,7 +54,7 @@ public class Navigator {
 	 * @param y:
 	 *            Y-coordinate of the arrival point
 	 */
-	public static void travelTo(double x, double y, boolean localizing) {
+	public static void travelTo(double x, double y, int treshHold, boolean localizing) {
 
 		try {
 			odo = Odometer.getOdometer();
@@ -107,10 +107,15 @@ public class Navigator {
 			deltaY = y * TILE_SIZE - currentPosition[1];
 			distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-			if (distance < 1.0) {
+			if (distance < treshHold) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
+				
+				if (treshHold >= 4) {
+					travelTo(x, y, 1, false);
+				}
+				
 				Sound.beepSequence();
 				if (localizing) {
 					LightLocalization.lightLocalize(x, y, true, totalDistance);
@@ -124,7 +129,7 @@ public class Navigator {
 
 			lastPosition = currentPosition;
 
-			if (ReOrientDistance > Ev3Boot.getTileSize() * 1.5) {
+			if (ReOrientDistance > Ev3Boot.getTileSize() * 1) {
 				Sound.beep();
 				leftMotor.stop(true);
 				rightMotor.stop(false);

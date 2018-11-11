@@ -59,10 +59,10 @@ public class LightLocalization {
 			e.printStackTrace();
 		}
 
-		if (traveledDistance < treshold) {
-			Sound.buzz();
-			return;
-		}
+//		if (traveledDistance < treshold) {
+//			Sound.buzz();
+//			return;
+//		}
 
 		SColor.fetchSample(data, 0);
 		color = data[0] * 1000;
@@ -85,7 +85,7 @@ public class LightLocalization {
 
 			SColor.fetchSample(data, 0);
 			color = data[0] * 1000;
-			if (color - lastColor > 5) {
+			if (color - lastColor > 3.5) {
 				temp = Ev3Boot.odo.getXYT()[2];
 				// System.out.println(temp);
 				Sound.beep();
@@ -109,19 +109,17 @@ public class LightLocalization {
 
 //		Navigator.turnBy((((xIntersectionplus - xIntersectionminus) + 360) % 360) / 2, false);
 
-
-
-		
 		xOrigin = ((x * Ev3Boot.getTileSize()))
-				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+1);
+				+ (sensorOffset * Math.cos(Math.toRadians(yIntersectionminus - yIntersectionplus) / 2)+2.0);
+
 		yOrigin = (y * Ev3Boot.getTileSize())
 				+ (sensorOffset * Math.cos(Math.toRadians(xIntersectionplus - xIntersectionminus) / 2));
 
 		odo.setX(xOrigin);
 		odo.setY(yOrigin);
 
-		Navigator.travelTo(x, y, false);
-		Navigator.turnTo((((xIntersectionplus+xIntersectionminus)/2)+181)%360);
+		Navigator.travelTo(x, y, 1, false);
+		Navigator.turnTo((((xIntersectionplus+xIntersectionminus)/2)+180)%360);
 		gyro.reset();
 	}
 	
