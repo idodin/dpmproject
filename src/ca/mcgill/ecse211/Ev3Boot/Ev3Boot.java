@@ -3,11 +3,12 @@ package ca.mcgill.ecse211.Ev3Boot;
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
+import ca.mcgill.ecse211.GameLogic.GameLogic;
 import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
-import ca.mcgill.ecse211.navigation.Navigator;
+import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
@@ -37,7 +38,7 @@ import lejos.robotics.filter.MeanFilter;
 public class Ev3Boot {
 
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.13";
+	private static final String SERVER_IP = "192.168.2.35";
 	private static final int TEAM_NUMBER = 21;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -84,17 +85,17 @@ public class Ev3Boot {
 	private static int red_Corner;
 	private static int green_Corner;
 	
-	private static int red_Corner_LL_x;
-	private static int red_Corner_LL_y;
+	private static int red_Zone_LL_x;
+	private static int red_Zone_LL_y;
 	
-	private static int red_Corner_UR_x;
-	private static int red_Corner_UR_y;
+	private static int red_Zone_UR_x;
+	private static int red_Zone_UR_y;
 	
-	private static int green_Corner_LL_x;
-	private static int green_Corner_LL_y;
+	private static int green_Zone_LL_x;
+	private static int green_Zone_LL_y;
 	
-	private static int green_Corner_UR_x;
-	private static int green_Corner_UR_y;
+	private static int green_Zone_UR_x;
+	private static int green_Zone_UR_y;
 	
 	private static int island_LL_x;
 	private static int island_LL_y;
@@ -119,7 +120,19 @@ public class Ev3Boot {
 
 	private static int green_Ring_Set_x;
 	private static int green_Ring_Set_y;
-
+	
+	//values color dependent
+	private static int corner;
+	
+	private static int tunnel_LL_x;
+	private static int tunnel_LL_y;
+	private static int tunnel_UR_x;
+	private static int tunnel_UR_y;
+	
+	private static int ringSet_x;
+	private static int ringSet_y;
+	private static boolean tunnelEntryIsLL;
+	
 	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
 
@@ -153,17 +166,17 @@ public class Ev3Boot {
 			red_Corner = ((Long) data.get("RedCorner")).intValue();
 			green_Corner = ((Long) data.get("GreenCorner")).intValue();
 			
-			red_Corner_LL_x = ((Long) data.get("Red_LL_x")).intValue();
-			red_Corner_LL_y = ((Long) data.get("Red_LL_y")).intValue();
+			red_Zone_LL_x = ((Long) data.get("Red_LL_x")).intValue();
+			red_Zone_LL_y = ((Long) data.get("Red_LL_y")).intValue();
 			
-			red_Corner_UR_x = ((Long) data.get("Red_UR_x")).intValue();
-			red_Corner_UR_y = ((Long) data.get("Red_UR_y")).intValue();
+			red_Zone_UR_x = ((Long) data.get("Red_UR_x")).intValue();
+			red_Zone_UR_y = ((Long) data.get("Red_UR_y")).intValue();
 			
-			green_Corner_LL_x = ((Long) data.get("Green_LL_x")).intValue();
-			green_Corner_LL_y = ((Long) data.get("Green_LL_y")).intValue();
+			green_Zone_LL_x = ((Long) data.get("Green_LL_x")).intValue();
+			green_Zone_LL_y = ((Long) data.get("Green_LL_y")).intValue();
 			
-			green_Corner_UR_x = ((Long) data.get("Green_UR_x")).intValue();
-			green_Corner_UR_y = ((Long) data.get("Green_UR_y")).intValue();
+			green_Zone_UR_x = ((Long) data.get("Green_UR_x")).intValue();
+			green_Zone_UR_y = ((Long) data.get("Green_UR_y")).intValue();
 			
 			island_LL_x = ((Long) data.get("Island_LL_x")).intValue();
 			island_LL_y = ((Long) data.get("Island_LL_y")).intValue();
@@ -211,11 +224,94 @@ public class Ev3Boot {
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
 
-		Navigator.travelTo(red_Tunnel_LL_x, red_Tunnel_LL_y, true);
-		Navigator.travelTo(1, 3, true);
-		Navigator.travelTo(3, 1, true);
-		Navigator.travelTo(0, 0, true);
+		if(redTeam == 21)
+		{
+			corner = red_Corner;
+			tunnel_LL_x = red_Tunnel_LL_x;
+			tunnel_LL_y = red_Tunnel_LL_y;
+			tunnel_UR_x = red_Tunnel_UR_x;
+			tunnel_UR_y = red_Tunnel_UR_y;
+			ringSet_x = red_Ring_Set_x;
+			ringSet_y = red_Ring_Set_y;
+			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
+		}
+		else 
+		{
+			corner = green_Corner;
+			tunnel_LL_x = green_Tunnel_LL_x;
+			tunnel_LL_y = green_Tunnel_LL_y;
+			tunnel_UR_x = green_Tunnel_UR_x;
+			tunnel_UR_y = green_Tunnel_UR_y;
+			ringSet_x = green_Ring_Set_x;
+			ringSet_y = green_Ring_Set_y;
+			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, green_Zone_LL_x, green_Zone_LL_y, green_Zone_UR_x, green_Zone_UR_y);
+		}
+		
+		switch (corner) {
+			case 0:
+				LightLocalization.lightLocalize(1, 1, false, 100);
+				break;
+			case 1:
+				LightLocalization.lightLocalize(7, 1, false, 100);
+				break;
+			case 2:
+				LightLocalization.lightLocalize(7, 7, false, 100);
+				break;
+			case 3:
+				LightLocalization.lightLocalize(1, 7, false, 100);
+				break;
+		}
+			
+		//if we want to got to the lower left of tunnel
+		if(tunnelEntryIsLL)
+		{
+			//coming from left
+			if(odo.getXYT()[0] <= tunnel_LL_x*TILE_SIZE)
+			{
+				Navigator.travelTo(tunnel_LL_x, tunnel_LL_y-1, 5, true);
+			}
+			//coming from right
+			else 
+			{
+				System.out.println("from right");
+				System.out.println("x: "+ odo.getXYT()[0]);
+				Navigator.travelTo(tunnel_LL_x+1, tunnel_LL_y-1, 5, true);
+			}
+		}
+		//if we want to got to the upper right of tunnel
+		else
+		{
+			System.out.println("ur x: " + tunnel_UR_x);
+			System.out.println("ur y " + tunnel_UR_y);
+			//coming from left
+			if(odo.getXYT()[0] <= tunnel_UR_x*TILE_SIZE)
+			{
+				Navigator.travelTo(tunnel_UR_x-1, tunnel_UR_y+1, 5, true);
+			}
+			//coming from right
+			else 
+			{
+				Navigator.travelTo(tunnel_UR_x, tunnel_UR_y+1, 5, true);
+			}
+		}
+		
+		if(tunnelEntryIsLL)
+		{
+			Navigator.travelTo(tunnel_LL_x+0.5, tunnel_LL_y-1, 2,false);
+			Navigator.travelTo(tunnel_UR_x-0.5, tunnel_UR_y+0.5, 3, false);
+			
+		}
+		else
+		{
+			Navigator.travelTo(tunnel_UR_x-0.5, tunnel_UR_y+1, 2, false);
+			Navigator.travelTo(tunnel_LL_x+0.5, tunnel_LL_y-0.5, 3, false);
+		}
 
+		int position= GameLogic.closestSideOfTree(ringSet_x,ringSet_y,odo.getXYT()[0],odo.getXYT()[1]);
+		System.out.println("Case" + position);
+		
+		RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
+		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 

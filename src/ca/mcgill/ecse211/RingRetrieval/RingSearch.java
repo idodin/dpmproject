@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.RingRetrieval;
 
+import ca.mcgill.ecse211.Navigation.Navigator;
 
 /**
  * This is the class's constructor.
@@ -15,9 +16,36 @@ public class RingSearch {
      * it either calls the grasp method from RingGrasp, or it keeps turning around the tree 
      * to find a higher value ring.
      */
-	public static void turnAroundTree()
+	public static void turnAroundTree(int position,int  ringSet_x,int ringSet_y)
 	{
-
+		switch (position) {
+		case 0: 
+				Navigator.travelTo(ringSet_x, ringSet_y-1, 2, true);
+				Navigator.travelTo(ringSet_x-1, ringSet_y, 2, false);
+				Navigator.travelTo(ringSet_x, ringSet_y+1, 2, false);
+				Navigator.travelTo(ringSet_x+1, ringSet_y, 2, false);
+				break;		
+		
+		case 1: Navigator.travelTo(ringSet_x-1, ringSet_y, 2, true);
+				Navigator.travelTo(ringSet_x, ringSet_y+1, 2, false);
+				Navigator.travelTo(ringSet_x+1, ringSet_y, 2, false);
+				Navigator.travelTo(ringSet_x, ringSet_y-1, 2, false);
+				break;
+				
+				
+		case 2: Navigator.travelTo(ringSet_x, ringSet_y+1, 2, true);
+				Navigator.travelTo(ringSet_x+1, ringSet_y, 2, false);
+				Navigator.travelTo(ringSet_x, ringSet_y-1, 2, false);
+				Navigator.travelTo(ringSet_x-1, ringSet_y, 2, false);
+				break;
+				
+		case 3: Navigator.travelTo(ringSet_x+1, ringSet_y, 2, true);
+				Navigator.travelTo(ringSet_x, ringSet_y-1, 2, false);
+				Navigator.travelTo(ringSet_x-1, ringSet_y, 2, false);
+				Navigator.travelTo(ringSet_x, ringSet_y+1, 2, false);
+				break;
+			
+		}
 	}
 
 
