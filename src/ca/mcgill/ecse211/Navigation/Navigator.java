@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.navigation;
+package ca.mcgill.ecse211.Navigation;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Localization.LightLocalization;
