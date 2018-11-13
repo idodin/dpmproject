@@ -266,18 +266,18 @@ public class Ev3Boot {
 		}
 
 		switch (corner) {
-		case 0:
-			LightLocalization.lightLocalize(1, 1, false, 100, 0);
-			break;
-		case 1:
-			LightLocalization.lightLocalize(7, 1, false, 100, 1);
-			break;
-		case 2:
-			LightLocalization.lightLocalize(7, 7, false, 100, 2);
-			break;
-		case 3:
-			LightLocalization.lightLocalize(1, 7, false, 100, 3);
-			break;
+			case 0:
+				LightLocalization.lightLocalize(1, 1, false);
+				break;
+			case 1:
+				LightLocalization.lightLocalize(7, 1, false);
+				break;
+			case 2:
+				LightLocalization.lightLocalize(7, 7, false);
+				break;
+			case 3:
+				LightLocalization.lightLocalize(1, 7, false);
+				break;
 		}
 
 		// if we want to got to the lower left of tunnel

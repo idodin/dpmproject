@@ -12,10 +12,10 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This class contains methods to allow the robot to navigate to specified
- * waypoints.
+ * This class contains methods to allow the robot to navigate to specified waypoint, or to turn to specific angle.
  * 
- * This class contains methods to allow the robot to avoid obstacles.
+ * It is mainly called by the Ev3Boot class to navigate to strategic point. It is also called by other LightLocalization class to 
+ * navigate to a line intersection.
  * 
  * @author Imad Dodin
  * @author An Khang Chau
@@ -49,20 +49,24 @@ public class Navigator {
 	private static double ReOrientDistance;
 	private static double distanceDifference;
 	private static double distance;
-
+	
 	/**
 	 * 
-	 * First calculate the angle needed to point toward the final destination, turn
-	 * to that angle and move forward.
+	 * This method execute navigation to a specific point, if wanted it can light localize upon arrival.
 	 * 
-	 * In a loop, calculate the distance between the current location and final
-	 * destination, if it is under 2cm exit the loop. Every 5000 loops, re-orient
-	 * the heading using "orientateTravel" method.
+	 * First calculate heading correct to point at the arrival point using the odometry current position.
+	 * Then turn to the calculated heading using turnTo() method.
+	 * Activate both motors to move forward.
+	 * In a loop calculate distance between current position and arrival point, if the distance is smaller than treshHold, stop the motors.
+	 * If the travelled distance since last re-orientation is bigger than a tile size, 
+	 * call orientateTravel() method to re-orient heading to face the arrival point and move forward.
+	 * This method is called periodically to reset error due to drift.
+	 * When the distance from arrival point is acceptable stop the motors and light localize if specified.
 	 * 
-	 * @param x:
-	 *            X-coordinate of the arrival point
-	 * @param y:
-	 *            Y-coordinate of the arrival point
+	 * @param x: x coordinate to navigate to
+	 * @param y: y coordinate to navigate to
+	 * @param treshHold: acceptable error distance
+	 * @param localizing: should to robot localize upon arrival
 	 */
 	public static void travelTo(double x, double y, int treshHold, boolean localizing) {
 
@@ -129,6 +133,7 @@ public class Navigator {
 				Sound.beepSequence();
 				if (localizing) {
 					LightLocalization.lightLocalize(x, y, true, totalDistance ,4);
+
 				}
 				return;
 			}
@@ -160,10 +165,8 @@ public class Navigator {
 	 * Re-orient the heading of the robot using the difference between current
 	 * position and desired position
 	 * 
-	 * @param x:
-	 *            X-coordinate of the arrival point
-	 * @param y:
-	 *            Y-coordinate of the arrival point
+	 * @param x: X-coordinate of the arrival point
+	 * @param y: Y-coordinate of the arrival point
 	 */
 	public static void orientateTravel(double x, double y) {
 		try {
@@ -202,13 +205,15 @@ public class Navigator {
 
 	/**
 	 * This method makes the robot turn to the specified bearing.
+	 * Mainly called by the travelTo() method and LightLocalize() method.
 	 * 
 	 * In a loop, calculate the difference between current heading and desired
-	 * heaing, if smaller than "turnError" stop turning and put motors back on
-	 * forward.
+	 * heading, if the difference is smaller than "turnError" stop turning and put
+	 * motors back on forward.
 	 * 
-	 * @param theta
-	 *            Bearing for the robot to readjust its heading to.
+	 * Always turn the smallest angle.
+	 * 
+	 * @param theta: Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
 
@@ -260,10 +265,8 @@ public class Navigator {
 	/**
 	 * Turn by the specified angle theta, can be both positive or negative
 	 * 
-	 * @param clockwise
-	 * 
-	 * @param theta:
-	 *            amount of degree the robot has to turn.
+	 * @param clockwise: true to turn clockwise and false to turn counter clockwise.
+	 * @param theta: amount of degree the robot has to turn.
 	 */
 	public static void turnBy(double theta, boolean clockwise, boolean blocking) {
 
@@ -285,7 +288,6 @@ public class Navigator {
 	 * 
 	 * @param radius
 	 * @param distance
-	 * @return
 	 */
 	public static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
@@ -298,7 +300,6 @@ public class Navigator {
 	 * @param radius
 	 * @param width
 	 * @param angle
-	 * @return
 	 */
 	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
