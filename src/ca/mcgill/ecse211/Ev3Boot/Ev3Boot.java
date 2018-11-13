@@ -249,16 +249,16 @@ public class Ev3Boot {
 		
 		switch (corner) {
 			case 0:
-				LightLocalization.lightLocalize(1, 1, false, 100);
+				LightLocalization.lightLocalize(1, 1, false);
 				break;
 			case 1:
-				LightLocalization.lightLocalize(7, 1, false, 100);
+				LightLocalization.lightLocalize(7, 1, false);
 				break;
 			case 2:
-				LightLocalization.lightLocalize(7, 7, false, 100);
+				LightLocalization.lightLocalize(7, 7, false);
 				break;
 			case 3:
-				LightLocalization.lightLocalize(1, 7, false, 100);
+				LightLocalization.lightLocalize(1, 7, false);
 				break;
 		}
 			

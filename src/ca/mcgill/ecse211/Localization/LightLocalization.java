@@ -11,8 +11,11 @@ import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This is the constructor, it's used to localize when the robot is at an
- * intersection, using the light sensor.
+ * This class role is to localize the robots position using the light sensor 
+ * assuming it is close to a line intersection.
+ * 
+ * This class contains methods to execute Circle Light Localization.
+ * 
  */
 public class LightLocalization {
 	private static double sensorOffset = -11.7;
@@ -37,21 +40,24 @@ public class LightLocalization {
 	public static Odometer odo;
 
 	private static double treshold = 1 * TILE_SIZE;
-
+	
 	/**
-	 * Rotate in place until all 4 line are detected, calculations done to determine
-	 * what is the current position.Turn by the computed angle, then reset the gyro.
-	 * Travel to the origin.
+	 * This method execute circle light localization using the light sensor.
 	 * 
-	 * Reset once, ~4 sec to reset.
+	 * It is called by the Ev3Boot class at the start of the run after UltraSonic Localization to perfect the heading correction and
+	 * to correct x and y. It is also called from the navigation class at the end of travelTo() to recorrect position values.
 	 * 
-	 * Requirement: Needs to be close enough to an intersection so that when the
-	 * robot rotates on place it detects all 4 lines. Needs to be in the lower left
-	 * quadrant to correct angle, but does not have to be in the lower left quadrant
-	 * to correct X and Y.
+	 * The robot rotates counter clockwise while scanning using a light sensor.
+	 * Rotates in place until all 4 line are detected. Stores angle which we detected every lines.
+	 * Using the 4 angles, compute where the real 0 degree heading is and where the intersection is.
+	 * Navigate to the line intersection, turn to the real 0 degree heading and reset the gyroscope
+	 * and set the new value of x and y.
+	 * 
+	 * @param x: x coordinate of the intersection the robot wants to localize
+	 * @param y: y coordinate of the intersection the robot wants to localize
+	 * @param positionOnly: boolean to determine whether to correct both heading and position or position only.
 	 */
-
-	public static void lightLocalize(double x, double y, boolean positionOnly, double traveledDistance) {
+	public static void lightLocalize(double x, double y, boolean positionOnly) {
 
 		try {
 			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
@@ -60,10 +66,6 @@ public class LightLocalization {
 			e.printStackTrace();
 		}
 
-//		if (traveledDistance < treshold) {
-//			Sound.buzz();
-//			return;
-//		}
 
 		SColor.fetchSample(data, 0);
 		color = data[0] * 1000;

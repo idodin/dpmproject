@@ -9,8 +9,9 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This class contains methods for Rising Edge and Falling Edge Ultrasonic Localization as well as 
- * Color Sensor Localization.
+ * This class role is to localize the robots position using the ultrasonic sensor assuming it is in a corner.
+ * 
+ * This class contains methods to execute Falling Edge Ultrasonic.
  * 
  * @author Imad Dodin
  * @author An Khang Chau
@@ -38,13 +39,19 @@ public class Localizer {
 	private static int rfalling = 30;
 
 	/**
-	 * Falling Edge Localization with the Ultrasonic Sensor.
+	 * This method execute Falling Edge Localization using the Ultrasonic Sensor.
 	 * 
-	 * Turn until first falling edge is met, record angle.
-	 * then turn clockwise until second falling edge is met, record angle.
+	 * It is called by the Ev3Boot class at the start of the run to roughly correct the heading of the robot.
+	 * A more precise heading correction will be done after.
 	 * 
-	 * Calculations done to determine where the 0 degrees heading is.
-	 * Turn to 0 degrees
+	 * First, the robot turns clockwise until distance is greater than d + k + rfalling.
+	 * This ensure that if the robot start facing the wall, it only start looking for falling edge after turning away from the wall.
+	 * Then the robot continue turning clockwise until 2 consecutive readings of distance is smaller than d + 5 + k.
+	 * Stop the motors when the first falling edge is found and record the angle as angle "a".
+	 * Then the robot start turning counter clockwise until 2 consecutive readings of distance is smaller than d + 5 + k.
+	 * Stop the motors and record the angle as angle "b".
+	 * Using "a" and "b", compute the angle correction to determine current angle.
+	 * Finally, turn to the 0 degree heading.
 	 * 
 	 * @throws OdometerExceptions
 	 */
