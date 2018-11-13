@@ -262,6 +262,7 @@ public class Ev3Boot {
 		}
 
 		switch (corner) {
+
 		case 0:
 			LightLocalization.lightLocalize(1, 1, false, 100, 0);
 			break;
@@ -318,9 +319,8 @@ public class Ev3Boot {
 		// RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
-			;
 		System.exit(0);
-
+		
 	}
 
 	/**
