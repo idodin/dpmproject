@@ -11,10 +11,13 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * 
- * Once the motor has reached the ring, this method uses
- *  a computed gaussian distribution and the light sensor
- *   to determine the ring color
+ * This is the class's constructor, this class is used to determine the color of a ring, 
+ * if it is either yellow, orange, blue or green.
+ * It assumes that the robot is close enough to be able to detect 
+ * the colors using the color sensor.
+ * This method uses a computed gaussian distribution for more reliability
+ *  when determining the ring color.
+ *   
  * @author Hieu Chau Nguyen
  *
  */
@@ -53,15 +56,18 @@ public class CheckColor{
 
 	
 	/**
-	 * Check if the robot finished detecting the color
-	 * @return Boolean value true if the color was detected false otherwise.
+	 * Checks if the robot has detected a color, 
+	 * returns true if the color was detected false otherwise.
+	 * @return detected 
 	 */
 	public static boolean finishDetect() {
 		return detected;
 	}
 	
 	/**
-	 * Restart the checker for stability reason
+	 * Restart the checker for stability reason,
+	 * sets the boolean detected to false and clears 
+	 * the colorCount array.
 	 */
 	public void restartChecker() {
 		detected = false; 
@@ -69,8 +75,13 @@ public class CheckColor{
 	}
 	
 	/**
-	 * Get the value of the detected Color
-	 * @return Integer value of the colour
+	 * Returns the value of the detected color, 
+	 * where: 
+	 *  0: ORANGE 
+	  	1: YELLOW 
+	 	2: GREEN 
+	 	3: BLUE 
+	 * @return detect 
 	 */
 	public static int getDetectedColor() {
 		return detect;
@@ -78,10 +89,13 @@ public class CheckColor{
 	
 	
 	/**
-	 * This method assumes the robot is close enough to the ring,
-	 * It makes the robot slightly move around to record multiple samples
-	 * using the fetchColor method.
-	 * It sets the variable detect to the value of the detected ring
+	 *  This method, records five samples of the ring's color inside a do while loop, 
+	 *  by making the robot slightly move around the ring, 
+	 *  and calling the fetchColor method at each position.
+	 *  After the loop is exited, meaning the detection is done,it sets the variable detect
+	 *  to the value of the detected ring, by going through the colorCount array,
+	 *  which is modified inside the fetchColor method,
+	 *  and retreving the maximum value. 
 	 */
 	public static void colorDetection() {
 		
@@ -134,8 +148,13 @@ public class CheckColor{
 	
 	
 	/**
-	 * This method records multiple samples, and implements a filter 
-	 * to ignore values too low caused by ambient lighting. 
+	 * This method is called inside the colorDetection method 
+	 * to record samples from the rings. 
+	 * It uses the color sensor's fetchSample to get the data,
+	 * and it implements a filter to ignore values that are too low, 
+	 * to avoid errors that have been caused by noise or a change in ambient lighting. 
+	 * Once it has detected a ring color, it increments the corresponding ring's index 
+	 * inside the colorCount array. 
 	 */
 	
 	private static void fetchColor() {

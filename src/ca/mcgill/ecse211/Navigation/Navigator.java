@@ -25,6 +25,16 @@ import lejos.robotics.SampleProvider;
 public class Navigator {
 
 	private static final int FORWARD_SPEED = 200;
+	private static final int TURN_SPEED = 100;
+	
+	public static int getTurnSpeed() {
+		return TURN_SPEED;
+	}
+
+	public static int getForwardSpeed() {
+		return FORWARD_SPEED;
+	}
+
 	private static final double TILE_SIZE = Ev3Boot.getTileSize();
 	private static final int TURN_ERROR = 1;
 	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
@@ -118,7 +128,7 @@ public class Navigator {
 				
 				Sound.beepSequence();
 				if (localizing) {
-					LightLocalization.lightLocalize(x, y, true, totalDistance);
+					LightLocalization.lightLocalize(x, y, true, totalDistance ,4);
 				}
 				return;
 			}
@@ -212,8 +222,8 @@ public class Navigator {
 		leftMotor.setAcceleration(500);
 		rightMotor.setAcceleration(500);
 
-		leftMotor.setSpeed(60);
-		rightMotor.setSpeed(60);
+		leftMotor.setSpeed(TURN_SPEED);
+		rightMotor.setSpeed(TURN_SPEED);
 
 		currentPosition = odo.getXYT();
 
@@ -255,16 +265,16 @@ public class Navigator {
 	 * @param theta:
 	 *            amount of degree the robot has to turn.
 	 */
-	public static void turnBy(double theta, boolean clockwise) {
+	public static void turnBy(double theta, boolean clockwise, boolean blocking) {
 
-		leftMotor.setSpeed(FORWARD_SPEED/2);
-		rightMotor.setSpeed(FORWARD_SPEED/2);
+		leftMotor.setSpeed(TURN_SPEED);
+		rightMotor.setSpeed(TURN_SPEED);
 		if (clockwise == false) {
 			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
-			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
+			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), !blocking);
 		} else {
 			leftMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
-			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
+			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), !blocking);
 		}
 
 	}

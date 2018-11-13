@@ -108,8 +108,7 @@ public class OdometerData {
   }
 
   /**
-   * Adds dx, dy and dtheta to the current values of x, y and theta, respectively. Useful for
-   * odometry.
+   * Adds dx, dy and dtheta to the current values of x, y and theta, respectively. 
    * 
    * @param dx
    * @param dy
@@ -134,7 +133,7 @@ public class OdometerData {
   }
 
   /**
-   * Overrides the values of x, y and theta. Use for odometry correction.
+   * Overrides the values of x, y and theta. 
    * 
    * @param x the value of x
    * @param y the value of y
@@ -156,7 +155,7 @@ public class OdometerData {
   }
 
   /**
-   * Overrides x. Use for odometry correction.
+   * Overrides x. 
    * 
    * @param x the value of x
    */
@@ -174,7 +173,7 @@ public class OdometerData {
   }
 
   /**
-   * Overrides y. Use for odometry correction.
+   * Overrides y.
    * 
    * @param y the value of y
    */
@@ -192,7 +191,7 @@ public class OdometerData {
   }
 
   /**
-   * Overrides theta. Use for odometry correction.
+   * Overrides theta. 
    * 
    * @param theta the value of theta
    */

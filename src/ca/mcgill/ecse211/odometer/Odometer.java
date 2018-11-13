@@ -1,12 +1,3 @@
-/**
- * This class is meant as a skeleton for the odometer class to be used.
- * 
- * @author Rodrigo Silva
- * @author Dirk Dubois
- * @author Derek Yu
- * @author Karim El-Baba
- * @author Michael Smith
- */
 
 package ca.mcgill.ecse211.odometer;
 
@@ -14,9 +5,11 @@ import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * This class uses the motors' tacho counts 
- * to keep track of its position. It extends a thread.
- *
+ * This class is used to keep track of the robot's position
+ *  and heading, by using it's motors' tacho counts.
+ * This class implements runnable, ans is run in parallel as long
+ * as the motor is travelling.
+ * 
  */
 public class Odometer extends OdometerData implements Runnable {
 
@@ -48,10 +41,12 @@ public class Odometer extends OdometerData implements Runnable {
 
 	/**
 	 * This is the default constructor of this class. It initiates all motors and
-	 * variables once.It cannot be accessed externally.
+	 * variables.It cannot be accessed externally.
 	 * 
 	 * @param leftMotor
 	 * @param rightMotor
+	 * @param TRACK      the wheel base of the robot
+	 * @param WHEEL_RAD  the wheel radius
 	 * @throws OdometerExceptions
 	 */
 	private Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, final double TRACK,
@@ -77,6 +72,8 @@ public class Odometer extends OdometerData implements Runnable {
 	 * 
 	 * @param leftMotor
 	 * @param rightMotor
+	 * @param TRACK      the wheel base of the robot
+	 * @param WHEEL_RAD  the wheel radius
 	 * @return new or existing Odometer Object
 	 * @throws OdometerExceptions
 	 */
@@ -106,11 +103,13 @@ public class Odometer extends OdometerData implements Runnable {
 	}
 
 	/**
-	 * This method is where the logic for the odometer will run. Use the methods
-	 * provided from the OdometerData class to implement the odometer.
-	 * 
-	 * Use gyroscope to detect the current heading.
-	 * Using the tacho count to know the wheels rotation distance and the gyroscope angle we can calculate the current position.
+	 * To update the robot's heading, this method uses the gyroscope.
+	 * To update the x and y corrdinates it uses the change in the motor's 
+	 * tacho counts to find the distance covered by each wheel. 
+	 * Using those two distances it computes the displacement of the robot.
+	 * Afterwards, the x and y  variations are recorded
+	 *  using the displacement and the variation in theta,
+	 * Finally, it uses the update method from OdometerData to keep track of the new values.
 	 */
 	public void run() {
 		long updateStart, updateEnd;
