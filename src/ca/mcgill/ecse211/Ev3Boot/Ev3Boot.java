@@ -26,8 +26,10 @@ import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
 /**
- * This class is the boot class for the Search and Localize Demo It initializes
- * and runs threads for odometry, localization and LCD Display.
+ * This is the constructor of the boot class,it intializes the needed fields for
+ * the used motors and sensors. This class's main method contains the method
+ * calls which define the game logic, including lightLocalize, localizeFE and
+ * travelTo.
  * 
  * @author Imad Dodin
  * @author An Khang Chau
@@ -42,7 +44,7 @@ public class Ev3Boot {
 
 	// ** Set these as appropriate for your team and current situation **
 
-	private static final String SERVER_IP = "192.168.2.35";
+	private static final String SERVER_IP = "192.168.2.11";
 	private static final int TEAM_NUMBER = 21;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -54,7 +56,7 @@ public class Ev3Boot {
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
 	// Configuration Objects
-	private static final double WHEEL_RAD = 2.09;
+	private static final double WHEEL_RAD = 2.106;
 	private static final double TRACK = 15.80;
 	private static final double TILE_SIZE = 30.48;
 	private static final Port usPort = LocalEV3.get().getPort("S4");
@@ -85,58 +87,69 @@ public class Ev3Boot {
 	// game values
 	private static int redTeam;
 	private static int greenTeam;
-	
+
 	private static int red_Corner;
 	private static int green_Corner;
-	
+
 	private static int red_Zone_LL_x;
 	private static int red_Zone_LL_y;
-	
+
 	private static int red_Zone_UR_x;
 	private static int red_Zone_UR_y;
-	
+
 	private static int green_Zone_LL_x;
 	private static int green_Zone_LL_y;
-	
+
 	private static int green_Zone_UR_x;
 	private static int green_Zone_UR_y;
-	
+
 	private static int island_LL_x;
 	private static int island_LL_y;
-	
+
 	private static int island_UR_x;
 	private static int island_UR_y;
-	
+
 	private static int red_Tunnel_LL_x;
 	private static int red_Tunnel_LL_y;
-	
+
 	private static int red_Tunnel_UR_x;
 	private static int red_Tunnel_UR_y;
-	
+
 	private static int green_Tunnel_LL_x;
 	private static int green_Tunnel_LL_y;
-	
+
 	private static int green_Tunnel_UR_x;
 	private static int green_Tunnel_UR_y;
-	
+
 	private static int red_Ring_Set_x;
 	private static int red_Ring_Set_y;
 
 	private static int green_Ring_Set_x;
 	private static int green_Ring_Set_y;
-	
-	//values color dependent
+
+	// values color dependent
 	private static int corner;
-	
+
 	private static int tunnel_LL_x;
 	private static int tunnel_LL_y;
 	private static int tunnel_UR_x;
 	private static int tunnel_UR_y;
-	
+
 	private static int ringSet_x;
 	private static int ringSet_y;
 	private static boolean tunnelEntryIsLL;
-	
+
+	/**
+	 * The main method establishes the connection with the Dpm server using the
+	 * WifiConnection class, and gets the necessary information about the field
+	 * (corner, red_Team...) It also initializes and runs threads for odometry and
+	 * LCD Display, Inside this method, the localizeFE and lightLocalize methods are
+	 * called which make the robot localize. It also calls the travelTo method from
+	 * the Navigator class, to make the robot first travel to the tunnel, through it
+	 * and to the ring set. Once the robot is at the ring set, a call is made to the
+	 * turnAroundTree from the RingSearch class to detect and retreive the rings.
+	 */
+
 	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
 
@@ -147,7 +160,7 @@ public class Ev3Boot {
 
 		// Connect to server and get the data, catching any errors that might occur
 		try {
-			
+
 			/*
 			 * getData() will connect to the server and wait until the user/TA presses the
 			 * "Start" button in the GUI on their laptop with the data filled in. Once it's
@@ -161,51 +174,50 @@ public class Ev3Boot {
 			 * invalid team number was specified and getData() will throw an exception
 			 * letting you know.
 			 */
-			
+
 			Map data = conn.getData();
-			
+
 			redTeam = ((Long) data.get("RedTeam")).intValue();
 			greenTeam = ((Long) data.get("GreenTeam")).intValue();
-			
+
 			red_Corner = ((Long) data.get("RedCorner")).intValue();
 			green_Corner = ((Long) data.get("GreenCorner")).intValue();
-			
+
 			red_Zone_LL_x = ((Long) data.get("Red_LL_x")).intValue();
 			red_Zone_LL_y = ((Long) data.get("Red_LL_y")).intValue();
-			
+
 			red_Zone_UR_x = ((Long) data.get("Red_UR_x")).intValue();
 			red_Zone_UR_y = ((Long) data.get("Red_UR_y")).intValue();
-			
+
 			green_Zone_LL_x = ((Long) data.get("Green_LL_x")).intValue();
 			green_Zone_LL_y = ((Long) data.get("Green_LL_y")).intValue();
-			
+
 			green_Zone_UR_x = ((Long) data.get("Green_UR_x")).intValue();
 			green_Zone_UR_y = ((Long) data.get("Green_UR_y")).intValue();
-			
+
 			island_LL_x = ((Long) data.get("Island_LL_x")).intValue();
 			island_LL_y = ((Long) data.get("Island_LL_y")).intValue();
-			
+
 			island_UR_x = ((Long) data.get("Island_UR_x")).intValue();
 			island_UR_y = ((Long) data.get("Island_UR_y")).intValue();
-			
+
 			red_Tunnel_LL_x = ((Long) data.get("TNR_LL_x")).intValue();
 			red_Tunnel_LL_y = ((Long) data.get("TNR_LL_y")).intValue();
-			
+
 			red_Tunnel_UR_x = ((Long) data.get("TNR_UR_x")).intValue();
 			red_Tunnel_UR_y = ((Long) data.get("TNR_UR_y")).intValue();
-			
+
 			green_Tunnel_LL_x = ((Long) data.get("TNG_LL_x")).intValue();
 			green_Tunnel_LL_y = ((Long) data.get("TNG_LL_y")).intValue();
-			
+
 			green_Tunnel_UR_x = ((Long) data.get("TNG_UR_x")).intValue();
 			green_Tunnel_UR_y = ((Long) data.get("TNG_UR_y")).intValue();
-			
+
 			red_Ring_Set_x = ((Long) data.get("TR_x")).intValue();
 			red_Ring_Set_y = ((Long) data.get("TR_y")).intValue();
 
 			green_Ring_Set_x = ((Long) data.get("TG_x")).intValue();
 			green_Ring_Set_y = ((Long) data.get("TG_y")).intValue();
-			
 
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -220,7 +232,7 @@ public class Ev3Boot {
 			e.printStackTrace();
 			return;
 		}
-
+		//
 		Display display = new Display(lcd);
 
 		Thread odoThread = new Thread(odo);
@@ -228,8 +240,10 @@ public class Ev3Boot {
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
 
-		if(redTeam == 21)
-		{
+		Localizer.localizeFE();
+		// LightLocalization.lightLocalize(0, 0, false, 0);
+
+		if (redTeam == 21) {
 			corner = red_Corner;
 			tunnel_LL_x = red_Tunnel_LL_x;
 			tunnel_LL_y = red_Tunnel_LL_y;
@@ -237,10 +251,9 @@ public class Ev3Boot {
 			tunnel_UR_y = red_Tunnel_UR_y;
 			ringSet_x = red_Ring_Set_x;
 			ringSet_y = red_Ring_Set_y;
-			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
-		}
-		else 
-		{
+			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
+					red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
+		} else {
 			corner = green_Corner;
 			tunnel_LL_x = green_Tunnel_LL_x;
 			tunnel_LL_y = green_Tunnel_LL_y;
@@ -248,81 +261,74 @@ public class Ev3Boot {
 			tunnel_UR_y = green_Tunnel_UR_y;
 			ringSet_x = green_Ring_Set_x;
 			ringSet_y = green_Ring_Set_y;
-			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, green_Zone_LL_x, green_Zone_LL_y, green_Zone_UR_x, green_Zone_UR_y);
-		}
-		
-		switch (corner) {
-			case 0:
-				LightLocalization.lightLocalize(1, 1, false, 100);
-				break;
-			case 1:
-				LightLocalization.lightLocalize(7, 1, false, 100);
-				break;
-			case 2:
-				LightLocalization.lightLocalize(7, 7, false, 100);
-				break;
-			case 3:
-				LightLocalization.lightLocalize(1, 7, false, 100);
-				break;
-		}
-			
-		//if we want to got to the lower left of tunnel
-		if(tunnelEntryIsLL)
-		{
-			//coming from left
-			if(odo.getXYT()[0] <= tunnel_LL_x*TILE_SIZE)
-			{
-				Navigator.travelTo(tunnel_LL_x, tunnel_LL_y-1, 5, true);
-			}
-			//coming from right
-			else 
-			{
-				System.out.println("from right");
-				System.out.println("x: "+ odo.getXYT()[0]);
-				Navigator.travelTo(tunnel_LL_x+1, tunnel_LL_y-1, 5, true);
-			}
-		}
-		//if we want to got to the upper right of tunnel
-		else
-		{
-			System.out.println("ur x: " + tunnel_UR_x);
-			System.out.println("ur y " + tunnel_UR_y);
-			//coming from left
-			if(odo.getXYT()[0] <= tunnel_UR_x*TILE_SIZE)
-			{
-				Navigator.travelTo(tunnel_UR_x-1, tunnel_UR_y+1, 5, true);
-			}
-			//coming from right
-			else 
-			{
-				Navigator.travelTo(tunnel_UR_x, tunnel_UR_y+1, 5, true);
-			}
-		}
-		
-		if(tunnelEntryIsLL)
-		{
-			Navigator.travelTo(tunnel_LL_x+0.5, tunnel_LL_y-1, 2,false);
-			Navigator.travelTo(tunnel_UR_x-0.5, tunnel_UR_y+0.5, 3, false);
-			
-		}
-		else
-		{
-			Navigator.travelTo(tunnel_UR_x-0.5, tunnel_UR_y+1, 2, false);
-			Navigator.travelTo(tunnel_LL_x+0.5, tunnel_LL_y-0.5, 3, false);
+			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
+					green_Zone_LL_x, green_Zone_LL_y, green_Zone_UR_x, green_Zone_UR_y);
 		}
 
-		int position= GameLogic.closestSideOfTree(ringSet_x,ringSet_y,odo.getXYT()[0],odo.getXYT()[1]);
+		switch (corner) {
+		case 0:
+			LightLocalization.lightLocalize(1, 1, false, 100, 0);
+			break;
+		case 1:
+			LightLocalization.lightLocalize(7, 1, false, 100, 1);
+			break;
+		case 2:
+			LightLocalization.lightLocalize(7, 7, false, 100, 2);
+			break;
+		case 3:
+			LightLocalization.lightLocalize(1, 7, false, 100, 3);
+			break;
+		}
+
+		// if we want to got to the lower left of tunnel
+		if (tunnelEntryIsLL) {
+			// coming from left
+			if (odo.getXYT()[0] <= tunnel_LL_x * TILE_SIZE) {
+				Navigator.travelTo(tunnel_LL_x, tunnel_LL_y - 1, 5, true);
+			}
+			// coming from right
+			else {
+				System.out.println("from right");
+				System.out.println("x: " + odo.getXYT()[0]);
+				Navigator.travelTo(tunnel_LL_x + 1, tunnel_LL_y - 1, 5, true);
+			}
+		}
+		// if we want to got to the upper right of tunnel
+		else {
+			System.out.println("ur x: " + tunnel_UR_x);
+			System.out.println("ur y " + tunnel_UR_y);
+			// coming from left
+			if (odo.getXYT()[0] <= tunnel_UR_x * TILE_SIZE) {
+				Navigator.travelTo(tunnel_UR_x - 1, tunnel_UR_y + 1, 5, true);
+			}
+			// coming from right
+			else {
+				Navigator.travelTo(tunnel_UR_x, tunnel_UR_y + 1, 5, true);
+			}
+		}
+
+		if (tunnelEntryIsLL) {
+			Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 1, 2, false);
+			Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 3, false);
+
+		} else {
+			Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 1, 2, false);
+			Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 3, false);
+		}
+
+		int position = GameLogic.closestSideOfTree(ringSet_x, ringSet_y, odo.getXYT()[0], odo.getXYT()[1]);
 		System.out.println("Case" + position);
-		
-		RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
-		
-		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+
+		// RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
+
+		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
+			;
 		System.exit(0);
 
 	}
 
 	/**
-	 * Return the Wheel Radius of the Robot
+	 * Returns the Wheel Radius of the Robot
 	 * 
 	 * @return: Wheel radius
 	 */
@@ -331,7 +337,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the Ultrasonic Sample Provider
+	 * Returns the Ultrasonic Sample Provider
 	 * 
 	 * @return: US sample provider
 	 */
@@ -340,7 +346,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the Ultrasonic Distance Buffer
+	 * Returns the Ultrasonic Distance Buffer
 	 * 
 	 * @return: US distance buffer
 	 */
@@ -349,7 +355,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the Track (Wheelbase) of the Robot
+	 * Returns the Track (Wheelbase) of the Robot
 	 * 
 	 * @return: wheel base
 	 */
@@ -358,7 +364,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the Ultrasonic Average Sample Provider
+	 * Returns the Ultrasonic Sample Provider
 	 * 
 	 * @return: US Sample Provider
 	 */
@@ -367,7 +373,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the Color Sensor Sample Provider
+	 * Returns the Color Sensor's Sample Provider
 	 * 
 	 * @return
 	 */
@@ -376,7 +382,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the Color Sensor Data Buffer
+	 * Returns the Color Sensor's Data Buffer
 	 * 
 	 * @return
 	 */
@@ -385,7 +391,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the left motor
+	 * Returns the left motor
 	 * 
 	 * @return: left motor
 	 */
@@ -394,7 +400,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return right motor
+	 * Returns right motor
 	 * 
 	 * @return: right motor
 	 */
@@ -403,7 +409,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return gyro buffer
+	 * Returns the gyro buffer
 	 * 
 	 * @return: Gyro buffer
 	 */
@@ -412,7 +418,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return tile size
+	 * Returns the tile size
 	 * 
 	 * @return: Tile size
 	 */
@@ -430,7 +436,7 @@ public class Ev3Boot {
 	}
 
 	/**
-	 * Return the color buffer of the front light sensor
+	 * Returns the color buffer of the front light sensor
 	 * 
 	 * @return: Front light sensor's color buffer
 	 */
