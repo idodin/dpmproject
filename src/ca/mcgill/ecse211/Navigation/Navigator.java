@@ -25,7 +25,7 @@ import lejos.robotics.SampleProvider;
 public class Navigator {
 
 	private static final int FORWARD_SPEED = 200;
-	private static final int TURN_SPEED = 100;
+	private static final int TURN_SPEED = 75;
 	
 	public static int getTurnSpeed() {
 		return TURN_SPEED;
@@ -144,7 +144,7 @@ public class Navigator {
 
 			lastPosition = currentPosition;
 
-			if (ReOrientDistance > Ev3Boot.getTileSize() * 1) {
+			if (ReOrientDistance > Ev3Boot.getTileSize() * 0.75) {
 				Sound.beep();
 				leftMotor.stop(true);
 				rightMotor.stop(false);
@@ -270,8 +270,8 @@ public class Navigator {
 	 */
 	public static void turnBy(double theta, boolean clockwise, boolean blocking) {
 
-		leftMotor.setSpeed(TURN_SPEED);
-		rightMotor.setSpeed(TURN_SPEED);
+		leftMotor.setSpeed(TURN_SPEED+50);
+		rightMotor.setSpeed(TURN_SPEED+50);
 		if (clockwise == false) {
 			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
 			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), !blocking);

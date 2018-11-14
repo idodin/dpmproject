@@ -26,8 +26,8 @@ public class Localizer {
 
 	private static final int FORWARD_SPEED = Navigator.getForwardSpeed();
 	private static final int TURN_SPEED = Navigator.getTurnSpeed();
-	private static final int FORWARD_ACCELERATION = 2000;
-	private static final int TURN_ACCELERATION = 2000;
+	private static final int FORWARD_ACCELERATION = 600;
+	private static final int TURN_ACCELERATION = 600;
 	private static double WHEEL_RADIUS = Ev3Boot.getWheelRad();
 
 	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
@@ -47,13 +47,6 @@ public class Localizer {
 	/**
 	 * This method execute Falling Edge Localization using the Ultrasonic Sensor.
 	 * 
-<<<<<<< HEAD
-	 * Turn until first falling edge is met, record angle. then turn clockwise until
-	 * second falling edge is met, record angle.
-	 * 
-	 * Calculations done to determine where the 0 degrees heading is. Turn to 0
-	 * degrees
-=======
 	 * It is called by the Ev3Boot class at the start of the run to roughly correct the heading of the robot.
 	 * A more precise heading correction will be done after.
 	 * 
@@ -65,7 +58,6 @@ public class Localizer {
 	 * Stop the motors and record the angle as angle "b".
 	 * Using "a" and "b", compute the angle correction to determine current angle.
 	 * Finally, turn to the 0 degree heading.
->>>>>>> CircleLocalization
 	 * 
 	 * @throws OdometerExceptions
 	 */
@@ -73,10 +65,11 @@ public class Localizer {
 		// Initialize variables
 		double a, b, correction;
 		a = b = 0;
-		// boolean a1set, a2set, b1set, b2set;
-		// a1set = a2set = b1set = b2set = false;
+
 		int dist, lastdist;
 		dist = lastdist = Integer.MAX_VALUE;
+		
+		setSpeedAccel(TURN_SPEED, TURN_ACCELERATION);
 
 		// Get Odometer Instance
 		try {
@@ -113,39 +106,41 @@ public class Localizer {
 		}
 
 		stopMotors();
-		Navigator.turnBy(1000, false, false);
-
-		while (dist < faceToTheWallDistance || dist == 0) {
-			usAverage.fetchSample(usData, 0);
-			dist = (int) (usData[0] * 100.00);
-		}
-
-		// Keep rotating until falling edge (right wall) is found.
-		while (true) {
-			usAverage.fetchSample(usData, 0);
-			dist = (int) (usData[0] * 100.00);
-			if (dist > 3 && dist < fallingDistance && lastdist <= fallingDistance) {
-				Sound.beep();
-				b = odo.getXYT()[2];
-				break;
-			}
-			lastdist = dist;
-		}
-
-		stopMotors();
-
-		// Correct theta and orientate to 0.
-		if (a < b) {
-			correction = 45 - (a + b) / 2;
-
-			// turnTo(180-(correction+odo.getXYT()[2]));
-			Navigator.turnBy(180 + correction + odo.getXYT()[2], true, true);
-
-		}
-		if (a >= b) {
-			correction = 225 - (a + b) / 2;
-			Navigator.turnBy(180 + correction + odo.getXYT()[2], true, true);
-		}
+//		Navigator.turnBy(1000, false, false);
+//
+//		while (dist < faceToTheWallDistance || dist == 0) {
+//			usAverage.fetchSample(usData, 0);
+//			dist = (int) (usData[0] * 100.00);
+//		}
+//
+//		// Keep rotating until falling edge (right wall) is found.
+//		while (true) {
+//			usAverage.fetchSample(usData, 0);
+//			dist = (int) (usData[0] * 100.00);
+//			if (dist > 3 && dist < fallingDistance && lastdist <= fallingDistance) {
+//				Sound.beep();
+//				b = odo.getXYT()[2];
+//				break;
+//			}
+//			lastdist = dist;
+//		}
+//
+//		stopMotors();
+//
+//		// Correct theta and orientate to 0.
+//		if (a < b) {
+//			correction = 45 - (a + b) / 2;
+//
+//			// turnTo(180-(correction+odo.getXYT()[2]));
+//			Navigator.turnBy(180 + correction + odo.getXYT()[2], true, true);
+//
+//		}
+//		if (a >= b) {
+//			correction = 225 - (a + b) / 2;
+//			Navigator.turnBy(180 + correction + odo.getXYT()[2], true, true);
+//		}
+		
+		Navigator.turnBy(75, false, true);
 		
 		Sound.beepSequence();
 		
@@ -162,7 +157,8 @@ public class Localizer {
 			lastColor = color;
 			SColor.fetchSample(data, 0);
 			color = data[0] * 1000;
-			if (color - lastColor > 4) {
+			System.out.println(color);
+			if (color - lastColor > 6500) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				leftMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10),true);
