@@ -44,7 +44,7 @@ public class Ev3Boot {
 
 	// ** Set these as appropriate for your team and current situation **
 
-	private static final String SERVER_IP = "192.168.2.57";
+	private static final String SERVER_IP = "192.168.2.2";
 	private static final int TEAM_NUMBER = 21;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -306,12 +306,12 @@ public class Ev3Boot {
 							Navigator.travelTo(currentPosition[0] + (tunnel_LL_x - currentPosition[0]) / 2,
 									currentPosition[1] + (tunnel_LL_y - currentPosition[1]) / 2, 4, true);
 						}
-						Navigator.travelTo(tunnel_LL_x - 1.1, tunnel_LL_y, 5, true);
+						Navigator.travelTo(tunnel_LL_x - 1, tunnel_LL_y, 5, true);
 						Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 2, false);
 						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y - 0.5, 5, false);
 						Navigator.travelTo(tunnel_UR_x, tunnel_UR_y - 0.5, 2, false);
 						Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 2, false);
-						Navigator.travelTo(tunnel_UR_x + 1.2, tunnel_UR_y - 0.2, 2, true);
+						Navigator.travelTo(tunnel_UR_x + 1, tunnel_UR_y , 2, true);
 
 					} else {
 						if (Math.sqrt(Math.pow(tunnel_LL_x - currentPosition[0], 2)
@@ -319,12 +319,12 @@ public class Ev3Boot {
 							Navigator.travelTo(currentPosition[0] + (tunnel_LL_x - currentPosition[0]) / 2,
 									currentPosition[1] + (tunnel_LL_y - currentPosition[1]) / 2, 4, true);
 						}
-						Navigator.travelTo(tunnel_LL_x, tunnel_LL_y - 1.1, 5, true);
+						Navigator.travelTo(tunnel_LL_x, tunnel_LL_y - 1, 5, true);
 						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 2, false);
 						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y - 0.5, 5, false);
 						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 2, false);
 						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 2, false);
-						Navigator.travelTo(tunnel_UR_x - 0.2, tunnel_UR_y + 1.2, 2, true);
+						Navigator.travelTo(tunnel_UR_x , tunnel_UR_y + 1, 2, true);
 					}
 				} else {
 					if (tunnel_LL_x - tunnel_UR_x > 1) {
@@ -333,12 +333,12 @@ public class Ev3Boot {
 							Navigator.travelTo(currentPosition[0] + (tunnel_UR_x - currentPosition[0]) / 2,
 									currentPosition[1] + (tunnel_UR_y - currentPosition[1]) / 2, 4, true);
 						}
-						Navigator.travelTo(tunnel_UR_x + 1.1, tunnel_UR_y, 5, true);
+						Navigator.travelTo(tunnel_UR_x + 1, tunnel_UR_y, 5, true);
 						Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 2, false);
 						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y + 0.5, 5, false);
 						Navigator.travelTo(tunnel_LL_x, tunnel_LL_y + 0.5, 2, false);
 						Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 2, false);
-						Navigator.travelTo(tunnel_LL_x - 1.2, tunnel_LL_y + 0.2, 2, true);
+						Navigator.travelTo(tunnel_LL_x - 1, tunnel_LL_y , 2, true);
 
 					} else {
 						if (Math.sqrt(Math.pow(tunnel_UR_x - currentPosition[0], 2)
@@ -346,12 +346,12 @@ public class Ev3Boot {
 							Navigator.travelTo(currentPosition[0] + (tunnel_UR_x - currentPosition[0]) / 2,
 									currentPosition[1] + (tunnel_UR_y - currentPosition[1]) / 2, 4, true);
 						}
-						Navigator.travelTo(tunnel_UR_x, tunnel_UR_y + 1.1, 5, true);
+						Navigator.travelTo(tunnel_UR_x, tunnel_UR_y + 1, 5, true);
 						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 2, false);
 						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y + 0.5, 5, false);
 						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 2, false);
 						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 2, false);
-						Navigator.travelTo(tunnel_LL_x + 0.2, tunnel_LL_y - 1.2, 2, true);
+						Navigator.travelTo(tunnel_LL_x , tunnel_LL_y - 1, 2, true);
 					}
 				}
 

@@ -84,7 +84,7 @@ public class RingSearch {
 			leftMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), true);
 			rightMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), false);
 			Ev3Boot.getArmHook().rotateTo(-205);
-			Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 95 : 25, false);
+			Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 : 32, false);
 			leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
 			rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
 			Ev3Boot.getArmHook().rotateTo(-230);
@@ -136,7 +136,7 @@ public class RingSearch {
 				leftMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), true);
 				rightMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), false);
 				Ev3Boot.getArmHook().rotateTo(-205);
-				Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 95 : 25, false);
+				Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 :32, false);
 				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
 				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
 				Ev3Boot.getArmHook().rotateTo(-230);
