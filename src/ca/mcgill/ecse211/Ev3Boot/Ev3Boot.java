@@ -9,7 +9,6 @@ import ca.mcgill.ecse211.GameLogic.GameLogic;
 import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.RingRetrieval.CheckColor;
-import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -20,7 +19,6 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
-import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
@@ -64,23 +62,17 @@ public class Ev3Boot {
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port colorPortBack = LocalEV3.get().getPort("S2");
 	private static final Port colorPortFront = LocalEV3.get().getPort("S3");
-	private static final Port gyroPort = LocalEV3.get().getPort("S1");
 
-	// Sensor Objects
-	public static EV3GyroSensor gyro = new EV3GyroSensor(gyroPort);
-	public static SampleProvider gyroAngle = gyro.getAngleMode();
 	private static SampleProvider usDistance = new EV3UltrasonicSensor(usPort).getMode("Distance");
 	private static SampleProvider usAverage = new MeanFilter(usDistance, 5);
 	private static float[] usData = new float[usAverage.sampleSize()];
 	private static SampleProvider colorBack = new EV3ColorSensor(colorPortBack).getMode("ColorID");
 	private static float[] colorBufferBack = new float[colorBack.sampleSize()];
-	private static float[] gyroBuffer = new float[gyroAngle.sampleSize()];
 	private static SampleProvider colorFront = new EV3ColorSensor(colorPortFront).getMode("RGB");
 	private static float[] colorBufferFront = new float[colorFront.sampleSize()];
 
 	public static Odometer odo;
 	public static Navigator navigator;
-	public static RingGrasp grasping;
 	public static RingSearch searching;
 	public static LightLocalization lightLocalization;
 	public static Localizer localizer;
@@ -505,15 +497,6 @@ public class Ev3Boot {
 	 */
 	public static EV3LargeRegulatedMotor getRightmotor() {
 		return rightMotor;
-	}
-
-	/**
-	 * Returns the gyro buffer
-	 * 
-	 * @return: Gyro buffer
-	 */
-	public static float[] getGyroBuffer() {
-		return gyroBuffer;
 	}
 
 	/**

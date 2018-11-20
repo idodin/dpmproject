@@ -9,14 +9,9 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
-<<<<<<< HEAD
- * This class contains methods for Rising Edge and Falling Edge Ultrasonic
- * Localization as well as Color Sensor Localization.
-=======
  * This class role is to localize the robots position using the ultrasonic sensor assuming it is in a corner.
  * 
  * This class contains methods to execute Falling Edge Ultrasonic.
->>>>>>> 5488394... java doc improvement
  * 
  * @author Imad Dodin
  * @author An Khang Chau

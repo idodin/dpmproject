@@ -34,9 +34,8 @@ public class RingSearch {
 	 * in the position field. At each side of the tree, we call the colorDetection
 	 * method from the checkColor class, which uses the light sensor to look for one
 	 * of the four ring colors. Once the colorDetection method has returned, if the
-	 * detected color is the one with the highest value it calls the grasp method
-	 * from RingGrasp, otherwise it keeps turning around the tree to find a higher
-	 * value ring.
+	 * detected color is the one with the highest value it attempts to grasp the ring, 
+	 * otherwise it keeps turning around the tree to find a higher value ring.
 	 * 
 	 * @param position: Which tree side is the closest side to the robot
 	 * @param ringSet_x: The tree's x coordinate
