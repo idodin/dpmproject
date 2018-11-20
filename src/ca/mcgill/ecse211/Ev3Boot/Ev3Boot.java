@@ -9,7 +9,6 @@ import ca.mcgill.ecse211.GameLogic.GameLogic;
 import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.RingRetrieval.CheckColor;
-import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -74,7 +73,6 @@ public class Ev3Boot {
 
 	public static Odometer odo;
 	public static Navigator navigator;
-	public static RingGrasp grasping;
 	public static RingSearch searching;
 	public static LightLocalization lightLocalization;
 	public static Localizer localizer;

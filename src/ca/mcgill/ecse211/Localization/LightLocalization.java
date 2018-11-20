@@ -7,7 +7,6 @@ import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -60,8 +59,7 @@ public class LightLocalization {
 	 * Rotates in place until all 4 line are detected. Stores angle which we
 	 * detected every lines. Using the 4 angles, compute where the real 0 degree
 	 * heading is and where the intersection is. Navigate to the line intersection,
-	 * turn to the real 0 degree heading and reset the gyroscope and set the new
-	 * value of x and y.
+	 * turn to the real 0 degree heading and set the new value of x and y.
 	 * 
 	 * @param x: x coordinate of the intersection the robot wants to localize
 	 * @param y: y coordinate of the intersection the robot wants to localize
