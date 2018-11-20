@@ -103,7 +103,6 @@ public class Odometer extends OdometerData implements Runnable {
 	}
 
 	/**
-	 * To update the robot's heading, this method uses the gyroscope.
 	 * To update the x and y coordinates it uses the change in the motor's 
 	 * tacho counts to find the distance covered by each wheel. 
 	 * Using those two distances it computes the displacement of the robot.
@@ -118,8 +117,6 @@ public class Odometer extends OdometerData implements Runnable {
 			theta = odo.getXYT()[2];
 			updateStart = System.currentTimeMillis();
 			
-			Ev3Boot.gyroAngle.fetchSample(Ev3Boot.getGyroBuffer(), 0);
-			newTheta = ((Ev3Boot.getGyroBuffer()[0] % 360) + 360) % 360;
 
 			leftMotorTachoCount = leftMotor.getTachoCount();
 			rightMotorTachoCount = rightMotor.getTachoCount();

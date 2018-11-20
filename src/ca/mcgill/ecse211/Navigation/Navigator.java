@@ -54,13 +54,11 @@ public class Navigator {
 	 * 
 	 * This method execute navigation to a specific point, if wanted it can light localize upon arrival.
 	 * 
-	 * First calculate heading correct to point at the arrival point using the odometry current position.
-	 * Then turn to the calculated heading using turnTo() method.
-	 * Activate both motors to move forward.
+	 * This method causes the robot to travel to an intermediate waypoint in the case of diagonal travel.
+	 * The method continuously polls the 2 rear light sensors. In the case that a line is detected by one of 
+	 * them, its respective motor is stopped until the robot corrects its heading (the second light sensor detects 
+	 * a line).
 	 * In a loop calculate distance between current position and arrival point, if the distance is smaller than treshHold, stop the motors.
-	 * If the travelled distance since last re-orientation is bigger than a tile size, 
-	 * call orientateTravel() method to re-orient heading to face the arrival point and move forward.
-	 * This method is called periodically to reset error due to drift.
 	 * When the distance from arrival point is acceptable stop the motors and light localize if specified.
 	 * 
 	 * @param x: x coordinate to navigate to
@@ -148,7 +146,6 @@ public class Navigator {
 				Sound.beep();
 				leftMotor.stop(true);
 				rightMotor.stop(false);
-				orientateTravel(x, y);
 				ReOrientDistance = 0;
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
@@ -159,49 +156,6 @@ public class Navigator {
 		}
 	}
 
-	/**
-	 * Method called by "travelTo" method.
-	 * 
-	 * Re-orient the heading of the robot using the difference between current
-	 * position and desired position
-	 * 
-	 * @param x: X-coordinate of the arrival point
-	 * @param y: Y-coordinate of the arrival point
-	 */
-	public static void orientateTravel(double x, double y) {
-		try {
-			odo = Odometer.getOdometer();
-		} catch (OdometerExceptions e) {
-			e.printStackTrace();
-			return;
-		}
-
-		currentPosition = odo.getXYT();
-
-		double baseAngle = 0;
-		double adjustAngle = 0;
-
-		double deltaX = x * TILE_SIZE - currentPosition[0];
-		double deltaY = y * TILE_SIZE - currentPosition[1];
-		double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
-		if (deltaX == 0 && deltaY != 0) {
-			turnTo(deltaY < 0 ? 180 : 0);
-		} else {
-			baseAngle = deltaX > 0 ? 90 : 270;
-			if ((deltaY > 0 && deltaX > 0) || (deltaY < 0 && deltaX < 0)) {
-				adjustAngle = -1 * Math.toDegrees(Math.atan(deltaY / deltaX));
-			} else {
-				adjustAngle = Math.toDegrees(Math.atan(Math.abs(deltaY) / Math.abs(deltaX)));
-			}
-
-			if (Math.abs(currentPosition[2] - (baseAngle + adjustAngle)) > 5)
-				turnTo(baseAngle + adjustAngle);
-
-		}
-
-		return;
-	}
 
 	/**
 	 * This method makes the robot turn to the specified bearing.
