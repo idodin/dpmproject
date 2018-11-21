@@ -31,8 +31,8 @@ public class Localizer {
 	private static double[] currentPosition;
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
-	private static SampleProvider SColor = Ev3Boot.getColorBack();
-	private static float[] data = Ev3Boot.getColorBufferBack();
+	private static SampleProvider SColor = Ev3Boot.getColorLeft();
+	private static float[] data = Ev3Boot.getColorLeftBuffer();
 	private static float color;
 	private static float lastColor;
 

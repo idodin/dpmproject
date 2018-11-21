@@ -24,7 +24,7 @@ import lejos.robotics.SampleProvider;
  */
 public class Navigator {
 
-	private static final int FORWARD_SPEED = 200;
+	private static final int FORWARD_SPEED = 100;
 	private static final int TURN_SPEED = 75;
 	
 	public static int getTurnSpeed() {
