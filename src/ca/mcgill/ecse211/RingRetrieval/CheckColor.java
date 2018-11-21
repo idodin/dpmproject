@@ -8,6 +8,7 @@ import ca.mcgill.ecse211.Navigation.Navigator;
  */
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -23,7 +24,7 @@ public class CheckColor{
 	private static final EV3LargeRegulatedMotor leftMotor  = Ev3Boot.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
 	private static final EV3LargeRegulatedMotor BigArmHook = Ev3Boot.getBigArmHook();
-	private static final EV3LargeRegulatedMotor armHook    = Ev3Boot.getArmHook();
+	private static final EV3MediumRegulatedMotor armHook    = Ev3Boot.getArmHook();
 	
 	private static double wheelrad = Ev3Boot.getWheelRad();
 	private static double track    = Ev3Boot.getTrack();

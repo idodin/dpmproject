@@ -35,9 +35,10 @@ public class LightLocalization {
 	private static double WHEEL_RAD = Ev3Boot.getWheelRad();
 	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
-	private static SampleProvider SColor = Ev3Boot.getColorBack();
-	private static float[] data = Ev3Boot.getColorBufferBack();
+	private static SampleProvider SColor = Ev3Boot.getColorLeft();
+	private static float[] data = Ev3Boot.getColorLeftBuffer();
 	private static final double TILE_SIZE = Ev3Boot.getTileSize();
+	//public static EV3GyroSensor gyro = Ev3Boot.gyro;
 	public static Odometer odo;
 	private static final int TURN_SPEED = Navigator.getTurnSpeed();
 	private static final int Localization_SPEED = 140;
@@ -289,5 +290,6 @@ public class LightLocalization {
 			break;
 		}
 		
+		//gyro.reset();
 	}
 }

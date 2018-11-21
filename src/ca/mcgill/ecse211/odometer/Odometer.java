@@ -116,7 +116,8 @@ public class Odometer extends OdometerData implements Runnable {
 		while (true) {
 			theta = odo.getXYT()[2];
 			updateStart = System.currentTimeMillis();
-			
+			//Ev3Boot.gyroAngle.fetchSample(Ev3Boot.getGyroBuffer(), 0);
+			//newTheta = ((Ev3Boot.getGyroBuffer()[0] % 360) + 360) % 360;
 
 			leftMotorTachoCount = leftMotor.getTachoCount();
 			rightMotorTachoCount = rightMotor.getTachoCount();
