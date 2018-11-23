@@ -3,7 +3,7 @@ package ca.mcgill.ecse211.Navigation;
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.odometer.Odometer;
-
+import ca.mcgill.ecse211.odometer.OdometerCorrection;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Sound;
 //import ca.mcgill.ecse211.odometer.Odometer;
@@ -24,8 +24,13 @@ import lejos.robotics.SampleProvider;
  */
 public class Navigator {
 
-	private static final int FORWARD_SPEED = 100;
+	private static final int FORWARD_SPEED = 150;
 	private static final int TURN_SPEED = 75;
+	
+	private static final int BLACK = 300;
+	private static final int errorMargin = 150;
+	private static final int CORRECTOR_SPEED = Navigator.getForwardSpeed()/3;
+	
 	
 	public static int getTurnSpeed() {
 		return TURN_SPEED;
@@ -39,6 +44,20 @@ public class Navigator {
 	private static final int TURN_ERROR = 1;
 	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
+	private static SampleProvider colorSensorLeft = Ev3Boot.getColorLeft();
+	private static SampleProvider colorSensorRight = Ev3Boot.getColorRight();
+	private static float[] colorLeftBuffer = Ev3Boot.getColorLeftBuffer();
+	private static float[] colorRightBuffer = Ev3Boot.getColorRightBuffer();
+	
+	private static float colorLeft;
+	private static float colorRight;
+	private static float oldColorLeft;
+	private static float oldColorRight;
+	private static final long CORRECTION_PERIOD = 10;
+	static long correctionStart;
+	static long correctionEnd;
+	
+	
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static double[] lastPosition;
@@ -66,7 +85,7 @@ public class Navigator {
 	 * @param treshHold: acceptable error distance
 	 * @param localizing: should to robot localize upon arrival
 	 */
-	public static void travelTo(double x, double y, int treshHold, boolean localizing) {
+	public static void travelTo(double x, double y, int treshHold) {
 
 		try {
 			odo = Odometer.getOdometer();
@@ -80,12 +99,9 @@ public class Navigator {
 
 		double deltaX = x * TILE_SIZE - currentPosition[0];
 		double deltaY = y * TILE_SIZE - currentPosition[1];
-		double totalDistance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
 		isNavigating = true;
-		ReOrientDistance = 0;
 
-		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			motor.stop();
 			motor.setAcceleration(500);
@@ -102,9 +118,10 @@ public class Navigator {
 				adjustAngle = Math.toDegrees(Math.atan(Math.abs(deltaY) / Math.abs(deltaX)));
 			}
 
+			//OdometerCorrection.isCorrecting = false;
 			turnTo(baseAngle + adjustAngle);
-			// System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " +
-			// adjustAngle);
+			//OdometerCorrection.isCorrecting = true;
+			
 		}
 
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -113,47 +130,143 @@ public class Navigator {
 		rightMotor.forward();
 
 		while (isNavigating) {
+
 			currentPosition = odo.getXYT();
 
 			deltaX = x * TILE_SIZE - currentPosition[0];
 			deltaY = y * TILE_SIZE - currentPosition[1];
 			distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-
+			
+			
+//		System.out.println("Distance:"+distance);
+//			System.out.println("delta x: "+ deltaX);
+//			System.out.println("delta y: "+ deltaY);
 			if (distance < treshHold) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
-				
-				if (treshHold >= 4) {
-					travelTo(x, y, 1, false);
-				}
-				
+				//OdometerCorrection.isCorrecting = false;
 				Sound.beepSequence();
-				if (localizing) {
-					LightLocalization.lightLocalize(x, y, true, totalDistance ,4);
-
-				}
+				
 				return;
 			}
+			
+					
+			correctionStart = System.currentTimeMillis();
+			oldColorLeft = colorLeft;
+			oldColorRight = colorRight;
 
-			distanceDifference = Math.sqrt(Math.pow(currentPosition[0] - lastPosition[0], 2)
-					+ Math.pow(currentPosition[1] - lastPosition[1], 2));
-			ReOrientDistance += distanceDifference;
+			colorSensorLeft.fetchSample(colorLeftBuffer, 0);
+			colorLeft = colorLeftBuffer[0] * 1000;
 
-			lastPosition = currentPosition;
+			colorSensorRight.fetchSample(colorRightBuffer, 0);
+			colorRight = colorRightBuffer[0] * 1000;
 
-			if (ReOrientDistance > Ev3Boot.getTileSize() * 0.75) {
-				Sound.beep();
+			if (colorLeft - oldColorLeft > 19) {
+				if (colorRight - oldColorRight > 19 || !pollMultiple(false))
+					continue;
+				
+
 				leftMotor.stop(true);
-				rightMotor.stop(false);
-				ReOrientDistance = 0;
-				leftMotor.setSpeed(FORWARD_SPEED);
-				rightMotor.setSpeed(FORWARD_SPEED);
+				while (colorRight - oldColorRight <= 19) {
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
+						rightMotor.stop();
+						rightMotor.setSpeed(CORRECTOR_SPEED);
+						rightMotor.forward();
+					}
+					oldColorRight = colorRight;
+					colorSensorRight.fetchSample(colorRightBuffer, 0);
+					colorRight = colorRightBuffer[0] * 1000;
+					//System.out.println(colorRight-oldColorRight);
+				}
+
+				Sound.beep();			
+				rightMotor.stop();
+				odo.setTheta(0);
+				
+				leftMotor.setSpeed(Navigator.getForwardSpeed());
+				rightMotor.setSpeed(Navigator.getForwardSpeed());
 				leftMotor.forward();
 				rightMotor.forward();
+
+				try {
+					Thread.sleep(400);
+					colorSensorRight.fetchSample(colorRightBuffer, 0);
+					colorRight = colorRightBuffer[0] * 1000;
+					colorSensorLeft.fetchSample(colorLeftBuffer, 0);
+					colorLeft = colorLeftBuffer[0] * 1000;
+					oldColorLeft = colorLeft;
+					oldColorRight = colorRight;
+					
+				} catch (InterruptedException e) { }
+
+			} else if (colorRight - oldColorRight > 19) {
+				if (colorLeft - oldColorLeft > 19 || !pollMultiple(true))
+					continue;
+				//System.out.println("Right line detected:\n" + (colorRight - oldColorRight));
+
+				rightMotor.stop(true);
+				while (colorLeft - oldColorLeft <= 19) {
+					if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
+						leftMotor.stop();
+						leftMotor.setSpeed(CORRECTOR_SPEED);
+						leftMotor.forward();
+					}
+					oldColorLeft = colorLeft;
+					colorSensorLeft.fetchSample(colorLeftBuffer, 0);
+					colorLeft = colorLeftBuffer[0] * 1000;
+					//System.out.println(colorLeft-oldColorLeft);
+				}
+
+				Sound.beep();
+				leftMotor.stop();
+				odo.setTheta(0);
+
+				leftMotor.setSpeed(Navigator.getForwardSpeed());
+				rightMotor.setSpeed(Navigator.getForwardSpeed());
+				leftMotor.forward();
+				rightMotor.forward();
+
+				try {
+					Thread.sleep(400);
+					colorSensorRight.fetchSample(colorRightBuffer, 0);
+					colorRight = colorRightBuffer[0] * 1000;
+					colorSensorLeft.fetchSample(colorLeftBuffer, 0);
+					colorLeft = colorLeftBuffer[0] * 1000;
+					oldColorLeft = colorLeft;
+					oldColorRight = colorRight;
+				} catch (InterruptedException e) {}
 			}
 
+			correctionEnd = System.currentTimeMillis();
+			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
+				try {
+					Thread.sleep(CORRECTION_PERIOD - (correctionEnd - correctionStart));
+				} catch (InterruptedException e) {
+
+				}
+			}
+			
+			
+
 		}
+					
+			
+			
+
+		}
+	
+	
+	public static void toStraightNavigator(double x, double y, int threshold) {
+		try {
+			odo = Odometer.getOdometer();
+		} catch (OdometerExceptions e) {
+			e.printStackTrace();
+			return;
+		}
+		currentPosition = odo.getXYT();
+		travelTo(currentPosition[0]/TILE_SIZE,y,threshold);
+		travelTo(x,currentPosition[1]/TILE_SIZE,threshold);
 	}
 
 
@@ -209,8 +322,6 @@ public class Navigator {
 			rightMotor.stop(false);
 		}
 
-		// OdometerCorrections.correction = true;
-
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 
@@ -257,6 +368,28 @@ public class Navigator {
 	 */
 	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	
+	private static boolean pollMultiple(Boolean isRight) {
+		int sampleCount = 10;
+		float sum = 0;
+		SampleProvider sample = isRight ? colorSensorRight : colorSensorLeft;
+		float[] buffer = isRight ?  colorRightBuffer : colorLeftBuffer;
+		
+		for(int i = 0; i<sampleCount; i++) {
+			sample.fetchSample(buffer, 0);
+			sum += buffer[0] * 1000;
+		}
+		
+		float avg = sum / sampleCount;
+		if (avg > BLACK - errorMargin && avg < BLACK + errorMargin) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		
+		
 	}
 
 }

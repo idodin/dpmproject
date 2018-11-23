@@ -60,7 +60,7 @@ public class Ev3Boot {
 
 	// Configuration Objects
 	private static final double WHEEL_RAD = 2.106;
-	private static final double TRACK = 15.80;
+	private static final double TRACK = 9.51;
 	private static final double TILE_SIZE = 30.48;
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port colorPortLeft = LocalEV3.get().getPort("S1");
@@ -172,16 +172,17 @@ public class Ev3Boot {
 
 
 
-		 (new Thread() {
-		 public void run() {
-		 leftMotor.setSpeed(Navigator.getForwardSpeed()/5);
-		 rightMotor.setSpeed(Navigator.getForwardSpeed()/5);
-		 leftMotor.forward();
-		 rightMotor.forward();
-		 OdometerCorrection.correct();
-		 }
-		 }).start();
+//		 (new Thread() {
+//		 public void run() {
+//		 leftMotor.setSpeed(Navigator.getForwardSpeed()/5);
+//		 rightMotor.setSpeed(Navigator.getForwardSpeed()/5);
+//		 leftMotor.forward();
+//		 rightMotor.forward();
+		// OdometerCorrection.correct();
+//		 }
+//		 }).start();
 		
+
 
 //		leftMotor.setSpeed(Navigator.getForwardSpeed());
 //		rightMotor.setSpeed(Navigator.getForwardSpeed());
@@ -286,19 +287,31 @@ public class Ev3Boot {
 		// // Wait until user decides to end program
 		// // Button.waitForAnyPress();
 		//
-		// try {
-		// odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
-		// } catch (OdometerExceptions e) {
-		// e.printStackTrace();
-		// return;
-		// }
+		 try {
+		 odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+		 } catch (OdometerExceptions e) {
+		 e.printStackTrace();
+		 return;
+		 }
 		// //
-		//// Display display = new Display(lcd);
+		 Display display = new Display(lcd);
 		//
-		// Thread odoThread = new Thread(odo);
-		// odoThread.start();
-		//// Thread odoDisplayThread = new Thread(display);
-		//// odoDisplayThread.start();
+		 Thread odoThread = new Thread(odo);
+		 odoThread.start();
+		 Thread odoDisplayThread = new Thread(display);
+		 odoDisplayThread.start();
+		 
+//		 leftMotor.forward();
+//	      leftMotor.flt();
+//	      rightMotor.forward();
+//	      rightMotor.flt();	 
+		 
+		    Button.waitForAnyPress(); 
+	//		Navigator.toStraightNavigator(0,2, 2);
+	     	Navigator.toStraightNavigator(2, 5, 5);
+//			Navigator.toStraightNavigator(2,0, 2);
+//			Navigator.toStraightNavigator(0,0, 2);
+			
 		//
 		// try{
 		// Localizer.localizeFE();

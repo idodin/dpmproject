@@ -148,7 +148,7 @@ public class LightLocalization {
 			odo.setX(xOrigin);
 			odo.setY(yOrigin);
 
-			Navigator.travelTo(x, y, 2, false);
+			Navigator.travelTo(x, y, 2);
 			Navigator.turnTo(((((secondLine + fourthLine) / 2) + 179) % 360)-4);
 
 			usAverage.fetchSample(usData, 0);
@@ -184,7 +184,7 @@ public class LightLocalization {
 			odo.setX(xOrigin);
 			odo.setY(yOrigin);
 
-			Navigator.travelTo(x, y, 2, false);
+			Navigator.travelTo(x, y, 2);
 			Navigator.turnTo((((firstLine + thirdLine) / 2) + 178) % 360);
 
 			usAverage.fetchSample(usData, 0);
@@ -218,7 +218,7 @@ public class LightLocalization {
 			odo.setX(xOrigin);
 			odo.setY(yOrigin);
 
-			Navigator.travelTo(x, y, 2, false);
+			Navigator.travelTo(x, y, 2);
 			Navigator.turnTo((((secondLine + fourthLine) / 2) + 178) % 360);
 
 			usAverage.fetchSample(usData, 0);
@@ -252,7 +252,7 @@ public class LightLocalization {
 			odo.setX(xOrigin);
 			odo.setY(yOrigin);
 
-			Navigator.travelTo(x, y, 2, false);
+			Navigator.travelTo(x, y, 2);
 			Navigator.turnTo((((firstLine + thirdLine) / 2) + 178) % 360);
 
 			usAverage.fetchSample(usData, 0);
@@ -285,7 +285,7 @@ public class LightLocalization {
 			odo.setX(xOrigin);
 			odo.setY(yOrigin);
 
-			Navigator.travelTo(x, y, 2, false);
+			Navigator.travelTo(x, y, 2);
 			Navigator.turnTo((((secondLine + fourthLine) / 2) + 180) % 360);
 			break;
 		}
