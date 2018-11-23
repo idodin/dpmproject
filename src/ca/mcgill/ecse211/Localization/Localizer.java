@@ -9,7 +9,8 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This class role is to localize the robots position using the ultrasonic sensor assuming it is in a corner.
+ * This class role is to localize the robots position using the ultrasonic
+ * sensor assuming it is in a corner.
  * 
  * This class contains methods to execute Falling Edge Ultrasonic.
  * 
@@ -21,19 +22,16 @@ public class Localizer {
 
 	private static final int FORWARD_SPEED = Navigator.getForwardSpeed();
 	private static final int TURN_SPEED = Navigator.getTurnSpeed();
-	private static final int FORWARD_ACCELERATION = 600;
 	private static final int TURN_ACCELERATION = 600;
-	private static double WHEEL_RADIUS = Ev3Boot.getWheelRad();
 
 	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
 	private static Odometer odo;
-	private static double[] currentPosition;
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
-	private static SampleProvider SColor = Ev3Boot.getColorLeft();
-	private static float[] data = Ev3Boot.getColorLeftBuffer();
-	private static float color;
+	private static SampleProvider color = Ev3Boot.getColorLeft();
+	private static float[] colorBuffer = Ev3Boot.getColorLeftBuffer();
+	private static float currentColor;
 	private static float lastColor;
 
 	private static int fallingDistance = 40;
@@ -42,32 +40,32 @@ public class Localizer {
 	/**
 	 * This method execute Falling Edge Localization using the Ultrasonic Sensor.
 	 * 
-	 * It is called by the Ev3Boot class at the start of the run to roughly correct the heading of the robot.
-	 * A more precise heading correction will be done after.
+	 * It is called by the Ev3Boot class at the start of the run to roughly correct
+	 * the heading of the robot. A more precise heading correction will be done
+	 * after.
 	 * 
-	 * First, the robot turns clockwise until distance is greater than d + k + rfalling.
-	 * This ensure that if the robot start facing the wall, it only start looking for falling edge after turning away from the wall.
-	 * Then the robot continue turning clockwise until 2 consecutive readings of distance is smaller than d + 5 + k.
-	 * Stop the motors when the first falling edge is found and record the angle as angle "a".
-	 * Then the robot start turning counter clockwise until 2 consecutive readings of distance is smaller than d + 5 + k.
-	 * Stop the motors and record the angle as angle "b".
-	 * Using "a" and "b", compute the angle correction to determine current angle.
-	 * Finally, turn to the 0 degree heading.
-<<<<<<< HEAD
->>>>>>> 5488394... java doc improvement
-=======
->>>>>>> 16c10c7... Update
+	 * First, the robot turns clockwise until distance is greater than d + k +
+	 * rfalling. This ensure that if the robot start facing the wall, it only start
+	 * looking for falling edge after turning away from the wall. Then the robot
+	 * continue turning clockwise until 2 consecutive readings of distance is
+	 * smaller than d + 5 + k. Stop the motors when the first falling edge is found
+	 * and record the angle as angle "a". Then the robot start turning counter
+	 * clockwise until 2 consecutive readings of distance is smaller than d + 5 + k.
+	 * Stop the motors and record the angle as angle "b". Using "a" and "b", compute
+	 * the angle correction to determine current angle. Finally, turn to the 0
+	 * degree heading.
 	 * 
 	 * @throws OdometerExceptions
 	 */
 	public static void localizeFE() throws OdometerExceptions {
+		
 		// Initialize variables
 		double a, b, correction;
 		a = b = 0;
 
 		int dist, lastdist;
 		dist = lastdist = Integer.MAX_VALUE;
-		
+
 		setSpeedAccel(TURN_SPEED, TURN_ACCELERATION);
 
 		// Get Odometer Instance
@@ -104,68 +102,116 @@ public class Localizer {
 			lastdist = dist;
 		}
 
+		// Turn in opposite direction.
 		stopMotors();
-//		Navigator.turnBy(1000, false, false);
-//
-//		while (dist < faceToTheWallDistance || dist == 0) {
-//			usAverage.fetchSample(usData, 0);
-//			dist = (int) (usData[0] * 100.00);
-//		}
-//
-//		// Keep rotating until falling edge (right wall) is found.
-//		while (true) {
-//			usAverage.fetchSample(usData, 0);
-//			dist = (int) (usData[0] * 100.00);
-//			if (dist > 3 && dist < fallingDistance && lastdist <= fallingDistance) {
-//				Sound.beep();
-//				b = odo.getXYT()[2];
-//				break;
-//			}
-//			lastdist = dist;
-//		}
-//
-//		stopMotors();
-//
-//		// Correct theta and orientate to 0.
-//		if (a < b) {
-//			correction = 45 - (a + b) / 2;
-//
-//			// turnTo(180-(correction+odo.getXYT()[2]));
-//			Navigator.turnBy(180 + correction + odo.getXYT()[2], true, true);
-//
-//		}
-//		if (a >= b) {
-//			correction = 225 - (a + b) / 2;
-//			Navigator.turnBy(180 + correction + odo.getXYT()[2], true, true);
-//		}
-		
-		Navigator.turnBy(75, false, true);
-		
+		Navigator.turnBy(1000, false, false);
+
+		// Do nothing until we re-pass previously detected wall.
+		while (dist < faceToTheWallDistance || dist == 0) {
+			usAverage.fetchSample(usData, 0);
+			dist = (int) (usData[0] * 100.00);
+		}
+
+		// Keep rotating until falling edge (right wall) is found.
+		while (true) {
+			usAverage.fetchSample(usData, 0);
+			dist = (int) (usData[0] * 100.00);
+
+			if (dist > 3 && dist <= fallingDistance && lastdist <= fallingDistance) {
+				Sound.beep();
+				b = odo.getXYT()[2];
+				break;
+			}
+			lastdist = dist;
+		}
+
 		Sound.beepSequence();
-		
+
+		stopMotors();
+
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
 
-		leftMotor.forward();
-		rightMotor.forward();
+		// leftMotor.forward();
+		// rightMotor.forward();
 
-		SColor.fetchSample(data, 0);
-		color = data[0] * 1000;
-		
-		while (true) {
-			lastColor = color;
-			SColor.fetchSample(data, 0);
-			color = data[0] * 1000;
-			System.out.println(color);
-			if (color - lastColor > 6500) {
-				leftMotor.stop(true);
-				rightMotor.stop();
-				leftMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10),true);
-				rightMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10),false);
-				break;
-			}
+		// SColor.fetchSample(data, 0);
+		// color = data[0] * 1000;
+
+		// while (true) {
+		// lastColor = color;
+		// SColor.fetchSample(data, 0);
+		// color = data[0] * 1000;
+		// System.out.println(color);
+		// if (color - lastColor > 6500) {
+		// leftMotor.stop(true);
+		// rightMotor.stop();
+		// leftMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10), true);
+		// rightMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10), false);
+		// break;
+		// }
+		// }
+
+		// Correct theta and orientate to 0.
+		if (a < b) {
+			correction = 45 - (a + b) / 2;
+			odo.setTheta(180 + correction + odo.getXYT()[2]);
+			Navigator.turnTo(0);
+
+		}
+		else if (a >= b) {
+			correction = 225 - (a + b) / 2;
+			odo.setTheta(180 + correction + odo.getXYT()[2]);
+			Navigator.turnTo(0);
 		}
 
+	}
+	
+	public static void localizeColor() throws OdometerExceptions {
+		boolean ySet = false;
+		boolean xSet = false;
+		
+		color.fetchSample(colorBuffer, 0);
+		currentColor = colorBuffer[0];
+		lastColor = currentColor;
+		
+		try {
+			odo = Odometer.getOdometer();
+		} catch (OdometerExceptions e) {
+			throw e;
+		}
+		
+		leftMotor.forward();
+		rightMotor.forward();
+		
+		while(true) {
+			color.fetchSample(colorBuffer, 0);
+			currentColor = colorBuffer[0];
+			
+			if (currentColor - lastColor > 19 && Navigator.pollMultiple(false) && !ySet) {
+				Sound.beep();
+				odo.setY(0);
+				ySet = true;
+				stopMotors();
+				leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
+				rightMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+				Navigator.turnTo(90);
+				leftMotor.forward();
+				rightMotor.forward();
+				lastColor = currentColor;
+				continue;
+			}
+
+			if (currentColor - lastColor > 19 && Navigator.pollMultiple(false) && ySet && !xSet) {
+				Sound.beep();
+				odo.setX(0);
+				xSet = true;
+				break;
+			}
+
+			lastColor = currentColor;
+		}
+		
 	}
 
 	/**

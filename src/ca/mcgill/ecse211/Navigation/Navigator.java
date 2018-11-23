@@ -370,7 +370,7 @@ public class Navigator {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
-	private static boolean pollMultiple(Boolean isRight) {
+	public static boolean pollMultiple(Boolean isRight) {
 		int sampleCount = 10;
 		float sum = 0;
 		SampleProvider sample = isRight ? colorSensorRight : colorSensorLeft;

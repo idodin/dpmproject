@@ -171,17 +171,31 @@ public class Ev3Boot {
 	public static void main(String[] args) throws OdometerExceptions {
 
 
+		// Start odometry
+		Thread odoThread = new Thread(Odometer.getOdometer());
+		odoThread.start();
 
-//		 (new Thread() {
-//		 public void run() {
-//		 leftMotor.setSpeed(Navigator.getForwardSpeed()/5);
-//		 rightMotor.setSpeed(Navigator.getForwardSpeed()/5);
-//		 leftMotor.forward();
-//		 rightMotor.forward();
-		// OdometerCorrection.correct();
-//		 }
-//		 }).start();
-		
+		(new Thread() {
+			public void run() {
+				int buttonChoice;
+				do {
+					// clear the display
+					lcd.clear();
+
+					// ask the user whether the motors should drive in a square or float
+					lcd.drawString("Awaiting Input  ", 0, 0);
+
+					buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
+				} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
+
+				try {
+					Localizer.localizeFE();
+				} catch (OdometerExceptions e) {
+					System.out.println("hello");
+					// donothing;
+				}
+			}
+		}).start();
 
 
 //		leftMotor.setSpeed(Navigator.getForwardSpeed());
@@ -287,7 +301,7 @@ public class Ev3Boot {
 		// // Wait until user decides to end program
 		// // Button.waitForAnyPress();
 		//
-		 try {
+		/* try {
 		 odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 		 } catch (OdometerExceptions e) {
 		 e.printStackTrace();
@@ -299,19 +313,19 @@ public class Ev3Boot {
 		 Thread odoThread = new Thread(odo);
 		 odoThread.start();
 		 Thread odoDisplayThread = new Thread(display);
-		 odoDisplayThread.start();
+		 odoDisplayThread.start();*/
 		 
 //		 leftMotor.forward();
 //	      leftMotor.flt();
 //	      rightMotor.forward();
 //	      rightMotor.flt();	 
-		 
+		 /*
 		    Button.waitForAnyPress(); 
 	//		Navigator.toStraightNavigator(0,2, 2);
 	     	Navigator.toStraightNavigator(2, 5, 5);
 //			Navigator.toStraightNavigator(2,0, 2);
 //			Navigator.toStraightNavigator(0,0, 2);
-			
+*/			
 		//
 		// try{
 		// Localizer.localizeFE();
