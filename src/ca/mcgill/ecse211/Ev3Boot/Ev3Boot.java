@@ -1,12 +1,11 @@
 package ca.mcgill.ecse211.Ev3Boot;
 
-import ca.mcgill.ecse211.Localization.LightLocalization;
+
 
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
 import ca.mcgill.ecse211.GameLogic.GameLogic;
-import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.RingRetrieval.CheckColor;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
@@ -91,7 +90,6 @@ public class Ev3Boot {
 	public static Navigator navigator;
 	// public static RingGrasp grasping;
 	// public static RingSearch searching;
-	public static LightLocalization lightLocalization;
 	public static Localizer localizer;
 	public static Display display;
 	public static OdometerCorrection correction;
@@ -171,12 +169,25 @@ public class Ev3Boot {
 	public static void main(String[] args) throws OdometerExceptions {
 
 
+		try {
+			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+		} catch (OdometerExceptions e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		Display display = new Display(lcd);
+		
 		// Start odometry
 		Thread odoThread = new Thread(Odometer.getOdometer());
 		odoThread.start();
 
+		Thread odoDisplayThread = new Thread(display);
+		odoDisplayThread.start();
+
 		(new Thread() {
 			public void run() {
+				
 				int buttonChoice;
 				do {
 					// clear the display
@@ -190,6 +201,10 @@ public class Ev3Boot {
 
 				try {
 					Localizer.localizeFE();
+					Localizer.localizeColor();
+					//System.out.println("x: " + odo.getXYT()[0]);
+					//System.out.println("y: " + odo.getXYT()[1]);
+					Navigator.toStraightNavigator(2, 2, 5);
 				} catch (OdometerExceptions e) {
 					System.out.println("hello");
 					// donothing;

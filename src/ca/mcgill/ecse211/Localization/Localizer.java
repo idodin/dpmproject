@@ -23,16 +23,22 @@ public class Localizer {
 	private static final int FORWARD_SPEED = Navigator.getForwardSpeed();
 	private static final int TURN_SPEED = Navigator.getTurnSpeed();
 	private static final int TURN_ACCELERATION = 600;
+	public static final int SENSOR_OFFSET = 13;
+	private static final int CORRECTOR_SPEED = Navigator.getForwardSpeed() / 3;
 
 	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
 	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
 	private static Odometer odo;
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
-	private static SampleProvider color = Ev3Boot.getColorLeft();
-	private static float[] colorBuffer = Ev3Boot.getColorLeftBuffer();
-	private static float currentColor;
-	private static float lastColor;
+	private static SampleProvider colorLeft = Ev3Boot.getColorLeft();
+	private static float[] colorBufferLeft = Ev3Boot.getColorLeftBuffer();
+	private static float currentColorLeft;
+	private static float oldColorLeft;
+	private static SampleProvider colorRight = Ev3Boot.getColorRight();
+	private static float[] colorBufferRight = Ev3Boot.getColorRightBuffer();
+	private static float currentColorRight;
+	private static float oldColorRight;
 
 	private static int fallingDistance = 40;
 	private static int faceToTheWallDistance = 80;
@@ -58,7 +64,7 @@ public class Localizer {
 	 * @throws OdometerExceptions
 	 */
 	public static void localizeFE() throws OdometerExceptions {
-		
+
 		// Initialize variables
 		double a, b, correction;
 		a = b = 0;
@@ -118,6 +124,7 @@ public class Localizer {
 			dist = (int) (usData[0] * 100.00);
 
 			if (dist > 3 && dist <= fallingDistance && lastdist <= fallingDistance) {
+				if(angleDiff(odo.getXYT()[2], a) < 60) continue;
 				Sound.beep();
 				b = odo.getXYT()[2];
 				break;
@@ -158,60 +165,183 @@ public class Localizer {
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
 			Navigator.turnTo(0);
 
-		}
-		else if (a >= b) {
+		} else if (a >= b) {
 			correction = 225 - (a + b) / 2;
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
 			Navigator.turnTo(0);
 		}
 
 	}
-	
+
 	public static void localizeColor() throws OdometerExceptions {
 		boolean ySet = false;
 		boolean xSet = false;
-		
-		color.fetchSample(colorBuffer, 0);
-		currentColor = colorBuffer[0];
-		lastColor = currentColor;
-		
+
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
 			throw e;
 		}
-		
+
 		leftMotor.forward();
 		rightMotor.forward();
-		
-		while(true) {
-			color.fetchSample(colorBuffer, 0);
-			currentColor = colorBuffer[0];
-			
-			if (currentColor - lastColor > 19 && Navigator.pollMultiple(false) && !ySet) {
-				Sound.beep();
-				odo.setY(0);
-				ySet = true;
+
+		colorLeft.fetchSample(colorBufferLeft, 0);
+		currentColorLeft = colorBufferLeft[0] * 1000;
+		oldColorLeft = currentColorLeft;
+
+		colorRight.fetchSample(colorBufferRight, 0);
+		currentColorRight = colorBufferRight[0] * 1000;
+		oldColorRight = currentColorRight;
+
+		while (true) {
+
+			oldColorLeft = currentColorLeft;
+			colorLeft.fetchSample(colorBufferLeft, 0);
+			currentColorLeft = colorBufferLeft[0] * 1000;
+
+			oldColorRight = currentColorRight;
+			colorRight.fetchSample(colorBufferRight, 0);
+			currentColorRight = colorBufferRight[0] * 1000;
+
+			// COPY START
+
+			if (currentColorLeft - oldColorLeft > 19 && Navigator.pollMultiple(false)) {
+
+				leftMotor.stop(true);
+				double theta = odo.getXYT()[2];
+				while (currentColorRight - oldColorRight <= 19) {
+					if (rightMotor.getAcceleration() != CORRECTOR_SPEED
+							|| leftMotor.getAcceleration() != CORRECTOR_SPEED) {
+						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
+					}
+					if(angleDiff(odo.getXYT()[2], theta) > 25)  {
+						rightMotor.stop(true);
+						leftMotor.stop();
+						leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
+						rightMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+						leftMotor.forward();
+						rightMotor.forward();
+						break;
+					}
+					oldColorRight = currentColorRight;
+					colorRight.fetchSample(colorBufferRight, 0);
+					currentColorRight = colorBufferRight[0] * 1000;
+				}
+				
+				setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
+
+				if (ySet) {
+					odo.setX(Ev3Boot.getTileSize() + SENSOR_OFFSET);
+					odo.setTheta(90);
+					xSet = true;
+					stopMotors();
+					break;
+				} else {
+					odo.setY(Ev3Boot.getTileSize() + SENSOR_OFFSET);
+					odo.setTheta(0);
+					ySet = true;
+				}
 				stopMotors();
-				leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-				rightMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+				
+				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
+				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
 				Navigator.turnTo(90);
 				leftMotor.forward();
 				rightMotor.forward();
-				lastColor = currentColor;
+				oldColorLeft = currentColorLeft;
+
+				leftMotor.setSpeed(Navigator.getForwardSpeed());
+				rightMotor.setSpeed(Navigator.getForwardSpeed());
+				leftMotor.forward();
+				rightMotor.forward();
+
+				try {
+					Thread.sleep(400);
+					colorRight.fetchSample(colorBufferRight, 0);
+					currentColorRight = colorBufferRight[0] * 1000;
+					colorLeft.fetchSample(colorBufferLeft, 0);
+					currentColorLeft = colorBufferLeft[0] * 1000;
+					oldColorLeft = currentColorLeft;
+					oldColorRight = currentColorRight;
+
+				} catch (InterruptedException e) {
+				}
+				continue;
+
+			} else if (currentColorRight - oldColorRight > 19 && Navigator.pollMultiple(true)) {
+				// System.out.println("Right line detected:\n" + (currentColorRight -
+				// oldColorRight));
+
+				rightMotor.stop(true);
+				double theta = odo.getXYT()[2];
+				while (currentColorLeft - oldColorLeft <= 19) {
+					if (rightMotor.getAcceleration() != CORRECTOR_SPEED
+							|| leftMotor.getAcceleration() != CORRECTOR_SPEED) {
+						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
+					}
+					
+					if(angleDiff(odo.getXYT()[2], theta)> 25) {
+						rightMotor.stop(true);
+						leftMotor.stop();
+						leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
+						rightMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+						leftMotor.forward();
+						rightMotor.forward();
+						break;
+					}
+					oldColorLeft = currentColorLeft;
+					colorLeft.fetchSample(colorBufferLeft, 0);
+					currentColorLeft = colorBufferLeft[0] * 1000;
+					// System.out.println(colorLeft-oldColorLeft);
+				}
+				
+				setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
+
+				if (ySet) {
+					odo.setX(Ev3Boot.getTileSize() + SENSOR_OFFSET);
+					odo.setTheta(90);
+					xSet = true;
+					stopMotors();
+					break;
+				} else {
+					odo.setY(Ev3Boot.getTileSize() + SENSOR_OFFSET);
+					odo.setTheta(0);
+					ySet = true;
+				}
+				stopMotors();
+
+				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
+				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+				Navigator.turnTo(90);
+				leftMotor.forward();
+				rightMotor.forward();
+				oldColorLeft = currentColorLeft;
+
+				leftMotor.setSpeed(Navigator.getForwardSpeed());
+				rightMotor.setSpeed(Navigator.getForwardSpeed());
+				leftMotor.forward();
+				rightMotor.forward();
+
+				try {
+					Thread.sleep(400);
+					colorRight.fetchSample(colorBufferRight, 0);
+					currentColorRight = colorBufferRight[0] * 1000;
+					colorLeft.fetchSample(colorBufferLeft, 0);
+					currentColorLeft = colorBufferLeft[0] * 1000;
+					oldColorLeft = currentColorLeft;
+					oldColorRight = currentColorRight;
+
+				} catch (InterruptedException e) {
+				}
 				continue;
 			}
-
-			if (currentColor - lastColor > 19 && Navigator.pollMultiple(false) && ySet && !xSet) {
-				Sound.beep();
-				odo.setX(0);
-				xSet = true;
-				break;
-			}
-
-			lastColor = currentColor;
+			
 		}
+		Navigator.travelTo(1, 1, 5, false);
+		Navigator.turnTo(0);
 		
+
 	}
 
 	/**
@@ -233,5 +363,11 @@ public class Localizer {
 			motor.setAcceleration(accel);
 			motor.setSpeed(speed);
 		}
+	}
+	
+	private static double angleDiff(double first, double second) {
+		double phi = Math.abs(first- second) % 360;
+		phi = phi > 180 ? 360 - phi : phi;
+		return phi;
 	}
 }
