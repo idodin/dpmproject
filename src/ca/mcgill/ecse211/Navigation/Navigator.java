@@ -32,8 +32,8 @@ public class Navigator {
 	private static final int errorMargin = 150;
 	private static final int CORRECTOR_SPEED = Navigator.getForwardSpeed() / 3;
 
-	private static int yCount = 1;
-	private static int xCount = 1;
+//	public static int yCount = 1;
+//	public static int xCount = 1;
 
 	public static int getTurnSpeed() {
 		return TURN_SPEED;
@@ -240,29 +240,49 @@ public class Navigator {
 			int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
 
 			if (updatePosition) {
-				yCount += yInc;
-				xCount += xInc;
-
+//				yCount += yInc;
+//				xCount += xInc;
+//
+//				if (xInc < 0) {
+//					newX = xCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+//					newTheta = 270;
+//				} else if (xInc > 0) {
+//					newX = (xCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+//					newTheta = 90;
+//				} else {
+//					newX = currentPosition[0];
+//				}
+//
+//				if (yInc < 0) {
+//					newY = yCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+//					newTheta = 180;
+//				} else if (yInc > 0) {
+//					newY = (yCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+//					newTheta = 0;
+//				} else {
+//					newY = currentPosition[1];
+//				}
+				
 				if (xInc < 0) {
-					newX = xCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
 					newTheta = 270;
 				} else if (xInc > 0) {
-					newX = (xCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
 					newTheta = 90;
 				} else {
 					newX = currentPosition[0];
 				}
 
 				if (yInc < 0) {
-					newY = yCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
 					newTheta = 180;
 				} else if (yInc > 0) {
-					newY = (yCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
 					newTheta = 0;
 				} else {
 					newY = currentPosition[1];
 				}
-
+				
 				odo.setXYT(newX, newY, newTheta);
 //				System.out.println("New co-ordinates: " + newX + " , " + newY);
 			}
@@ -334,24 +354,24 @@ public class Navigator {
 			int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
 
 			if (updatePosition) {
-				yCount += yInc;
-				xCount += xInc;
+//				yCount += yInc;
+//				xCount += xInc;
 
 				if (xInc < 0) {
-					newX = xCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
 					newTheta = 270;
 				} else if (xInc > 0) {
-					newX = (xCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
 					newTheta = 90;
 				} else {
 					newX = currentPosition[0];
 				}
 
 				if (yInc < 0) {
-					newY = yCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
 					newTheta = 180;
 				} else if (yInc > 0) {
-					newY = (yCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
 					newTheta = 0;
 				} else {
 					newY = currentPosition[1];
@@ -380,6 +400,7 @@ public class Navigator {
 	}
 
 	public static void toStraightNavigator(double x, double y, int threshold) {
+		//System.out.println("coord: (" + x + ", " + y + ")");
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -501,6 +522,11 @@ public class Navigator {
 			return false;
 		}
 
+	}
+	
+	public static double roundToNearestTileSize(double value)
+	{
+		return TILE_SIZE * (Math.round(value/TILE_SIZE));
 	}
 
 }

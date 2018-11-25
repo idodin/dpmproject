@@ -165,13 +165,12 @@ public class Ev3Boot {
 
 	// @SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
-
 		try {
 			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 		} catch (OdometerExceptions e) {
 			e.printStackTrace();
 			return;
-		}
+		}	
 
 		Display display = new Display(lcd);
 
@@ -181,6 +180,20 @@ public class Ev3Boot {
 
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
+
+		// start of random shit
+		red_Zone_LL_x = 2;
+		red_Zone_LL_y = 0;
+
+		red_Zone_UR_x = 8;
+		red_Zone_UR_y = 3;
+
+		tunnel_LL_x = 2;
+		tunnel_LL_y = 3;
+
+		tunnel_UR_x = 3;
+		tunnel_UR_y = 5;
+		// end of random shit
 
 		(new Thread() {
 			public void run() {
@@ -199,7 +212,55 @@ public class Ev3Boot {
 				try {
 					Localizer.localizeFE();
 					Localizer.localizeColor();
-					Navigator.toStraightNavigator(3.5, 3.5, 5);
+					
+					
+					
+					tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
+							red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
+					
+					double[] odoPosition = odo.getXYT();
+					int[] currentPosition = new int[3];
+					 currentPosition[0] = (int) Math.round(odoPosition[0] / TILE_SIZE);
+					 currentPosition[1] = (int) Math.round(odoPosition[1] / TILE_SIZE);
+					
+					if (tunnelEntryIsLL) 
+					{
+						if (tunnel_LL_x - tunnel_UR_x > 1) 
+						{
+							Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
+							Navigator.turnTo(90);
+							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
+							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
+							Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
+
+						} 
+						else 
+						{
+							Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
+							Navigator.turnTo(0);
+							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
+							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
+							Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
+						}
+					} 
+					else
+					{
+						if (tunnel_LL_x - tunnel_UR_x > 1) {
+							Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
+							Navigator.turnTo(270);
+							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
+							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
+							Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
+						} 
+						else 
+						{
+							Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
+							Navigator.turnTo(180);
+							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
+							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
+							Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
+						}
+					}
 				} catch (OdometerExceptions e) {
 					System.out.println("hello");
 					// donothing;
