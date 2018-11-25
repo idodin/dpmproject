@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.RingRetrieval;
 import java.util.HashMap;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
+import ca.mcgill.ecse211.Ev3Boot.MotorController;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -15,14 +16,11 @@ import lejos.robotics.SampleProvider;
  * searching method, which makes the robot turn around the tree until it detects
  * a ring.
  */
-public class RingSearch {
+public class RingSearch extends MotorController{
 
 	private static float[] usData = Ev3Boot.getUSData();
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static int distance;
-	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
-	private static final int FORWARD_SPEED = Navigator.getForwardSpeed();
 	private static HashMap<Integer, int[]> positionMap;
 	private static Odometer odo;
 
@@ -43,9 +41,6 @@ public class RingSearch {
 	 */
 	public static void turnAroundTree(int position, int ringSet_x, int ringSet_y) {
 		// Initialize Hash Map with tree search positions and integer indicating visits.
-		
-		
-		
 		try {
 			odo = Odometer.getOdometer();
 		}
@@ -54,7 +49,6 @@ public class RingSearch {
 		}
 
 		positionMap = new HashMap<Integer, int[]>();
-		;
 		positionMap.put(0, new int[] { ringSet_x, ringSet_y - 1, 0 });
 		positionMap.put(1, new int[] { ringSet_x + 1, ringSet_y, 0 });
 		positionMap.put(2, new int[] { ringSet_x, ringSet_y + 1, 0 });
@@ -80,15 +74,12 @@ public class RingSearch {
 		if (getColor != 0) {
 			beepColor(getColor);
 			Navigator.turnTo((360 - 90 * position) % 360);
-			leftMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), true);
-			rightMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), false);
+			forwardBy(-3);
 			Ev3Boot.getArmHook().rotateTo(-205);
 			Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 : 32, false);
-			leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-			rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+			forwardBy(5);
 			Ev3Boot.getArmHook().rotateTo(-230);
-			leftMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 20), true);
-			rightMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 20), false);
+			forwardBy(20);
 			return;
 		}
 
@@ -124,7 +115,7 @@ public class RingSearch {
 				return false;
 			}
 			Navigator.travelTo(posArray[0], posArray[1], 2, true);
-			Navigator.turnTo((360 - 90 * nextPosition) % 360);
+			turnTo((360 - 90 * nextPosition) % 360);
 			CheckColor.restartChecker();
 			CheckColor.colorDetection();
 			getColor = CheckColor.getDetectedColor();
@@ -132,15 +123,12 @@ public class RingSearch {
 			if (getColor != 0) {
 				beepColor(getColor);
 				Navigator.turnTo((360 - 90 * nextPosition) % 360);
-				leftMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), true);
-				rightMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 3), false);
+				forwardBy(3);
 				Ev3Boot.getArmHook().rotateTo(-205);
 				Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 :32, false);
-				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
+				forwardBy(5);
 				Ev3Boot.getArmHook().rotateTo(-230);
-				leftMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 20), true);
-				rightMotor.rotate(-Navigator.convertDistance(Ev3Boot.getWheelRad(), 20), false);
+				forwardBy(20);
 				return true;
 			}
 			if (!travelPosition(sequenceStart, nextPosition, currentPosition)) {

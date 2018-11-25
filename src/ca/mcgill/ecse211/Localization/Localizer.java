@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.Localization;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
+import ca.mcgill.ecse211.Ev3Boot.MotorController;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -18,17 +19,11 @@ import lejos.robotics.SampleProvider;
  * @author An Khang Chau
  *
  */
-public class Localizer {
+public class Localizer extends MotorController {
 
-	private static final int FORWARD_SPEED = Navigator.getForwardSpeed();
-	private static final int TURN_SPEED = Navigator.getTurnSpeed();
 	private static final int TURN_ACCELERATION = 600;
 	public static final int SENSOR_OFFSET = 13;
-	private static final int CORRECTOR_SPEED = Navigator.getForwardSpeed() / 3;
 
-	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
-	private static Odometer odo;
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
 	private static SampleProvider colorLeft = Ev3Boot.getColorLeft();
@@ -137,8 +132,7 @@ public class Localizer {
 
 		stopMotors();
 
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
+		setSpeeds(FORWARD_SPEED);
 
 		// leftMotor.forward();
 		// rightMotor.forward();
@@ -164,12 +158,12 @@ public class Localizer {
 		if (a < b) {
 			correction = 45 - (a + b) / 2;
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
-			Navigator.turnTo(0);
+			turnTo(0);
 
 		} else if (a >= b) {
 			correction = 225 - (a + b) / 2;
 			odo.setTheta(180 + correction + odo.getXYT()[2]);
-			Navigator.turnTo(0);
+			turnTo(0);
 		}
 
 	}
@@ -184,8 +178,7 @@ public class Localizer {
 			throw e;
 		}
 
-		leftMotor.forward();
-		rightMotor.forward();
+		bothForwards();
 
 		colorLeft.fetchSample(colorBufferLeft, 0);
 		currentColorLeft = colorBufferLeft[0] * 1000;
@@ -212,17 +205,13 @@ public class Localizer {
 				leftMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorRight - oldColorRight <= 19) {
-					if (rightMotor.getAcceleration() != CORRECTOR_SPEED
-							|| leftMotor.getAcceleration() != CORRECTOR_SPEED) {
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED
+							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
 						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
-						rightMotor.stop(true);
-						leftMotor.stop();
-						leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-						rightMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
-						leftMotor.forward();
-						rightMotor.forward();
+						stopBoth();
+						bothForwards();
 						break;
 					}
 					oldColorRight = currentColorRight;
@@ -245,17 +234,13 @@ public class Localizer {
 				}
 				stopMotors();
 
-				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
-				Navigator.turnTo(90);
-				leftMotor.forward();
-				rightMotor.forward();
+				forwardBy(5);
+				turnTo(90);
+				bothForwards();
 				oldColorLeft = currentColorLeft;
 
-				leftMotor.setSpeed(Navigator.getForwardSpeed());
-				rightMotor.setSpeed(Navigator.getForwardSpeed());
-				leftMotor.forward();
-				rightMotor.forward();
+				setSpeeds(FORWARD_SPEED);
+				bothForwards();
 
 				try {
 					Thread.sleep(400);
@@ -277,18 +262,15 @@ public class Localizer {
 				rightMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorLeft - oldColorLeft <= 19) {
-					if (rightMotor.getAcceleration() != CORRECTOR_SPEED
-							|| leftMotor.getAcceleration() != CORRECTOR_SPEED) {
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED
+							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
 						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
 
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
-						rightMotor.stop(true);
-						leftMotor.stop();
-						leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-						rightMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
-						leftMotor.forward();
-						rightMotor.forward();
+						stopBoth();
+						forwardBy(-5);
+						bothForwards();
 						break;
 					}
 					oldColorLeft = currentColorLeft;
@@ -312,17 +294,13 @@ public class Localizer {
 				}
 				stopMotors();
 
-				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
-				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
-				Navigator.turnTo(90);
-				leftMotor.forward();
-				rightMotor.forward();
+				forwardBy(5);
+				turnTo(90);
+				bothForwards();
 				oldColorLeft = currentColorLeft;
 
-				leftMotor.setSpeed(Navigator.getForwardSpeed());
-				rightMotor.setSpeed(Navigator.getForwardSpeed());
-				leftMotor.forward();
-				rightMotor.forward();
+				setSpeeds(FORWARD_SPEED);
+				bothForwards();
 
 				try {
 					Thread.sleep(400);
@@ -340,7 +318,7 @@ public class Localizer {
 
 		}
 		Navigator.travelTo(1.5, 1.5, 3, false);
-		Navigator.turnTo(0);
+		turnTo(0);
 
 	}
 
@@ -350,19 +328,6 @@ public class Localizer {
 	private static void stopMotors() {
 		leftMotor.stop(true);
 		rightMotor.stop(false);
-	}
-
-	/**
-	 * Set Speed and Acceleration for both motors.
-	 * 
-	 * @param speed
-	 * @param accel
-	 */
-	private static void setSpeedAccel(int speed, int accel) {
-		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			motor.setAcceleration(accel);
-			motor.setSpeed(speed);
-		}
 	}
 
 	private static double angleDiff(double first, double second) {

@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.Navigation;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
+import ca.mcgill.ecse211.Ev3Boot.MotorController;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -23,30 +24,14 @@ import lejos.robotics.SampleProvider;
  * @author Chaimae Fahmi
  *
  */
-public class Navigator {
-
-	private static final int FORWARD_SPEED = 100;
-	private static final int TURN_SPEED = 75;
+public class Navigator extends MotorController{
 
 	private static final int BLACK = 300;
 	private static final int errorMargin = 150;
-	private static final int CORRECTOR_SPEED = Navigator.getForwardSpeed() / 3;
 
-//	public static int yCount = 1;
-//	public static int xCount = 1;
-
-	public static int getTurnSpeed() {
-		return TURN_SPEED;
-	}
-
-	public static int getForwardSpeed() {
-		return FORWARD_SPEED;
-	}
 
 	private static final double TILE_SIZE = Ev3Boot.getTileSize();
 	private static final int TURN_ERROR = 1;
-	private static final EV3LargeRegulatedMotor leftMotor = Ev3Boot.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
 	private static SampleProvider colorSensorLeft = Ev3Boot.getColorLeft();
 	private static SampleProvider colorSensorRight = Ev3Boot.getColorRight();
 	private static float[] colorLeftBuffer = Ev3Boot.getColorLeftBuffer();
@@ -140,10 +125,8 @@ public class Navigator {
 
 		}
 
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-		leftMotor.forward();
-		rightMotor.forward();
+		setSpeeds(FORWARD_SPEED);
+		bothForwards();
 
 		while (isNavigating) {
 
@@ -208,8 +191,7 @@ public class Navigator {
 				updatePosition = true;
 				if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
 					rightMotor.stop();
-					rightMotor.setSpeed(CORRECTOR_SPEED);
-					leftMotor.setSpeed(CORRECTOR_SPEED);
+					setSpeeds(CORRECTOR_SPEED);
 					rightMotor.forward();
 				}
 				phi = Math.abs(odo.getXYT()[2] - theta) % 360;
@@ -217,10 +199,9 @@ public class Navigator {
 				if (phi > 15) {
 					rightMotor.stop(true);
 					leftMotor.stop();
-					leftMotor.rotate(-1 * convertDistance(Ev3Boot.getWheelRad(), 5), true);
-					rightMotor.rotate(-1 * convertDistance(Ev3Boot.getWheelRad(), 5), false);
-					leftMotor.forward();
-					rightMotor.forward();
+					turnBy(15, true, true);
+					forwardBy(-5);
+					bothForwards();
 					updatePosition = false;
 					break;
 				}
@@ -292,10 +273,8 @@ public class Navigator {
 
 			// Are we crossing tile boundary from the upper or lower boundary?
 
-			leftMotor.setSpeed(Navigator.getForwardSpeed());
-			rightMotor.setSpeed(Navigator.getForwardSpeed());
-			leftMotor.forward();
-			rightMotor.forward();
+			setSpeeds(FORWARD_SPEED);
+			bothForwards();
 
 			try {
 				Thread.sleep(400);
@@ -322,8 +301,7 @@ public class Navigator {
 				updatePosition = true;
 				if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
 					leftMotor.stop();
-					leftMotor.setSpeed(CORRECTOR_SPEED);
-					rightMotor.setSpeed(CORRECTOR_SPEED);
+					setSpeeds(CORRECTOR_SPEED);
 					leftMotor.forward();
 				}
 				phi = Math.abs(odo.getXYT()[2] - theta) % 360;
@@ -331,10 +309,9 @@ public class Navigator {
 				if (phi > 15) {
 					rightMotor.stop(true);
 					leftMotor.stop();
-					leftMotor.rotate(-1 * convertDistance(Ev3Boot.getWheelRad(), 5), true);
-					rightMotor.rotate(-1 * convertDistance(Ev3Boot.getWheelRad(), 5), false);
-					leftMotor.forward();
-					rightMotor.forward();
+					turnBy(15, false, true);
+					forwardBy(-5);
+					bothForwards();
 					updatePosition = false;
 					break;
 				}
@@ -381,10 +358,8 @@ public class Navigator {
 //				System.out.println("New co-ordinates: " + newX + " , " + newY);
 			}
 
-			leftMotor.setSpeed(Navigator.getForwardSpeed());
-			rightMotor.setSpeed(Navigator.getForwardSpeed());
-			leftMotor.forward();
-			rightMotor.forward();
+			setSpeeds(FORWARD_SPEED);
+			bothForwards();
 
 			try {
 				Thread.sleep(400);
@@ -412,54 +387,7 @@ public class Navigator {
 		travelTo(x, y, threshold, true);
 	}
 
-	/**
-	 * This method makes the robot turn to the specified bearing. Mainly called by
-	 * the travelTo() method and LightLocalize() method.
-	 * 
-	 * In a loop, calculate the difference between current heading and desired
-	 * heading, if the difference is smaller than "turnError" stop turning and put
-	 * motors back on forward.
-	 * 
-	 * Always turn the smallest angle.
-	 * 
-	 * @param theta: Bearing for the robot to readjust its heading to.
-	 */
-	/**
-	 * This method makes the robot turn to the specified bearing.
-	 * 
-	 * @param theta Bearing for the robot to readjust its heading to.
-	 */
-	public static void turnTo(double theta) {
-
-		try {
-			odo = Odometer.getOdometer();
-		} catch (OdometerExceptions e) {
-			e.printStackTrace();
-			return;
-		}
-
-		leftMotor.setSpeed(100);
-		rightMotor.setSpeed(100);
-
-		currentPosition = odo.getXYT();
-
-		double deltaT = (((theta - currentPosition[2]) % 360) + 360) % 360;
-
-//		System.out.println("TURNING \nCurrent theta: " + currentPosition[2] + "\nDesired theta: " + theta
-//				+ "\nDelta theta (clockwise): " + deltaT);
-
-		if (deltaT < 180) {
-			leftMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), deltaT), true);
-			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), deltaT), false);
-		} else {
-			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 360 - deltaT), true);
-			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 360 - deltaT), false);
-		}
-
-		leftMotor.setSpeed(FORWARD_SPEED);
-		rightMotor.setSpeed(FORWARD_SPEED);
-
-	}
+	
 
 	/**
 	 * Turn by the specified angle theta, can be both positive or negative
@@ -469,8 +397,7 @@ public class Navigator {
 	 */
 	public static void turnBy(double theta, boolean clockwise, boolean blocking) {
 
-		leftMotor.setSpeed(TURN_SPEED + 50);
-		rightMotor.setSpeed(TURN_SPEED + 50);
+		setSpeeds(TURN_SPEED + 50);
 		if (clockwise == false) {
 			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
 			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), !blocking);
@@ -481,28 +408,6 @@ public class Navigator {
 
 	}
 
-	/**
-	 * This method allows the conversion of a distance to the total rotation of each
-	 * wheel need to cover that distance.
-	 * 
-	 * @param radius
-	 * @param distance
-	 */
-	public static int convertDistance(double radius, double distance) {
-		return (int) ((180.0 * distance) / (Math.PI * radius));
-	}
-
-	/**
-	 * This method allows the conversion of an angle to the rotation of each wheel
-	 * needed to rotate that angle
-	 * 
-	 * @param radius
-	 * @param width
-	 * @param angle
-	 */
-	public static int convertAngle(double radius, double width, double angle) {
-		return convertDistance(radius, Math.PI * width * angle / 360.0);
-	}
 
 	public static boolean pollMultiple(Boolean isRight) {
 		int sampleCount = 10;

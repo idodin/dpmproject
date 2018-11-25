@@ -9,7 +9,6 @@ import ca.mcgill.ecse211.RingRetrieval.CheckColor;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
-import ca.mcgill.ecse211.odometer.OdometerCorrection;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -38,7 +37,7 @@ import lejos.robotics.filter.MeanFilter;
  *
  */
 
-public class Ev3Boot {
+public class Ev3Boot extends MotorController {
 
 	// ** Set these as appropriate for your team and current situation **
 
@@ -48,17 +47,7 @@ public class Ev3Boot {
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
 
-	// Motor Objects, and Robot related parameters
-	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-	private static final EV3LargeRegulatedMotor BigArmHook = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-	private static final EV3MediumRegulatedMotor armHook = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
-	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
-
-	// Configuration Objects
-	private static final double WHEEL_RAD = 2.106;
-	private static final double TRACK = 9.51;
-	private static final double TILE_SIZE = 30.48;
+	
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port colorPortLeft = LocalEV3.get().getPort("S1");
 	private static final Port colorPortFront = LocalEV3.get().getPort("S3");
@@ -90,7 +79,6 @@ public class Ev3Boot {
 	// public static RingSearch searching;
 	public static Localizer localizer;
 	public static Display display;
-	public static OdometerCorrection correction;
 
 	// game values
 	private static int redTeam;
@@ -212,55 +200,7 @@ public class Ev3Boot {
 				try {
 					Localizer.localizeFE();
 					Localizer.localizeColor();
-					
-					
-					
-					tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
-							red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
-					
-					double[] odoPosition = odo.getXYT();
-					int[] currentPosition = new int[3];
-					 currentPosition[0] = (int) Math.round(odoPosition[0] / TILE_SIZE);
-					 currentPosition[1] = (int) Math.round(odoPosition[1] / TILE_SIZE);
-					
-					if (tunnelEntryIsLL) 
-					{
-						if (tunnel_LL_x - tunnel_UR_x > 1) 
-						{
-							Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
-							Navigator.turnTo(90);
-							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
-							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
-							Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
-
-						} 
-						else 
-						{
-							Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
-							Navigator.turnTo(0);
-							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
-							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
-							Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
-						}
-					} 
-					else
-					{
-						if (tunnel_LL_x - tunnel_UR_x > 1) {
-							Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
-							Navigator.turnTo(270);
-							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
-							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
-							Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
-						} 
-						else 
-						{
-							Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
-							Navigator.turnTo(180);
-							leftMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), true);
-							rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 8), false);
-							Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
-						}
-					}
+					GameLogic.travelToTunnel(true);
 				} catch (OdometerExceptions e) {
 					System.out.println("hello");
 					// donothing;
