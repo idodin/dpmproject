@@ -5,10 +5,9 @@ import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * This class is used to keep track of the robot's position
- *  and heading, by using it's motors' tacho counts.
- * This class implements runnable, ans is run in parallel as long
- * as the motor is travelling.
+ * This class is used to keep track of the robot's position and heading, by
+ * using it's motors' tacho counts. This class implements runnable, ans is run
+ * in parallel as long as the motor is travelling.
  * 
  */
 public class Odometer extends OdometerData implements Runnable {
@@ -26,7 +25,7 @@ public class Odometer extends OdometerData implements Runnable {
 	private double distL;
 	private double distR;
 
-	private final double WHEEL_RAD;
+	private double WHEEL_RAD = Ev3Boot.getWheelRad();
 
 	private double dX;
 	private double dY;
@@ -34,10 +33,10 @@ public class Odometer extends OdometerData implements Runnable {
 	private double deltaD;
 	private double deltaT;
 
-	private double theta = Math.toRadians(OdometerData.getOdometerData().getXYT()[2]);
-	private double newTheta;
-	
+	private double theta;
+
 	private static final long ODOMETER_PERIOD = 25; // odometer update period in ms
+	private double TRACK = Ev3Boot.getTrack();
 
 	/**
 	 * This is the default constructor of this class. It initiates all motors and
@@ -61,7 +60,8 @@ public class Odometer extends OdometerData implements Runnable {
 
 		this.leftMotorTachoCount = 0;
 		this.rightMotorTachoCount = 0;
-		
+
+		this.TRACK = TRACK;
 		this.WHEEL_RAD = WHEEL_RAD;
 
 	}
@@ -103,21 +103,17 @@ public class Odometer extends OdometerData implements Runnable {
 	}
 
 	/**
-	 * To update the x and y coordinates it uses the change in the motor's 
-	 * tacho counts to find the distance covered by each wheel. 
-	 * Using those two distances it computes the displacement of the robot.
-	 * Afterwards, the x and y  variations are recorded
-	 *  using the displacement and the variation in theta,
-	 * Finally, it uses the update method from OdometerData to keep track of the new values.
+	 * To update the x and y coordinates it uses the change in the motor's tacho
+	 * counts to find the distance covered by each wheel. Using those two distances
+	 * it computes the displacement of the robot. Afterwards, the x and y variations
+	 * are recorded using the displacement and the variation in theta, Finally, it
+	 * uses the update method from OdometerData to keep track of the new values.
 	 */
 	public void run() {
 		long updateStart, updateEnd;
 
 		while (true) {
-			theta = odo.getXYT()[2];
 			updateStart = System.currentTimeMillis();
-			//Ev3Boot.gyroAngle.fetchSample(Ev3Boot.getGyroBuffer(), 0);
-			//newTheta = ((Ev3Boot.getGyroBuffer()[0] % 360) + 360) % 360;
 
 			leftMotorTachoCount = leftMotor.getTachoCount();
 			rightMotorTachoCount = rightMotor.getTachoCount();
@@ -129,17 +125,16 @@ public class Odometer extends OdometerData implements Runnable {
 			lastTachoL = leftMotorTachoCount;
 			lastTachoR = rightMotorTachoCount;
 
-			
 			deltaD = (distL + distR) * 0.5;
-			deltaT = newTheta - theta;
+			deltaT = (distL - distR) / TRACK;
+			theta = odo.getXYT()[2];
+			theta += deltaT;
 
-			
-			dX = deltaD * Math.sin(Math.toRadians(newTheta));
-			dY = deltaD * Math.cos(Math.toRadians(newTheta));
-			
-			odo.update(dX, dY, deltaT);
-			
-			
+			dX = deltaD * Math.sin(Math.toRadians(theta));
+			dY = deltaD * Math.cos(Math.toRadians(theta));
+
+			odo.update(dX, dY, 180 * deltaT / Math.PI); // Convert back to degrees.
+
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();
 			if (updateEnd - updateStart < ODOMETER_PERIOD) {

@@ -16,7 +16,7 @@ public class OdometerCorrection {
 	private static float[] colorRightBuffer = Ev3Boot.getColorRightBuffer();
 	
 	private static final int CORRECTOR_SPEED = Navigator.getForwardSpeed()/3;
-	
+	public boolean isCorrecting = false;
 	private static final int BLACK = 300;
 	private static final int errorMargin = 150;
 	

@@ -123,7 +123,7 @@ public class RingSearch {
 				positionMap.put(nextPosition, new int[] { posArray[0], posArray[1], -1 });
 				return false;
 			}
-			Navigator.travelTo(posArray[0], posArray[1], 2, false);
+			Navigator.travelTo(posArray[0], posArray[1], 2, true);
 			Navigator.turnTo((360 - 90 * nextPosition) % 360);
 			CheckColor.restartChecker();
 			CheckColor.colorDetection();
@@ -145,7 +145,7 @@ public class RingSearch {
 			}
 			if (!travelPosition(sequenceStart, nextPosition, currentPosition)) {
 				int[] returnPosArray = positionMap.get(currentPosition);
-				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 2, false);
+				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 2, true);
 				return false;
 			}
 			else {
