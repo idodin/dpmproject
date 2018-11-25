@@ -71,6 +71,19 @@ public class Navigator {
 	private static double distanceDifference;
 	private static double distance;
 
+	private static boolean updatePosition;
+	private static double deltaX;
+	private static double deltaY;
+
+	private static double baseAngle;
+	private static double adjustAngle;
+
+	private static double newX;
+	private static double newY;
+	private static double newTheta;
+
+	private static double phi;
+
 	/**
 	 * 
 	 * This method execute navigation to a specific point, if wanted it can light
@@ -91,9 +104,6 @@ public class Navigator {
 	 * @param localizing: should to robot localize upon arrival
 	 */
 	public static void travelTo(double x, double y, int treshHold, boolean checkLine) {
-//		System.out.println("x: " + x);
-//		System.out.println("y: " + y);
-
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -104,21 +114,20 @@ public class Navigator {
 		currentPosition = odo.getXYT();
 		lastPosition = odo.getXYT();
 
-		double deltaX = x * TILE_SIZE - currentPosition[0];
-		double deltaY = y * TILE_SIZE - currentPosition[1];
-
-		isNavigating = true;
-
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			motor.stop();
 			motor.setAcceleration(500);
 		}
 
+		isNavigating = true;
+
+		deltaX = x * TILE_SIZE - currentPosition[0];
+		deltaY = y * TILE_SIZE - currentPosition[1];
+
 		if (deltaX == 0 && deltaY != 0) {
 			turnTo(deltaY < 0 ? 180 : 0);
 		} else {
-			double baseAngle = deltaX > 0 ? 90 : 270;
-			double adjustAngle;
+			baseAngle = deltaX > 0 ? 90 : 270;
 			if ((deltaY > 0 && deltaX > 0) || (deltaY < 0 && deltaX < 0)) {
 				adjustAngle = -1 * Math.toDegrees(Math.atan(deltaY / deltaX));
 			} else {
@@ -157,7 +166,9 @@ public class Navigator {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
-				// OdometerCorrection.isCorrecting = false;
+				if (treshHold > 4) {
+					travelTo(x, y, 2, false);
+				}
 				Sound.beepSequence();
 
 				return;
@@ -194,13 +205,14 @@ public class Navigator {
 			leftMotor.stop(true);
 			double theta = odo.getXYT()[2];
 			while (colorRight - oldColorRight <= 19) {
+				updatePosition = true;
 				if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
 					rightMotor.stop();
 					rightMotor.setSpeed(CORRECTOR_SPEED);
 					leftMotor.setSpeed(CORRECTOR_SPEED);
 					rightMotor.forward();
 				}
-				double phi = Math.abs(odo.getXYT()[2] - theta) % 360;
+				phi = Math.abs(odo.getXYT()[2] - theta) % 360;
 				phi = phi > 180 ? 360 - phi : phi;
 				if (phi > 15) {
 					rightMotor.stop(true);
@@ -209,6 +221,7 @@ public class Navigator {
 					rightMotor.rotate(-1 * convertDistance(Ev3Boot.getWheelRad(), 5), false);
 					leftMotor.forward();
 					rightMotor.forward();
+					updatePosition = false;
 					break;
 				}
 				oldColorRight = colorRight;
@@ -220,40 +233,44 @@ public class Navigator {
 			Sound.beep();
 			rightMotor.stop();
 
-			double[] currentPosition = odo.getXYT();
-
-			double newX, newY;
+			currentPosition = odo.getXYT();
 
 			// How much do you increment by?
 			int yInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
 			int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
 
-			yCount += yInc;
-			xCount += xInc;
+			if (updatePosition) {
+				yCount += yInc;
+				xCount += xInc;
 
-			System.out.println("X COUNT INCREASED!: " + xCount);
-			System.out.println("Y COUNT INCREASED!: " + yCount);
+				if (xInc < 0) {
+					newX = xCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newTheta = 270;
+				} else if (xInc > 0) {
+					newX = (xCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newTheta = 90;
+				} else {
+					newX = currentPosition[0];
+				}
+
+				if (yInc < 0) {
+					newY = yCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newTheta = 180;
+				} else if (yInc > 0) {
+					newY = (yCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newTheta = 0;
+				} else {
+					newY = currentPosition[1];
+				}
+
+				odo.setXYT(newX, newY, newTheta);
+//				System.out.println("New co-ordinates: " + newX + " , " + newY);
+			}
+
+//			System.out.println("X COUNT INCREASED!: " + xCount);
+//			System.out.println("Y COUNT INCREASED!: " + yCount);
 
 			// Are we crossing tile boundary from the upper or lower boundary?
-			if (xInc < 0) {
-				newX = xCount * TILE_SIZE;
-			} else if (xInc > 0) {
-				newX = (xCount - 1) * TILE_SIZE;
-			} else {
-				newX = currentPosition[0];
-			}
-
-			if (yInc < 0) {
-				newY = yCount * TILE_SIZE + Localizer.SENSOR_OFFSET;
-			} else if (yInc > 0) {
-				newY = (yCount - 1) * TILE_SIZE - Localizer.SENSOR_OFFSET;
-			} else {
-				newY = currentPosition[1];
-			}
-
-			odo.setXYT(newX, newY, currentPosition[2]);
-			
-			System.out.println("New co-ordinates: " + newX + " , " + newY);
 
 			leftMotor.setSpeed(Navigator.getForwardSpeed());
 			rightMotor.setSpeed(Navigator.getForwardSpeed());
@@ -282,13 +299,14 @@ public class Navigator {
 			rightMotor.stop(true);
 			double theta = odo.getXYT()[2];
 			while (colorLeft - oldColorLeft <= 19) {
+				updatePosition = true;
 				if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
 					leftMotor.stop();
 					leftMotor.setSpeed(CORRECTOR_SPEED);
 					rightMotor.setSpeed(CORRECTOR_SPEED);
 					leftMotor.forward();
 				}
-				double phi = Math.abs(odo.getXYT()[2] - theta) % 360;
+				phi = Math.abs(odo.getXYT()[2] - theta) % 360;
 				phi = phi > 180 ? 360 - phi : phi;
 				if (phi > 15) {
 					rightMotor.stop(true);
@@ -297,6 +315,7 @@ public class Navigator {
 					rightMotor.rotate(-1 * convertDistance(Ev3Boot.getWheelRad(), 5), false);
 					leftMotor.forward();
 					rightMotor.forward();
+					updatePosition = false;
 					break;
 				}
 				oldColorLeft = colorLeft;
@@ -308,41 +327,39 @@ public class Navigator {
 			Sound.beep();
 			leftMotor.stop();
 
-			double[] currentPosition = odo.getXYT();
-
-			double newX, newY;
+			currentPosition = odo.getXYT();
 
 			// How much do you increment by?
 			int yInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
 			int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
 
-			yCount += yInc;
-			xCount += xInc;
+			if (updatePosition) {
+				yCount += yInc;
+				xCount += xInc;
 
-			System.out.println("X COUNT INCREASED!: " + xCount);
-			System.out.println("Y COUNT INCREASED!: " + yCount);
+				if (xInc < 0) {
+					newX = xCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newTheta = 270;
+				} else if (xInc > 0) {
+					newX = (xCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newTheta = 90;
+				} else {
+					newX = currentPosition[0];
+				}
 
-			// Are we crossing tile boundary from the upper or lower boundary?
-			if (xInc < 0) {
-				newX = xCount * TILE_SIZE;
-			} else if (xInc > 0) {
-				newX = (xCount - 1) * TILE_SIZE;
-			} else {
-				newX = currentPosition[0];
+				if (yInc < 0) {
+					newY = yCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
+					newTheta = 180;
+				} else if (yInc > 0) {
+					newY = (yCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
+					newTheta = 0;
+				} else {
+					newY = currentPosition[1];
+				}
+
+				odo.setXYT(newX, newY, newTheta);
+//				System.out.println("New co-ordinates: " + newX + " , " + newY);
 			}
-
-			if (yInc < 0) {
-				newY = yCount * TILE_SIZE + Localizer.SENSOR_OFFSET;
-			} else if (yInc > 0) {
-				newY = (yCount - 1) * TILE_SIZE - Localizer.SENSOR_OFFSET;
-			} else {
-				newY = currentPosition[1];
-			}
-
-			odo.setXYT(newX, newY, currentPosition[2]);
-			
-			System.out.println("New co-ordinates: " + newX + " , " + newY);
-
 
 			leftMotor.setSpeed(Navigator.getForwardSpeed());
 			rightMotor.setSpeed(Navigator.getForwardSpeed());
@@ -370,7 +387,7 @@ public class Navigator {
 			return;
 		}
 		currentPosition = odo.getXYT();
-		travelTo(currentPosition[0] / TILE_SIZE, y, (int) (threshold * 0.8), true);
+		travelTo(currentPosition[0] / TILE_SIZE, y, threshold, true);
 		travelTo(x, y, threshold, true);
 	}
 

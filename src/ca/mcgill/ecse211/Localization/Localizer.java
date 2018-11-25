@@ -124,7 +124,8 @@ public class Localizer {
 			dist = (int) (usData[0] * 100.00);
 
 			if (dist > 3 && dist <= fallingDistance && lastdist <= fallingDistance) {
-				if(angleDiff(odo.getXYT()[2], a) < 60) continue;
+				if (angleDiff(odo.getXYT()[2], a) < 60)
+					continue;
 				Sound.beep();
 				b = odo.getXYT()[2];
 				break;
@@ -215,7 +216,7 @@ public class Localizer {
 							|| leftMotor.getAcceleration() != CORRECTOR_SPEED) {
 						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
-					if(angleDiff(odo.getXYT()[2], theta) > 25)  {
+					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						rightMotor.stop(true);
 						leftMotor.stop();
 						leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
@@ -228,7 +229,7 @@ public class Localizer {
 					colorRight.fetchSample(colorBufferRight, 0);
 					currentColorRight = colorBufferRight[0] * 1000;
 				}
-				
+
 				setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
 
 				if (ySet) {
@@ -243,7 +244,7 @@ public class Localizer {
 					ySet = true;
 				}
 				stopMotors();
-				
+
 				leftMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
 				rightMotor.rotate(Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), false);
 				Navigator.turnTo(90);
@@ -280,8 +281,8 @@ public class Localizer {
 							|| leftMotor.getAcceleration() != CORRECTOR_SPEED) {
 						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
-					
-					if(angleDiff(odo.getXYT()[2], theta)> 25) {
+
+					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						rightMotor.stop(true);
 						leftMotor.stop();
 						leftMotor.rotate(-1 * Navigator.convertDistance(Ev3Boot.getWheelRad(), 5), true);
@@ -295,7 +296,7 @@ public class Localizer {
 					currentColorLeft = colorBufferLeft[0] * 1000;
 					// System.out.println(colorLeft-oldColorLeft);
 				}
-				
+
 				setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
 
 				if (ySet) {
@@ -336,11 +337,10 @@ public class Localizer {
 				}
 				continue;
 			}
-			
+
 		}
-		Navigator.travelTo(1, 1, 5, false);
+		Navigator.travelTo(1.5, 1.5, 3, false);
 		Navigator.turnTo(0);
-		
 
 	}
 
@@ -364,9 +364,9 @@ public class Localizer {
 			motor.setSpeed(speed);
 		}
 	}
-	
+
 	private static double angleDiff(double first, double second) {
-		double phi = Math.abs(first- second) % 360;
+		double phi = Math.abs(first - second) % 360;
 		phi = phi > 180 ? 360 - phi : phi;
 		return phi;
 	}
