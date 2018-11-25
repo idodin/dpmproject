@@ -21,8 +21,8 @@ public abstract class MotorController {
 	public static final TextLCD lcd = LocalEV3.get().getTextLCD();
 
 	// Configuration Objects
-	public static final double WHEEL_RAD = 2.106;
-	public static final double TRACK = 9.69;
+	public static final double WHEEL_RAD = 2.103;
+	public static final double TRACK = 9.45;
 	public static final double TILE_SIZE = 30.48;
 	
 	public static void stopBoth() {
@@ -31,9 +31,11 @@ public abstract class MotorController {
 	}
 
 	public static void setSpeeds(int speed) {
-		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			m.stop();
-		}
+//		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
+//			m.stop();
+//		}
+		leftMotor.stop(true);
+		rightMotor.stop(false);
 		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			m.setSpeed(speed);
 		}
@@ -45,9 +47,11 @@ public abstract class MotorController {
 	}
 
 	public static void setAccels(int accel) {
-		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			m.stop();
-		}
+//		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
+//			m.stop();
+//		}
+		leftMotor.stop(true);
+		rightMotor.stop(false);
 		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			m.setAcceleration(accel);
 		}
@@ -64,9 +68,11 @@ public abstract class MotorController {
 	}
 
 	public static void bothForwards() {
-		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			m.stop();
-		}
+//		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
+//			m.stop();
+//		}
+		leftMotor.stop(true);
+		rightMotor.stop(false);
 
 		try {
 			Thread.sleep(300);

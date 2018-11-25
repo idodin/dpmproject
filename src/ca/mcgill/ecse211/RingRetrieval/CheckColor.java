@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.RingRetrieval;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
+import ca.mcgill.ecse211.Ev3Boot.MotorController;
 import ca.mcgill.ecse211.Navigation.Navigator;
 
 /**

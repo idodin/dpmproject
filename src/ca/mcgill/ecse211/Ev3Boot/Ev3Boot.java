@@ -181,6 +181,8 @@ public class Ev3Boot extends MotorController {
 
 		tunnel_UR_x = 3;
 		tunnel_UR_y = 5;
+		ringSet_x = 5;
+		ringSet_y = 7;
 		// end of random shit
 
 		(new Thread() {
@@ -201,6 +203,8 @@ public class Ev3Boot extends MotorController {
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
+					 int position = GameLogic.closestSideOfTree(ringSet_x, ringSet_y, odo.getXYT()[0], odo.getXYT()[1]);
+					 RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
 				} catch (OdometerExceptions e) {
 					System.out.println("hello");
 					// donothing;

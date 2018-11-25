@@ -35,25 +35,41 @@ public class GameLogic extends MotorController {
 					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
 					turnTo(90);
 					forwardBy(-10);
-					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
+					Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
+					Navigator.travelTo(tunnel_UR_x + 1, tunnel_UR_y - 0.5, 7,false);
+					BigArmHook.rotate(-120);
 
 				} else {
 					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
 					turnTo(0);
 					forwardBy(-10);
-					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
+					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
+					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 1, 7,false);
+					BigArmHook.rotate(-120);
 				}
 			} else {
 				if (tunnel_LL_x - tunnel_UR_x > 1) {
 					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
 					turnTo(270);
 					forwardBy(-10);
-					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
+					Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 3, true);
+					Navigator.travelTo(tunnel_LL_x - 1, tunnel_LL_y + 0.5, 7,false);
+					BigArmHook.rotate(-120);
 				} else {
 					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
 					turnTo(180);
 					forwardBy(-10);
-					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
+					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
+					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 1, 7,false);
+					BigArmHook.rotate(-120);
 				}
 			}
 		}
@@ -69,14 +85,22 @@ public class GameLogic extends MotorController {
 	 *
 	 * Method is called by the Ev3Boot class.
 	 * 
-	 * @param tunnel_ll_x: tunnel lower left x coordinate
-	 * @param tunnel_ll_y: tunnel lower left y coordinate
-	 * @param tunnel_ur_x: tunnel upper right x coordinate
-	 * @param tunnel_ur_y: tunnel upper right y coordinate
-	 * @param zone_ll_x: current zone lower left x coordinate
-	 * @param zone_ll_y: current zone lower left y coordinate
-	 * @param zone_ur_x: current zone upper right x coordinate
-	 * @param zone_ur_y: current zone upper right y coordinate
+	 * @param tunnel_ll_x:
+	 *            tunnel lower left x coordinate
+	 * @param tunnel_ll_y:
+	 *            tunnel lower left y coordinate
+	 * @param tunnel_ur_x:
+	 *            tunnel upper right x coordinate
+	 * @param tunnel_ur_y:
+	 *            tunnel upper right y coordinate
+	 * @param zone_ll_x:
+	 *            current zone lower left x coordinate
+	 * @param zone_ll_y:
+	 *            current zone lower left y coordinate
+	 * @param zone_ur_x:
+	 *            current zone upper right x coordinate
+	 * @param zone_ur_y:
+	 *            current zone upper right y coordinate
 	 * @return true if entry to take is lower left, false if entry to take is upper
 	 *         right
 	 */
@@ -102,10 +126,14 @@ public class GameLogic extends MotorController {
 	 * 
 	 * Method is called by the Ev3Boot class.
 	 * 
-	 * @param ring_x: ring x coordinate
-	 * @param ring_y: ring y coordinate
-	 * @param robot_x: current x position
-	 * @param robot_y: current y position
+	 * @param ring_x:
+	 *            ring x coordinate
+	 * @param ring_y:
+	 *            ring y coordinate
+	 * @param robot_x:
+	 *            current x position
+	 * @param robot_y:
+	 *            current y position
 	 * @return 0 or 1 or 2 or 3 0 = bottom 1 = left 2 = top 3 = right
 	 */
 	public static int closestSideOfTree(int ring_x, int ring_y, double robot_x, double robot_y) {

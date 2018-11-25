@@ -62,13 +62,14 @@ public class RingSearch extends MotorController{
 		currentPosition[0] = (int)Math.round(odoPosition[0] / Ev3Boot.getTileSize());
 		currentPosition[1] = (int)Math.round(odoPosition[1] / Ev3Boot.getTileSize());
 
-		if(Math.sqrt(Math.pow(posArray[0] - currentPosition[0], 2) + Math.pow(posArray[1] - currentPosition[1], 2)) > 4) {
-			Navigator.travelTo(currentPosition[0] + (posArray[0] - currentPosition[0])/2, currentPosition[1] + (posArray[1] - currentPosition[1])/2, 4, true);
-		}
-		Navigator.travelTo(posArray[0], posArray[1], 4, true);
+//		if(Math.sqrt(Math.pow(posArray[0] - currentPosition[0], 2) + Math.pow(posArray[1] - currentPosition[1], 2)) > 4) {
+//			Navigator.travelTo(currentPosition[0] + (posArray[0] - currentPosition[0])/2, currentPosition[1] + (posArray[1] - currentPosition[1])/2, 4, true);
+//		}
+		Navigator.toStraightNavigator(posArray[0], posArray[1], 7);
+		System.out.println("first side: (" + posArray[0] + "," + posArray[1] +")");
 		Navigator.turnTo((360 - 90 * position) % 360);
 		CheckColor.restartChecker();
-		CheckColor.colorDetection();
+		//CheckColor.colorDetection();
 		getColor = CheckColor.getDetectedColor();
 
 		if (getColor != 0) {
@@ -114,7 +115,7 @@ public class RingSearch extends MotorController{
 				positionMap.put(nextPosition, new int[] { posArray[0], posArray[1], -1 });
 				return false;
 			}
-			Navigator.travelTo(posArray[0], posArray[1], 2, true);
+			Navigator.travelTo(posArray[0], posArray[1], 7, false);
 			turnTo((360 - 90 * nextPosition) % 360);
 			CheckColor.restartChecker();
 			CheckColor.colorDetection();
@@ -133,7 +134,7 @@ public class RingSearch extends MotorController{
 			}
 			if (!travelPosition(sequenceStart, nextPosition, currentPosition)) {
 				int[] returnPosArray = positionMap.get(currentPosition);
-				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 2, true);
+				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 7, false);
 				return false;
 			}
 			else {
