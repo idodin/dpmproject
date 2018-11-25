@@ -1,12 +1,9 @@
 package ca.mcgill.ecse211.Ev3Boot;
 
-import ca.mcgill.ecse211.Localization.LightLocalization;
-
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
 import ca.mcgill.ecse211.GameLogic.GameLogic;
-import ca.mcgill.ecse211.Localization.LightLocalization;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.RingRetrieval.CheckColor;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
@@ -91,7 +88,6 @@ public class Ev3Boot {
 	public static Navigator navigator;
 	// public static RingGrasp grasping;
 	// public static RingSearch searching;
-	public static LightLocalization lightLocalization;
 	public static Localizer localizer;
 	public static Display display;
 	public static OdometerCorrection correction;
@@ -170,19 +166,46 @@ public class Ev3Boot {
 	// @SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
 
+		try {
+			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+		} catch (OdometerExceptions e) {
+			e.printStackTrace();
+			return;
+		}
 
+		Display display = new Display(lcd);
 
-//		 (new Thread() {
-//		 public void run() {
-//		 leftMotor.setSpeed(Navigator.getForwardSpeed()/5);
-//		 rightMotor.setSpeed(Navigator.getForwardSpeed()/5);
-//		 leftMotor.forward();
-//		 rightMotor.forward();
-		// OdometerCorrection.correct();
-//		 }
-//		 }).start();
-		
+		// Start odometry
+		Thread odoThread = new Thread(Odometer.getOdometer());
+		odoThread.start();
 
+		Thread odoDisplayThread = new Thread(display);
+		odoDisplayThread.start();
+
+		(new Thread() {
+			public void run() {
+
+				int buttonChoice;
+				do {
+//					// clear the display
+//					lcd.clear();
+//
+//					// ask the user whether the motors should drive in a square or float
+//					lcd.drawString("Awaiting Input  ", 0, 0);
+
+					buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
+				} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
+
+				try {
+					Localizer.localizeFE();
+					Localizer.localizeColor();
+					Navigator.toStraightNavigator(3.5, 3.5, 5);
+				} catch (OdometerExceptions e) {
+					System.out.println("hello");
+					// donothing;
+				}
+			}
+		}).start();
 
 //		leftMotor.setSpeed(Navigator.getForwardSpeed());
 //		rightMotor.setSpeed(Navigator.getForwardSpeed());
@@ -287,31 +310,23 @@ public class Ev3Boot {
 		// // Wait until user decides to end program
 		// // Button.waitForAnyPress();
 		//
-		 try {
-		 odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
-		 } catch (OdometerExceptions e) {
-		 e.printStackTrace();
-		 return;
-		 }
-		// //
-		 Display display = new Display(lcd);
-		//
-		 Thread odoThread = new Thread(odo);
-		 odoThread.start();
-		 Thread odoDisplayThread = new Thread(display);
-		 odoDisplayThread.start();
-		 
+		/*
+		 * try { odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); }
+		 * catch (OdometerExceptions e) { e.printStackTrace(); return; } // // Display
+		 * display = new Display(lcd); // Thread odoThread = new Thread(odo);
+		 * odoThread.start(); Thread odoDisplayThread = new Thread(display);
+		 * odoDisplayThread.start();
+		 */
+
 //		 leftMotor.forward();
 //	      leftMotor.flt();
 //	      rightMotor.forward();
 //	      rightMotor.flt();	 
-		 
-		    Button.waitForAnyPress(); 
-	//		Navigator.toStraightNavigator(0,2, 2);
-	     	Navigator.toStraightNavigator(2, 5, 5);
-//			Navigator.toStraightNavigator(2,0, 2);
-//			Navigator.toStraightNavigator(0,0, 2);
-			
+		/*
+		 * Button.waitForAnyPress(); // Navigator.toStraightNavigator(0,2, 2);
+		 * Navigator.toStraightNavigator(2, 5, 5); // Navigator.toStraightNavigator(2,0,
+		 * 2); // Navigator.toStraightNavigator(0,0, 2);
+		 */
 		//
 		// try{
 		// Localizer.localizeFE();
