@@ -32,43 +32,45 @@ public class GameLogic extends MotorController {
 		if (going) {
 			if (tunnelEntryIsLL) {
 				if (tunnel_LL_x - tunnel_UR_x > 1) {
-					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
+					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 7);
 					turnTo(90);
-					forwardBy(-10);
+					forwardBy(-13);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
-					Navigator.travelTo(tunnel_UR_x + 1, tunnel_UR_y - 0.5, 7,false);
+					//Navigator.travelTo((tunnel_UR_x + 1 - tunnel_LL_x) /2 + tunnel_LL_x, tunnel_UR_y - 0.5, 7,false);
+					Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.8, 7,false);
 					BigArmHook.rotate(-120);
 
 				} else {
-					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
+					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 6);
 					turnTo(0);
-					forwardBy(-10);
+					forwardBy(-13);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
-					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 1, 7,false);
+					//Navigator.travelTo(tunnel_UR_x - 0.5, (tunnel_UR_y + 1 - tunnel_LL_y )/2 + tunnel_LL_y , 7,false);
+					Navigator.travelTo(tunnel_UR_x - 0.2, tunnel_UR_y + 0.5, 7,false);
 					BigArmHook.rotate(-120);
 				}
 			} else {
 				if (tunnel_LL_x - tunnel_UR_x > 1) {
-					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5);
+					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 7);
 					turnTo(270);
-					forwardBy(-10);
+					forwardBy(-13);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 3, true);
-					Navigator.travelTo(tunnel_LL_x - 1, tunnel_LL_y + 0.5, 7,false);
+					Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
+					Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.8, 7,false);
 					BigArmHook.rotate(-120);
 				} else {
-					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5);
+					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 7);
 					turnTo(180);
-					forwardBy(-10);
+					forwardBy(-13);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
-					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 1, 7,false);
+					Navigator.travelTo(tunnel_LL_x + 0.2, tunnel_LL_y - 0.5, 7,false);
 					BigArmHook.rotate(-120);
 				}
 			}
@@ -134,7 +136,7 @@ public class GameLogic extends MotorController {
 	 *            current x position
 	 * @param robot_y:
 	 *            current y position
-	 * @return 0 or 1 or 2 or 3 0 = bottom 1 = left 2 = top 3 = right
+	 * @return 0 or 1 or 2 or 3 0 = bottom 1 = right 2 = top 3 = left
 	 */
 	public static int closestSideOfTree(int ring_x, int ring_y, double robot_x, double robot_y) {
 		double smallestDist = 999999;
@@ -147,7 +149,7 @@ public class GameLogic extends MotorController {
 			position = 0;
 		}
 
-		int x1 = ring_x - 1;
+		int x1 = ring_x + 1;
 		int y1 = ring_y;
 		if (Math.hypot(x1 - robot_x, y1 - robot_y) < smallestDist) {
 			smallestDist = Math.hypot(x1 - robot_x, y1 - robot_y);
@@ -161,7 +163,7 @@ public class GameLogic extends MotorController {
 			position = 2;
 		}
 
-		int x3 = ring_x + 1;
+		int x3 = ring_x - 1;
 		int y3 = ring_y;
 		if (Math.hypot(x3 - robot_x, y3 - robot_y) < smallestDist) {
 			smallestDist = Math.hypot(x3 - robot_x, y3 - robot_y);

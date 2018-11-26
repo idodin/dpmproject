@@ -24,11 +24,10 @@ import lejos.robotics.SampleProvider;
  * @author Chaimae Fahmi
  *
  */
-public class Navigator extends MotorController{
+public class Navigator extends MotorController {
 
 	private static final int BLACK = 300;
 	private static final int errorMargin = 150;
-
 
 	private static final double TILE_SIZE = Ev3Boot.getTileSize();
 	private static final int TURN_ERROR = 1;
@@ -83,12 +82,21 @@ public class Navigator extends MotorController{
 	 * motors. When the distance from arrival point is acceptable stop the motors
 	 * and light localize if specified.
 	 * 
-	 * @param x: x coordinate to navigate to
-	 * @param y: y coordinate to navigate to
-	 * @param treshHold: acceptable error distance
-	 * @param localizing: should to robot localize upon arrival
+	 * @param x:
+	 *            x coordinate to navigate to
+	 * @param y:
+	 *            y coordinate to navigate to
+	 * @param treshHold:
+	 *            acceptable error distance
+	 * @param localizing:
+	 *            should to robot localize upon arrival
 	 */
 	public static void travelTo(double x, double y, int treshHold, boolean checkLine) {
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - Ev3Boot.demoStart >= 60000) {
+			// Sound.buzz();
+		}
+
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -99,12 +107,12 @@ public class Navigator extends MotorController{
 		currentPosition = odo.getXYT();
 		lastPosition = odo.getXYT();
 
-		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			motor.stop();
-			motor.setAcceleration(500);
-		}
+		// Set wheel accelerations.
+		setAccels(500);
 
 		isNavigating = true;
+
+		// Calculate Turn Angle
 
 		deltaX = x * TILE_SIZE - currentPosition[0];
 		deltaY = y * TILE_SIZE - currentPosition[1];
@@ -125,14 +133,11 @@ public class Navigator extends MotorController{
 
 		}
 
+		// Begin moving forwards
 		setSpeeds(FORWARD_SPEED);
 		bothForwards();
 
 		while (isNavigating) {
-
-//			System.out.println("Distance:"+distance);
-//			System.out.println("delta x: "+ deltaX);
-//			System.out.println("delta y: "+ deltaY);
 
 			correctionStart = System.currentTimeMillis();
 
@@ -171,9 +176,11 @@ public class Navigator extends MotorController{
 	}
 
 	public static void checkForLines() {
+		// Take previously retrieved values for colours as old colour values.
 		oldColorLeft = colorLeft;
 		oldColorRight = colorRight;
 
+		// Fetch new colours.
 		colorSensorLeft.fetchSample(colorLeftBuffer, 0);
 		colorLeft = colorLeftBuffer[0] * 1000;
 
@@ -181,39 +188,45 @@ public class Navigator extends MotorController{
 		colorRight = colorRightBuffer[0] * 1000;
 
 		if (colorLeft - oldColorLeft > 19) {
+			// If both sensors on line or black line was falsely detected.
 			if (colorRight - oldColorRight > 19 || !pollMultiple(false)) {
 				return;
 			}
 
 			leftMotor.stop(true);
 			double theta = odo.getXYT()[2];
+
+			// Keep turning Right Motor in cases where no line was detected AND/OR a black
+			// line was
+			// falsely detected.
 			while (colorRight - oldColorRight <= 19) {
 				updatePosition = true;
-				if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
-					rightMotor.stop();
-					setSpeeds(CORRECTOR_SPEED);
-					rightMotor.forward();
-				}
-				phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-				phi = phi > 180 ? 360 - phi : phi;
-				if (phi > 15) {
+				// if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
+				// setSpeeds(CORRECTOR_SPEED);
+				// }
+				double omega = odo.getXYT()[2];
+				phi = angleDiff(theta, omega);
+				// If we've been turning for more than degrees, stop, turn in opposite direction
+				// and go back.
+				if (phi > 25) {
+					System.out.println(omega);
 					rightMotor.stop(true);
 					leftMotor.stop();
-					turnBy(15, true, true);
+					turnBy(21, true, true);
 					forwardBy(-5);
-					bothForwards();
 					updatePosition = false;
 					break;
 				}
+
+				// Poll new colors
 				oldColorRight = colorRight;
 				colorSensorRight.fetchSample(colorRightBuffer, 0);
 				colorRight = colorRightBuffer[0] * 1000;
 				// System.out.println(colorRight-oldColorRight);
 			}
 
+			bothForwards();
 			Sound.beep();
-			rightMotor.stop();
-
 			currentPosition = odo.getXYT();
 
 			// How much do you increment by?
@@ -221,71 +234,32 @@ public class Navigator extends MotorController{
 			int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
 
 			if (updatePosition) {
-//				yCount += yInc;
-//				xCount += xInc;
-//
-//				if (xInc < 0) {
-//					newX = xCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
-//					newTheta = 270;
-//				} else if (xInc > 0) {
-//					newX = (xCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
-//					newTheta = 90;
-//				} else {
-//					newX = currentPosition[0];
-//				}
-//
-//				if (yInc < 0) {
-//					newY = yCount * TILE_SIZE - Localizer.SENSOR_OFFSET;
-//					newTheta = 180;
-//				} else if (yInc > 0) {
-//					newY = (yCount) * TILE_SIZE + Localizer.SENSOR_OFFSET;
-//					newTheta = 0;
-//				} else {
-//					newY = currentPosition[1];
-//				}
-				
+
 				if (xInc < 0) {
-					newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET)
+							- Localizer.SENSOR_OFFSET;
 					newTheta = 270;
 				} else if (xInc > 0) {
-					newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET)
+							+ Localizer.SENSOR_OFFSET;
 					newTheta = 90;
 				} else {
 					newX = currentPosition[0];
 				}
 
 				if (yInc < 0) {
-					newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET)
+							- Localizer.SENSOR_OFFSET;
 					newTheta = 180;
 				} else if (yInc > 0) {
-					newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET)
+							+ Localizer.SENSOR_OFFSET;
 					newTheta = 0;
 				} else {
 					newY = currentPosition[1];
 				}
-				
+
 				odo.setXYT(newX, newY, newTheta);
-//				System.out.println("New co-ordinates: " + newX + " , " + newY);
-			}
-
-//			System.out.println("X COUNT INCREASED!: " + xCount);
-//			System.out.println("Y COUNT INCREASED!: " + yCount);
-
-			// Are we crossing tile boundary from the upper or lower boundary?
-
-			setSpeeds(FORWARD_SPEED);
-			bothForwards();
-
-			try {
-				Thread.sleep(400);
-				colorSensorRight.fetchSample(colorRightBuffer, 0);
-				colorRight = colorRightBuffer[0] * 1000;
-				colorSensorLeft.fetchSample(colorLeftBuffer, 0);
-				colorLeft = colorLeftBuffer[0] * 1000;
-				oldColorLeft = colorLeft;
-				oldColorRight = colorRight;
-
-			} catch (InterruptedException e) {
 			}
 
 		} else if (colorRight - oldColorRight > 19) {
@@ -300,18 +274,19 @@ public class Navigator extends MotorController{
 			while (colorLeft - oldColorLeft <= 19) {
 				updatePosition = true;
 				if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
-					leftMotor.stop();
-					setSpeeds(CORRECTOR_SPEED);
-					leftMotor.forward();
+					// setSpeeds(CORRECTOR_SPEED);
 				}
-				phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-				phi = phi > 180 ? 360 - phi : phi;
-				if (phi > 15) {
+
+				double omega = odo.getXYT()[2];
+				phi = angleDiff(theta, omega);
+				// If we've been turning for more than degrees, stop, turn in opposite direction
+				// and go back.
+				if (phi > 25) {
+					System.out.println(omega);
 					rightMotor.stop(true);
 					leftMotor.stop();
-					turnBy(15, false, true);
+					turnBy(21, false, true);
 					forwardBy(-5);
-					bothForwards();
 					updatePosition = false;
 					break;
 				}
@@ -322,7 +297,7 @@ public class Navigator extends MotorController{
 			}
 
 			Sound.beep();
-			leftMotor.stop();
+			bothForwards();
 
 			currentPosition = odo.getXYT();
 
@@ -331,51 +306,42 @@ public class Navigator extends MotorController{
 			int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
 
 			if (updatePosition) {
-//				yCount += yInc;
-//				xCount += xInc;
+				// yCount += yInc;
+				// xCount += xInc;
 
 				if (xInc < 0) {
-					newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET)
+							- Localizer.SENSOR_OFFSET;
 					newTheta = 270;
 				} else if (xInc > 0) {
-					newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
+					newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET)
+							+ Localizer.SENSOR_OFFSET;
 					newTheta = 90;
 				} else {
 					newX = currentPosition[0];
 				}
 
 				if (yInc < 0) {
-					newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET) - Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET)
+							- Localizer.SENSOR_OFFSET;
 					newTheta = 180;
 				} else if (yInc > 0) {
-					newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET) + Localizer.SENSOR_OFFSET;
+					newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET)
+							+ Localizer.SENSOR_OFFSET;
 					newTheta = 0;
 				} else {
 					newY = currentPosition[1];
 				}
 
 				odo.setXYT(newX, newY, newTheta);
-//				System.out.println("New co-ordinates: " + newX + " , " + newY);
+				// System.out.println("New co-ordinates: " + newX + " , " + newY);
 			}
 
-			setSpeeds(FORWARD_SPEED);
-			bothForwards();
-
-			try {
-				Thread.sleep(400);
-				colorSensorRight.fetchSample(colorRightBuffer, 0);
-				colorRight = colorRightBuffer[0] * 1000;
-				colorSensorLeft.fetchSample(colorLeftBuffer, 0);
-				colorLeft = colorLeftBuffer[0] * 1000;
-				oldColorLeft = colorLeft;
-				oldColorRight = colorRight;
-			} catch (InterruptedException e) {
-			}
 		}
 	}
 
 	public static void toStraightNavigator(double x, double y, int threshold) {
-		//System.out.println("coord: (" + x + ", " + y + ")");
+		// System.out.println("coord: (" + x + ", " + y + ")");
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -387,30 +353,8 @@ public class Navigator extends MotorController{
 		travelTo(x, y, threshold, true);
 	}
 
-	
-
-	/**
-	 * Turn by the specified angle theta, can be both positive or negative
-	 * 
-	 * @param clockwise: true to turn clockwise and false to turn counter clockwise.
-	 * @param theta: amount of degree the robot has to turn.
-	 */
-	public static void turnBy(double theta, boolean clockwise, boolean blocking) {
-
-		setSpeeds(TURN_SPEED + 50);
-		if (clockwise == false) {
-			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
-			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), !blocking);
-		} else {
-			leftMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), true);
-			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), theta), !blocking);
-		}
-
-	}
-
-
 	public static boolean pollMultiple(Boolean isRight) {
-		int sampleCount = 10;
+		int sampleCount = 15;
 		float sum = 0;
 		SampleProvider sample = isRight ? colorSensorRight : colorSensorLeft;
 		float[] buffer = isRight ? colorRightBuffer : colorLeftBuffer;
@@ -428,10 +372,9 @@ public class Navigator extends MotorController{
 		}
 
 	}
-	
-	public static double roundToNearestTileSize(double value)
-	{
-		return TILE_SIZE * (Math.round(value/TILE_SIZE));
+
+	public static double roundToNearestTileSize(double value) {
+		return TILE_SIZE * (Math.round(value / TILE_SIZE));
 	}
 
 }

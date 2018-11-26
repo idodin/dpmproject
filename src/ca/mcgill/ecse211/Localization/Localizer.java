@@ -22,7 +22,7 @@ import lejos.robotics.SampleProvider;
 public class Localizer extends MotorController {
 
 	private static final int TURN_ACCELERATION = 600;
-	public static final int SENSOR_OFFSET = 13;
+	public static final double SENSOR_OFFSET = 12.5;
 
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
@@ -79,7 +79,7 @@ public class Localizer extends MotorController {
 		}
 
 		// Start turning, this will be stopped when Falling Edges are detected.
-		Navigator.turnBy(1000, true, false);
+		turnBy(1000, true, false, TURN_SPEED);
 
 		// Sample from Ultrasonic Sensor
 		usAverage.fetchSample(usData, 0);
@@ -106,8 +106,8 @@ public class Localizer extends MotorController {
 		}
 
 		// Turn in opposite direction.
-		stopMotors();
-		Navigator.turnBy(1000, false, false);
+		stopBoth();
+		turnBy(1000, false, false, TURN_SPEED);
 
 		// Do nothing until we re-pass previously detected wall.
 		while (dist < faceToTheWallDistance || dist == 0) {
@@ -121,7 +121,7 @@ public class Localizer extends MotorController {
 			dist = (int) (usData[0] * 100.00);
 
 			if (dist > 3 && dist <= fallingDistance && lastdist <= fallingDistance) {
-				if (angleDiff(odo.getXYT()[2], a) < 60)
+				if (angleDiff(odo.getXYT()[2], a) < 60 || angleDiff(odo.getXYT()[2], a) > 140)
 					continue;
 				Sound.beep();
 				b = odo.getXYT()[2];
@@ -132,7 +132,7 @@ public class Localizer extends MotorController {
 
 		Sound.beepSequence();
 
-		stopMotors();
+		stopBoth();
 
 		setSpeeds(FORWARD_SPEED);
 
@@ -207,32 +207,32 @@ public class Localizer extends MotorController {
 				leftMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorRight - oldColorRight <= 19) {
-//					if (rightMotor.getSpeed() != CORRECTOR_SPEED
-//							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
-//						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
-//					}
-					if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
-						rightMotor.stop();
-						setSpeeds(CORRECTOR_SPEED);
-						rightMotor.forward();
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED
+							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
+						//setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
-					
-//					if (angleDiff(odo.getXYT()[2], theta) > 25) {
-//						stopBoth();
-//						Navigator.turnBy(15, true, true);
-//						bothForwards();
-//						break;
+//					if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
+//						rightMotor.stop();
+//						setSpeeds(CORRECTOR_SPEED);
+//						rightMotor.forward();
 //					}
-					phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-					phi = phi > 180 ? 360 - phi : phi;
-					if (phi > 15) {
-						rightMotor.stop(true);
-						leftMotor.stop();
-						Navigator.turnBy(15, true, true);
-						forwardBy(-5);
+					
+					if (angleDiff(odo.getXYT()[2], theta) > 25) {
+						stopBoth();
+						turnBy(15, true, true, CORRECTOR_SPEED);
 						bothForwards();
 						break;
 					}
+//					phi = Math.abs(odo.getXYT()[2] - theta) % 360;
+//					phi = phi > 180 ? 360 - phi : phi;
+//					if (phi > 15) {
+//						rightMotor.stop(true);
+//						leftMotor.stop();
+//						Navigator.turnBy(15, true, true);
+//						forwardBy(-5);
+//						bothForwards();
+//						break;
+//					}
 					
 					oldColorRight = currentColorRight;
 					colorRight.fetchSample(colorBufferRight, 0);
@@ -240,24 +240,24 @@ public class Localizer extends MotorController {
 				}
 
 				if (ySet) {
-					stopMotors();
+					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
 					odo.setX(Ev3Boot.getTileSize() + SENSOR_OFFSET);
 					odo.setTheta(90);
 					xSet = true;
 					break;
 				} else {
-					stopMotors();
+					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
 					odo.setY(Ev3Boot.getTileSize() + SENSOR_OFFSET);
 					odo.setTheta(0);
 					ySet = true;
 				}
-				stopMotors();
+				stopBoth();
 
 				forwardBy(5);
 				turnTo(90);
-//				bothForwards();
+				bothForwards();
 				oldColorLeft = currentColorLeft;
 
 				setSpeeds(FORWARD_SPEED);
@@ -283,35 +283,35 @@ public class Localizer extends MotorController {
 				rightMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorLeft - oldColorLeft <= 19) {
-//					if (rightMotor.getSpeed() != CORRECTOR_SPEED
-//							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
-//						setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
-//					}
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED
+							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
+						//setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
+					}
 
-					if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
-						leftMotor.stop();
-						setSpeeds(CORRECTOR_SPEED);
-						leftMotor.forward();
+//					if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
+//						leftMotor.stop();
+//						setSpeeds(CORRECTOR_SPEED);
+//						leftMotor.forward();
+//					}
+					
+					if (angleDiff(odo.getXYT()[2], theta) > 25) {
+						stopBoth();
+						turnBy(15, false, true, CORRECTOR_SPEED); 
+						forwardBy(-5);
+						bothForwards();
+						break;
 					}
 					
-//					if (angleDiff(odo.getXYT()[2], theta) > 25) {
-//						stopBoth();
+//					phi = Math.abs(odo.getXYT()[2] - theta) % 360;
+//					phi = phi > 180 ? 360 - phi : phi;
+//					if (phi > 15) {
+//						rightMotor.stop(true);
+//						leftMotor.stop();
 //						Navigator.turnBy(15, false, true);
 //						forwardBy(-5);
 //						bothForwards();
 //						break;
 //					}
-					
-					phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-					phi = phi > 180 ? 360 - phi : phi;
-					if (phi > 15) {
-						rightMotor.stop(true);
-						leftMotor.stop();
-						Navigator.turnBy(15, false, true);
-						forwardBy(-5);
-						bothForwards();
-						break;
-					}
 					
 					oldColorLeft = currentColorLeft;
 					colorLeft.fetchSample(colorBufferLeft, 0);
@@ -320,24 +320,24 @@ public class Localizer extends MotorController {
 				}
 
 				if (ySet) {
-					stopMotors();
+					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
 					odo.setX(Ev3Boot.getTileSize() + SENSOR_OFFSET);
 					odo.setTheta(90);
 					xSet = true;
 					break;
 				} else {
-					stopMotors();
+					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
 					odo.setY(Ev3Boot.getTileSize() + SENSOR_OFFSET);
 					odo.setTheta(0);
 					ySet = true;
 				}
-				stopMotors();
+				stopBoth();
 
 				forwardBy(5);
 				turnTo(90);
-//				bothForwards();
+				bothForwards();
 				oldColorLeft = currentColorLeft;
 
 				setSpeeds(FORWARD_SPEED);
@@ -363,17 +363,5 @@ public class Localizer extends MotorController {
 
 	}
 
-	/**
-	 * Stop both motors at the same time.
-	 */
-	private static void stopMotors() {
-		leftMotor.stop(true);
-		rightMotor.stop(false);
-	}
 
-	private static double angleDiff(double first, double second) {
-		double phi = Math.abs(first - second) % 360;
-		phi = phi > 180 ? 360 - phi : phi;
-		return phi;
-	}
 }

@@ -10,7 +10,7 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 public abstract class MotorController {
 	public static Odometer odo = null;
 	public static final int FORWARD_SPEED = 115;
-	public static final int TURN_SPEED = 75;
+	public static final int TURN_SPEED = 125;
 	public static final int CORRECTOR_SPEED = 30;
 
 	// Motor Objects, and Robot related parameters
@@ -22,41 +22,46 @@ public abstract class MotorController {
 
 	// Configuration Objects
 	public static final double WHEEL_RAD = 2.103;
-	public static final double TRACK = 9.45;
+	public static final double TRACK = 9.8;
 	public static final double TILE_SIZE = 30.48;
-	
+
 	public static void stopBoth() {
 		leftMotor.stop(true);
 		rightMotor.stop(false);
 	}
 
 	public static void setSpeeds(int speed) {
-//		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-//			m.stop();
-//		}
+		// for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor,
+		// rightMotor }) {
+		// m.stop();
+		// }
+		if (leftMotor.getSpeed() == TURN_SPEED && rightMotor.getSpeed() == TURN_SPEED) {
+			return;
+		}
 		leftMotor.stop(true);
 		rightMotor.stop(false);
 		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			m.setSpeed(speed);
 		}
 		try {
-			Thread.sleep(300);
+			Thread.sleep(200);
 		} catch (InterruptedException e) {
 			// do nothing
 		}
 	}
 
 	public static void setAccels(int accel) {
-//		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-//			m.stop();
-//		}
+		// for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor,
+		// rightMotor }) {
+		// m.stop();
+		// }
 		leftMotor.stop(true);
 		rightMotor.stop(false);
 		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			m.setAcceleration(accel);
 		}
 		try {
-			Thread.sleep(300);
+			Thread.sleep(200);
 		} catch (InterruptedException e) {
 			// do nothing
 		}
@@ -68,21 +73,13 @@ public abstract class MotorController {
 	}
 
 	public static void bothForwards() {
-//		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-//			m.stop();
-//		}
-		leftMotor.stop(true);
-		rightMotor.stop(false);
+		// for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor,
+		// rightMotor }) {
+		// m.stop();
+		// }
 
-		try {
-			Thread.sleep(300);
-		} catch (InterruptedException e) {
-
-		}
-
-		for (EV3LargeRegulatedMotor m : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
-			m.forward();
-		}
+		leftMotor.forward();
+		rightMotor.forward();
 	}
 
 	/**
@@ -113,12 +110,14 @@ public abstract class MotorController {
 	 * 
 	 * Always turn the smallest angle.
 	 * 
-	 * @param theta: Bearing for the robot to readjust its heading to.
+	 * @param theta:
+	 *            Bearing for the robot to readjust its heading to.
 	 */
 	/**
 	 * This method makes the robot turn to the specified bearing.
 	 * 
-	 * @param theta Bearing for the robot to readjust its heading to.
+	 * @param theta
+	 *            Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
 
@@ -129,26 +128,70 @@ public abstract class MotorController {
 			return;
 		}
 
-		leftMotor.setSpeed(100);
-		rightMotor.setSpeed(100);
+		setSpeeds(TURN_SPEED);
 
 		double[] currentPosition = odo.getXYT();
 
 		double deltaT = (((theta - currentPosition[2]) % 360) + 360) % 360;
 
-//		System.out.println("TURNING \nCurrent theta: " + currentPosition[2] + "\nDesired theta: " + theta
-//				+ "\nDelta theta (clockwise): " + deltaT);
+		// System.out.println("TURNING \nCurrent theta: " + currentPosition[2] +
+		// "\nDesired theta: " + theta
+		// + "\nDelta theta (clockwise): " + deltaT);
 
 		if (deltaT < 180) {
-			leftMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), deltaT), true);
-			rightMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), deltaT), false);
+			leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, deltaT), true);
+			rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, deltaT), false);
 		} else {
-			leftMotor.rotate(-convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 360 - deltaT), true);
-			rightMotor.rotate(convertAngle(Ev3Boot.getWheelRad(), Ev3Boot.getTrack(), 360 - deltaT), false);
+			leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, 360 - deltaT), true);
+			rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, 360 - deltaT), false);
 		}
 
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
+
+	}
+
+	/**
+	 * Turn by the specified angle theta, can be both positive or negative
+	 * 
+	 * @param clockwise:
+	 *            true to turn clockwise and false to turn counter clockwise.
+	 * @param theta:
+	 *            amount of degree the robot has to turn.
+	 */
+	public static void turnBy(double theta, boolean clockwise, boolean blocking, int SPEED) {
+
+		setSpeeds(SPEED);
+		
+		
+		if (clockwise == false) {
+			leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), true);
+			rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), !blocking);
+		} else {
+			leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), true);
+			rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), !blocking);
+		}
+
+	}
+	
+	/**
+	 * Turn by the specified angle theta, can be both positive or negative
+	 * 
+	 * @param clockwise:
+	 *            true to turn clockwise and false to turn counter clockwise.
+	 * @param theta:
+	 *            amount of degree the robot has to turn.
+	 */
+	public static void turnBy(double theta, boolean clockwise, boolean blocking) {
+		
+		
+		if (clockwise == false) {
+			leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), true);
+			rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), !blocking);
+		} else {
+			leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, theta), true);
+			rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, theta), !blocking);
+		}
 
 	}
 
@@ -173,6 +216,12 @@ public abstract class MotorController {
 	 */
 	public static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	
+	public static double angleDiff(double first, double second) {
+		double phi = Math.abs(first - second) % 360;
+		phi = phi > 180 ? 360 - phi : phi;
+		return phi;
 	}
 
 }

@@ -47,7 +47,6 @@ public class Ev3Boot extends MotorController {
 	// Enable/disable printing of debug info from the WiFi class
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
 
-	
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port colorPortLeft = LocalEV3.get().getPort("S1");
 	private static final Port colorPortFront = LocalEV3.get().getPort("S3");
@@ -139,6 +138,7 @@ public class Ev3Boot extends MotorController {
 	private static float oldColorRight;
 
 	private static final double COLOR_MIN = 0.0113; // minimum total colour for ring detection
+	public static long demoStart;
 
 	/**
 	 * The main method establishes the connection with the Dpm server using the
@@ -158,7 +158,7 @@ public class Ev3Boot extends MotorController {
 		} catch (OdometerExceptions e) {
 			e.printStackTrace();
 			return;
-		}	
+		}
 
 		Display display = new Display(lcd);
 
@@ -182,7 +182,7 @@ public class Ev3Boot extends MotorController {
 		tunnel_UR_x = 3;
 		tunnel_UR_y = 5;
 		ringSet_x = 5;
-		ringSet_y = 7;
+		ringSet_y = 6;
 		// end of random shit
 
 		(new Thread() {
@@ -190,21 +190,49 @@ public class Ev3Boot extends MotorController {
 
 				int buttonChoice;
 				do {
-//					// clear the display
-//					lcd.clear();
-//
-//					// ask the user whether the motors should drive in a square or float
-//					lcd.drawString("Awaiting Input  ", 0, 0);
+					// // clear the display
+					// lcd.clear();
+					//
+					// // ask the user whether the motors should drive in a square or float
+					// lcd.drawString("Awaiting Input ", 0, 0);
 
 					buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
 				} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
 
 				try {
+					demoStart = System.currentTimeMillis();
+//					Navigator.toStraightNavigator(4.5, 4.5, 7);
+//					Navigator.toStraightNavigator(0.5, 0.5, 7);
+//					turnBy(90, true, false, TURN_SPEED);
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//					}
+//					turnBy(90, true, false, TURN_SPEED);
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//					}
+//					turnBy(90, true, false, TURN_SPEED);
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//					}
+//					turnBy(90, true, false, TURN_SPEED);
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//					}
+//					forwardBy(TILE_SIZE);
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//					}
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
-					 int position = GameLogic.closestSideOfTree(ringSet_x, ringSet_y, odo.getXYT()[0], odo.getXYT()[1]);
-					 RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
+					int position = GameLogic.closestSideOfTree(ringSet_x, ringSet_y, odo.getXYT()[0], odo.getXYT()[1]);
+					RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
 				} catch (OdometerExceptions e) {
 					System.out.println("hello");
 					// donothing;
@@ -212,28 +240,28 @@ public class Ev3Boot extends MotorController {
 			}
 		}).start();
 
-//		leftMotor.setSpeed(Navigator.getForwardSpeed());
-//		rightMotor.setSpeed(Navigator.getForwardSpeed());
-//		leftMotor.forward();
-//		rightMotor.forward();
-//
-//		colorRight.fetchSample(colorRightBuffer, 0);
-//		color = colorRightBuffer[0] * 1000;
-//		oldColorRight = color;
-//
-//		while (true) {
-//			colorRight.fetchSample(colorRightBuffer, 0);
-//			color = colorRightBuffer[0] * 1000;
-//
-//			if (color - oldColorRight> 19) {
-//				Sound.beep();
-//				for (int i = 0; i < 1000; i++) {
-//					colorRight.fetchSample(colorRightBuffer, 0);
-//					color = colorRightBuffer[0] * 1000;
-//				}
-//			}
-//			oldColorRight = color;
-//		}
+		// leftMotor.setSpeed(Navigator.getForwardSpeed());
+		// rightMotor.setSpeed(Navigator.getForwardSpeed());
+		// leftMotor.forward();
+		// rightMotor.forward();
+		//
+		// colorRight.fetchSample(colorRightBuffer, 0);
+		// color = colorRightBuffer[0] * 1000;
+		// oldColorRight = color;
+		//
+		// while (true) {
+		// colorRight.fetchSample(colorRightBuffer, 0);
+		// color = colorRightBuffer[0] * 1000;
+		//
+		// if (color - oldColorRight> 19) {
+		// Sound.beep();
+		// for (int i = 0; i < 1000; i++) {
+		// colorRight.fetchSample(colorRightBuffer, 0);
+		// color = colorRightBuffer[0] * 1000;
+		// }
+		// }
+		// oldColorRight = color;
+		// }
 
 		// (new Thread() {
 		// public void run() {
@@ -323,10 +351,10 @@ public class Ev3Boot extends MotorController {
 		 * odoDisplayThread.start();
 		 */
 
-//		 leftMotor.forward();
-//	      leftMotor.flt();
-//	      rightMotor.forward();
-//	      rightMotor.flt();	 
+		// leftMotor.forward();
+		// leftMotor.flt();
+		// rightMotor.forward();
+		// rightMotor.flt();
 		/*
 		 * Button.waitForAnyPress(); // Navigator.toStraightNavigator(0,2, 2);
 		 * Navigator.toStraightNavigator(2, 5, 5); // Navigator.toStraightNavigator(2,0,
