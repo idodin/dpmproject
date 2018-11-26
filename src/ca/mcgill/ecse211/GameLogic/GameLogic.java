@@ -2,6 +2,7 @@ package ca.mcgill.ecse211.GameLogic;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Ev3Boot.MotorController;
+import ca.mcgill.ecse211.Ev3Boot.Wifi;
 import ca.mcgill.ecse211.Navigation.Navigator;
 
 /**
@@ -13,21 +14,18 @@ public class GameLogic extends MotorController {
 	// start of random shit
 
 	public static void travelToTunnel(boolean going) {
-
-		int red_Zone_LL_x = 2;
-		int red_Zone_LL_y = 0;
-
-		int red_Zone_UR_x = 8;
-		int red_Zone_UR_y = 3;
-
-		int tunnel_LL_x = 2;
-		int tunnel_LL_y = 3;
-
-		int tunnel_UR_x = 3;
-		int tunnel_UR_y = 5;
-
-		boolean tunnelEntryIsLL = isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, red_Zone_LL_x,
-				red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
+		
+		int tunnel_LL_x = Wifi.getTunnel_LL_x();
+		int tunnel_LL_y = Wifi.getTunnel_LL_y();
+		int tunnel_UR_x = Wifi.getTunnel_UR_x();
+		int tunnel_UR_y = Wifi.getTunnel_UR_y();
+		int team_Zone_LL_x = Wifi.getTeam_zone_LL_x();
+		int team_Zone_LL_y = Wifi.getTeam_zone_LL_y();
+		int team_Zone_UR_x = Wifi.getTeam_zone_UR_x();
+		int team_Zone_UR_y = Wifi.getTeam_zone_UR_y();
+		
+		boolean tunnelEntryIsLL = isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, team_Zone_LL_x,
+				team_Zone_LL_y, team_Zone_UR_x, team_Zone_UR_y);
 
 		if (going) {
 			if (tunnelEntryIsLL) {
@@ -39,7 +37,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
 					//Navigator.travelTo((tunnel_UR_x + 1 - tunnel_LL_x) /2 + tunnel_LL_x, tunnel_UR_y - 0.5, 7,false);
-					Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.8, 7,false);
+					Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 7,false);
 					BigArmHook.rotate(-120);
 
 				} else {
@@ -50,7 +48,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
 					//Navigator.travelTo(tunnel_UR_x - 0.5, (tunnel_UR_y + 1 - tunnel_LL_y )/2 + tunnel_LL_y , 7,false);
-					Navigator.travelTo(tunnel_UR_x - 0.2, tunnel_UR_y + 0.5, 7,false);
+					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 7,false);
 					BigArmHook.rotate(-120);
 				}
 			} else {
@@ -61,7 +59,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
-					Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.8, 7,false);
+					Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 7,false);
 					BigArmHook.rotate(-120);
 				} else {
 					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 7);
@@ -70,7 +68,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
-					Navigator.travelTo(tunnel_LL_x + 0.2, tunnel_LL_y - 0.5, 7,false);
+					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 7,false);
 					BigArmHook.rotate(-120);
 				}
 			}

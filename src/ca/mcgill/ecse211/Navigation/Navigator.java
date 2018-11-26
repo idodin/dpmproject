@@ -108,7 +108,11 @@ public class Navigator extends MotorController {
 		lastPosition = odo.getXYT();
 
 		// Set wheel accelerations.
-		setAccels(500);
+		if (!checkLine) {
+			setSpeedAccel(FORWARD_SPEED * 2, 500);
+		} else {
+			setSpeedAccel(FORWARD_SPEED, 500);
+		}
 
 		isNavigating = true;
 
@@ -133,8 +137,6 @@ public class Navigator extends MotorController {
 
 		}
 
-		// Begin moving forwards
-		setSpeeds(FORWARD_SPEED);
 		bothForwards();
 
 		while (isNavigating) {

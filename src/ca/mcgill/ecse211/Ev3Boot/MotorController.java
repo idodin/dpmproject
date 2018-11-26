@@ -9,7 +9,7 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 public abstract class MotorController {
 	public static Odometer odo = null;
-	public static final int FORWARD_SPEED = 115;
+	public static final int FORWARD_SPEED = 225;
 	public static final int TURN_SPEED = 125;
 	public static final int CORRECTOR_SPEED = 30;
 
