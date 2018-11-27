@@ -29,7 +29,7 @@ public class Navigator extends MotorController {
 	private static final int BLACK = 300;
 	private static final int errorMargin = 150;
 
-	private static final double TILE_SIZE = Ev3Boot.getTileSize();
+	// private static final double TILE_SIZE = Ev3Boot.getTileSize();
 	private static final int TURN_ERROR = 1;
 	private static SampleProvider colorSensorLeft = Ev3Boot.getColorLeft();
 	private static SampleProvider colorSensorRight = Ev3Boot.getColorRight();
@@ -67,6 +67,72 @@ public class Navigator extends MotorController {
 	private static double newTheta;
 
 	private static double phi;
+
+	/**
+	 * 
+	 * This method execute navigation to a specific point, if wanted it can light
+	 * localize upon arrival.
+	 * 
+	 * This method causes the robot to travel to an intermediate waypoint in the
+	 * case of diagonal travel. The method continuously polls the 2 rear light
+	 * sensors. In the case that a line is detected by one of them, its respective
+	 * motor is stopped until the robot corrects its heading (the second light
+	 * sensor detects a line). In a loop calculate distance between current position
+	 * and arrival point, if the distance is smaller than treshHold, stop the
+	 * motors. When the distance from arrival point is acceptable stop the motors
+	 * and light localize if specified.
+	 * 
+	 * @param x:
+	 *            x coordinate to navigate to
+	 * @param y:
+	 *            y coordinate to navigate to
+	 * @param treshHold:
+	 *            acceptable error distance
+	 * @param localizing:
+	 *            should to robot localize upon arrival
+	 */
+	public static void travelUntil() {
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - Ev3Boot.demoStart >= 60000) {
+			// Sound.buzz();
+		}
+
+		try {
+			odo = Odometer.getOdometer();
+		} catch (OdometerExceptions e) {
+			e.printStackTrace();
+			return;
+		}
+
+		// Set wheel accelerations.
+			setSpeedAccel(FORWARD_SPEED, 500);
+
+		isNavigating = true;
+
+		bothForwards();
+
+		while (isNavigating) {
+
+			correctionStart = System.currentTimeMillis();
+
+			if(checkForLines()) {
+				stopBoth();
+				isNavigating = false;
+			}
+
+
+			correctionEnd = System.currentTimeMillis();
+			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
+				try {
+					Thread.sleep(CORRECTION_PERIOD - (correctionEnd - correctionStart));
+				} catch (InterruptedException e) {
+
+				}
+			}
+
+		}
+
+	}
 
 	/**
 	 * 
@@ -177,7 +243,7 @@ public class Navigator extends MotorController {
 
 	}
 
-	public static void checkForLines() {
+	public static boolean checkForLines() {
 		// Take previously retrieved values for colours as old colour values.
 		oldColorLeft = colorLeft;
 		oldColorRight = colorRight;
@@ -192,7 +258,7 @@ public class Navigator extends MotorController {
 		if (colorLeft - oldColorLeft > 19) {
 			// If both sensors on line or black line was falsely detected.
 			if (colorRight - oldColorRight > 19 || !pollMultiple(false)) {
-				return;
+				return pollMultiple(false);
 			}
 
 			leftMotor.stop(true);
@@ -203,9 +269,6 @@ public class Navigator extends MotorController {
 			// falsely detected.
 			while (colorRight - oldColorRight <= 19) {
 				updatePosition = true;
-				// if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
-				// setSpeeds(CORRECTOR_SPEED);
-				// }
 				double omega = odo.getXYT()[2];
 				phi = angleDiff(theta, omega);
 				// If we've been turning for more than degrees, stop, turn in opposite direction
@@ -214,8 +277,8 @@ public class Navigator extends MotorController {
 					System.out.println(omega);
 					rightMotor.stop(true);
 					leftMotor.stop();
-					turnBy(21, true, true);
-					forwardBy(-5);
+					turnBy(26, true, true);
+					forwardBy(-7);
 					updatePosition = false;
 					break;
 				}
@@ -262,11 +325,13 @@ public class Navigator extends MotorController {
 				}
 
 				odo.setXYT(newX, newY, newTheta);
+				
+				return true;
 			}
 
 		} else if (colorRight - oldColorRight > 19) {
 			if (colorLeft - oldColorLeft > 19 || !pollMultiple(true)) {
-				return;
+				return false;
 			}
 
 			// System.out.println("Right line detected:\n" + (colorRight - oldColorRight));
@@ -287,8 +352,8 @@ public class Navigator extends MotorController {
 					System.out.println(omega);
 					rightMotor.stop(true);
 					leftMotor.stop();
-					turnBy(21, false, true);
-					forwardBy(-5);
+					turnBy(26, false, true);
+					forwardBy(-7);
 					updatePosition = false;
 					break;
 				}
@@ -337,9 +402,12 @@ public class Navigator extends MotorController {
 
 				odo.setXYT(newX, newY, newTheta);
 				// System.out.println("New co-ordinates: " + newX + " , " + newY);
+				
+				return true;
 			}
 
 		}
+		return false;
 	}
 
 	public static void toStraightNavigator(double x, double y, int threshold) {

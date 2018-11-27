@@ -21,7 +21,7 @@ public class RingSearch extends MotorController{
 	private static float[] usData = Ev3Boot.getUSData();
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static int distance;
-	private static HashMap<Integer, int[]> positionMap;
+	private static HashMap<Integer, double[]> positionMap;
 	private static Odometer odo;
 	
 	private static int color;
@@ -53,15 +53,15 @@ public class RingSearch extends MotorController{
 			//donothing;
 		}
 
-		positionMap = new HashMap<Integer, int[]>();
-		positionMap.put(0, new int[] { ringSet_x, ringSet_y - 1, 0 });
-		positionMap.put(1, new int[] { ringSet_x + 1, ringSet_y, 0 });
-		positionMap.put(2, new int[] { ringSet_x, ringSet_y + 1, 0 });
-		positionMap.put(3, new int[] { ringSet_x - 1, ringSet_y, 0 });
+		positionMap = new HashMap<Integer, double[]>();
+		positionMap.put(0, new double[] { ringSet_x, ringSet_y - 1, 0, ringSet_x, ringSet_y - 0.3 });
+		positionMap.put(1, new double[] { ringSet_x + 1, ringSet_y, 0, ringSet_x + 0.3, ringSet_y });
+		positionMap.put(2, new double[] { ringSet_x, ringSet_y + 1, 0 , ringSet_x, ringSet_y+0.3});
+		positionMap.put(3, new double[] { ringSet_x - 1, ringSet_y, 0, ringSet_x - 0.3, ringSet_y });
 
 		int getColor = 0;
 
-		int[] posArray = positionMap.get(position);
+		double[] posArray = positionMap.get(position);
 		double[] odoPosition = odo.getXYT();
 		int[] currentPosition = new int[3];
 		currentPosition[0] = (int)Math.round(odoPosition[0] / Ev3Boot.getTileSize());
@@ -130,7 +130,7 @@ public class RingSearch extends MotorController{
 		int getColor;
 		System.out.println("Next position: " + nextPosition);
 
-		int[] posArray = positionMap.get(nextPosition);
+		double[] posArray = positionMap.get(nextPosition);
 
 		if (nextPosition == sequenceStart) {
 			System.out.println(posArray[0] + "," + posArray[1]);
@@ -144,15 +144,20 @@ public class RingSearch extends MotorController{
 				System.out.println(posArray[0] + "," + posArray[1]);
 				System.out.println("Next position out of bounds: " + nextPosition);
 				positionMap.remove(nextPosition);
-				positionMap.put(nextPosition, new int[] { posArray[0], posArray[1], -1 });
+				positionMap.put(nextPosition, new double[] { posArray[0], posArray[1], -1 });
 				return false;
 			}
 			System.out.println("Going To"+posArray[0] +"," + posArray[1]);
-			Navigator.travelTo(posArray[0], posArray[1], 7, false);
+			
+			// Travel to position
+			Navigator.travelTo(posArray[0], posArray[1] , 7, false);
+			
+			// Turn towards tree
 			turnTo((360 - 90 * nextPosition) % 360);
-//			CheckColor.restartChecker();
-//		//	CheckColor.colorDetection();
-//			getColor = CheckColor.getDetectedColor();
+			
+			forwardBy(-10);
+			
+			Navigator.travelUntil();
 			
 			CheckColor.colorDetection();
 			
@@ -178,7 +183,7 @@ public class RingSearch extends MotorController{
 //				return true;
 //			}
 			if (!travelPosition(sequenceStart, nextPosition, currentPosition)) {
-				int[] returnPosArray = positionMap.get(currentPosition);
+				double[] returnPosArray = positionMap.get(currentPosition);
 				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 7, false);
 				return false;
 			}

@@ -255,18 +255,18 @@ public class Ev3Boot extends MotorController {
 	 * 
 	 * @return: left motor
 	 */
-	public static EV3LargeRegulatedMotor getLeftmotor() {
-		return leftMotor;
-	}
-
-	/**
-	 * Returns right motor
-	 * 
-	 * @return: right motor
-	 */
-	public static EV3LargeRegulatedMotor getRightmotor() {
-		return rightMotor;
-	}
+//	public static EV3LargeRegulatedMotor getLeftmotor() {
+//		return leftMotor;
+//	}
+//
+//	/**
+//	 * Returns right motor
+//	 * 
+//	 * @return: right motor
+//	 */
+//	public static EV3LargeRegulatedMotor getRightmotor() {
+//		return rightMotor;
+//	}
 
 	/**
 	 * Returns the tile size

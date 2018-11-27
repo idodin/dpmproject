@@ -32,7 +32,7 @@ public class CheckColor extends MotorController{
 	private static SampleProvider colorSample = Ev3Boot.getColorFront();
 	private static float[] colorBuffer = Ev3Boot.getColorBufferFront();
 	private static double minimum_value = Ev3Boot.getColorMin();
-	private static double approach_dist = 9.0;
+	private static double approach_dist = 7.5;
 	//How often a colour is detected, and at which elevation? 
 	private static int[][] colorCount;
 
@@ -123,6 +123,12 @@ public class CheckColor extends MotorController{
 		
 		int step = 4; // color detection steps for the robot
 		int elev = 1; // elevation being checked
+		
+
+		int max[]       = {0,0};
+		int maxHolder[] = {0,0};
+		int sample[][] = colorCount;
+		
 		do {
 
 			fetchColor(elev);
@@ -144,64 +150,39 @@ public class CheckColor extends MotorController{
 				rightMotor.rotate(-Navigator.convertAngle(WHEEL_RAD, TRACK, 5.0), false);
 			}
 			// Switch to detecting low elevation.
-			else if(elev == 1){
-				leftMotor.rotate (-Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), true);
-				rightMotor.rotate (Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), false);
-				
+			else {
 
-				leftMotor.rotate (-Navigator.convertDistance(WHEEL_RAD, 1.0), true);
-				rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 1.0), true);
-				BigArmHook.rotateTo(75);
+				for(int j = 0; j < 4; j++) 
+					if(colorCount[elev][j] > max[elev]) {
+						maxHolder[elev] = j+1;
+						max[elev] = colorCount[elev][j];
+					}
 				
-				step = 5; 
-				elev = 0;
+				if(maxHolder[elev] != 0) {
+					detect = maxHolder[elev];
+					elevation = elev + 1;
+					break;
+				}
+				if(elev == 1){
+					leftMotor.rotate (-Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), true);
+					rightMotor.rotate (Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), false);
+					
 
+					leftMotor.rotate (-Navigator.convertDistance(WHEEL_RAD, 1.0), true);
+					rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 1.0), true);
+					BigArmHook.rotateTo(75);
+					
+					step = 5; 
+					elev = 0;
+				}
+				else {
+					detect = 0;
+					elevation = 0;
+				}
 			}
 			
 			step--;
 		}while(step >= 0);
-		
-		int max[]       = {0,0};
-		int maxHolder[] = {0,0};
-		int sample[][] = colorCount;
-		
-		for(int i = 0; i < 2; i++) {
-			for(int j = 0; j < 4; j++) 
-				if(colorCount[i][j] > max[i]) {
-					maxHolder[i] = j+1;
-					max[i] = colorCount[i][j];
-				}
-		}
-		
-		// One elevation detect colour, the other do not
-		if(maxHolder[0] == 0) {
-			detect = maxHolder[1];
-			elevation = 2;
-		}
-		else if(maxHolder[1] == 0) {
-			detect = maxHolder[0];
-			elevation = 1;
-		}
-		
-		// Wall detected, where both high and low have the same colour
-		else if(maxHolder[0] == maxHolder[1] && Math.abs(max[0] - max[1]) <= 6) {
-			detect = 0;
-			elevation = 0;
-		}
-		
-		// Check how much data collected by a single colour
-		else if(max[0] > max[1]) {
-			detect = maxHolder[0];
-			elevation = 1;
-		}
-		else if(max[1] > max[0]){
-			detect = maxHolder[1];
-			elevation = 2;
-		}
-		else {
-			detect = 0;
-			elevation = 0;
-		}
 		
 		if(detect != 0) 
 			for(int i = 0; i < (5 - detect); i++)

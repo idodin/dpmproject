@@ -37,7 +37,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
 					//Navigator.travelTo((tunnel_UR_x + 1 - tunnel_LL_x) /2 + tunnel_LL_x, tunnel_UR_y - 0.5, 7,false);
-					Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 7,false);
+					Navigator.travelTo(tunnel_UR_x + 0.7, tunnel_UR_y - 0.5, 7,false);
 					BigArmHook.rotate(-120);
 
 				} else {
@@ -48,7 +48,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
 					//Navigator.travelTo(tunnel_UR_x - 0.5, (tunnel_UR_y + 1 - tunnel_LL_y )/2 + tunnel_LL_y , 7,false);
-					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 7,false);
+					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.7, 7,false);
 					BigArmHook.rotate(-120);
 				}
 			} else {
@@ -59,7 +59,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
-					Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 7,false);
+					Navigator.travelTo(tunnel_LL_x - 0.7, tunnel_LL_y + 0.5, 7,false);
 					BigArmHook.rotate(-120);
 				} else {
 					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 7);
@@ -68,7 +68,7 @@ public class GameLogic extends MotorController {
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
-					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 7,false);
+					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7,false);
 					BigArmHook.rotate(-120);
 				}
 			}
@@ -140,8 +140,8 @@ public class GameLogic extends MotorController {
 		double smallestDist = 999999;
 		int position = -1;
 
-		double x0 = ring_x * Ev3Boot.getTileSize();
-		double y0 = (ring_y - 1) * Ev3Boot.getTileSize();
+		double x0 = ring_x * TILE_SIZE;
+		double y0 = (ring_y - 1) * TILE_SIZE;
 		if (Math.hypot(x0 - robot_x, y0 - robot_y) < smallestDist) {
 			smallestDist = Math.hypot(x0 - robot_x, y0 - robot_y);
 			position = 0;

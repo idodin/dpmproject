@@ -20,7 +20,7 @@ public class RingGrasp extends MotorController{
 //	
 //	private static double wheelrad      = Ev3BootGrasping.getWheelRad();
 //	private static double track         = Ev3BootGrasping.getTrack();
-	private static double approach_dist = 9.0;
+	private static double approach_dist = 7.0;
 	
 	/**
 	 * This method is called inside the ring search process,

@@ -2,6 +2,7 @@ package ca.mcgill.ecse211.Localization;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Ev3Boot.MotorController;
+import ca.mcgill.ecse211.Ev3Boot.Wifi;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -34,10 +35,11 @@ public class Localizer extends MotorController {
 	private static float[] colorBufferRight = Ev3Boot.getColorRightBuffer();
 	private static float currentColorRight;
 	private static float oldColorRight;
+	private static int corner;
 
 	private static int fallingDistance = 40;
 	private static int faceToTheWallDistance = 80;
-	
+
 	private static double phi;
 
 	/**
@@ -171,8 +173,12 @@ public class Localizer extends MotorController {
 	}
 
 	public static void localizeColor() throws OdometerExceptions {
-		boolean ySet = false;
-		boolean xSet = false;
+		int map_x = 7;
+		int map_y = 7;
+		
+		boolean firstSet = false;
+		boolean secondSet = false;
+		corner = Wifi.getCorner();
 
 		try {
 			odo = Odometer.getOdometer();
@@ -207,56 +213,112 @@ public class Localizer extends MotorController {
 				leftMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorRight - oldColorRight <= 19) {
-					if (rightMotor.getSpeed() != CORRECTOR_SPEED
-							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
-						//setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED || leftMotor.getSpeed() != CORRECTOR_SPEED) {
+						// setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
-//					if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
-//						rightMotor.stop();
-//						setSpeeds(CORRECTOR_SPEED);
-//						rightMotor.forward();
-//					}
-					
+					// if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
+					// rightMotor.stop();
+					// setSpeeds(CORRECTOR_SPEED);
+					// rightMotor.forward();
+					// }
+
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						stopBoth();
 						turnBy(15, true, true, CORRECTOR_SPEED);
 						bothForwards();
 						break;
 					}
-//					phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-//					phi = phi > 180 ? 360 - phi : phi;
-//					if (phi > 15) {
-//						rightMotor.stop(true);
-//						leftMotor.stop();
-//						Navigator.turnBy(15, true, true);
-//						forwardBy(-5);
-//						bothForwards();
-//						break;
-//					}
-					
+					// phi = Math.abs(odo.getXYT()[2] - theta) % 360;
+					// phi = phi > 180 ? 360 - phi : phi;
+					// if (phi > 15) {
+					// rightMotor.stop(true);
+					// leftMotor.stop();
+					// Navigator.turnBy(15, true, true);
+					// forwardBy(-5);
+					// bothForwards();
+					// break;
+					// }
+
 					oldColorRight = currentColorRight;
 					colorRight.fetchSample(colorBufferRight, 0);
 					currentColorRight = colorBufferRight[0] * 1000;
 				}
 
-				if (ySet) {
+				if (firstSet) {
 					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
-					odo.setX(Ev3Boot.getTileSize() + SENSOR_OFFSET);
-					odo.setTheta(90);
-					xSet = true;
+					switch (corner) {
+					case 0:
+						odo.setX(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(90);
+						Navigator.travelTo(1,1,2,false);
+						Navigator.turnTo(0);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(1.5,1.5,2,false);
+						break;
+					case 1:
+						odo.setY(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(0);
+						Navigator.travelTo(map_x,1,2,false);
+						Navigator.turnTo(0);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(map_x - 0.5,1.5,2,false);	
+						break;
+					case 2:
+						odo.setX(map_x * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(270);
+						Navigator.travelTo(map_x, map_y,2 ,false);
+						Navigator.turnTo(180);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(map_x - 0.5, map_y - 0.5,2,false);
+						break;
+					case 3:
+						odo.setY(map_y * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(180);
+						Navigator.travelTo(1,map_y,2,false);
+						Navigator.turnTo(180);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(1.5, map_y-0.5,2,false);
+						break;
+					}
+
+					secondSet = true;
 					break;
 				} else {
 					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
-					odo.setY(Ev3Boot.getTileSize() + SENSOR_OFFSET);
-					odo.setTheta(0);
-					ySet = true;
+					switch (corner) {
+					case 0:
+						odo.setY(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(0);
+						break;
+					case 1:
+						odo.setX(map_x * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(270);
+						break;
+					case 2:
+						odo.setY(map_y * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(180);
+						break;
+					case 3:
+						odo.setX(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(90);
+						break;
+					}
+					firstSet = true;
 				}
 				stopBoth();
 
-				forwardBy(5);
-				turnTo(90);
+				forwardBy(-20);
+				turnBy(90, true, true);
 				bothForwards();
 				oldColorLeft = currentColorLeft;
 
@@ -283,60 +345,116 @@ public class Localizer extends MotorController {
 				rightMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorLeft - oldColorLeft <= 19) {
-					if (rightMotor.getSpeed() != CORRECTOR_SPEED
-							|| leftMotor.getSpeed() != CORRECTOR_SPEED) {
-						//setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
+					if (rightMotor.getSpeed() != CORRECTOR_SPEED || leftMotor.getSpeed() != CORRECTOR_SPEED) {
+						// setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
 
-//					if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
-//						leftMotor.stop();
-//						setSpeeds(CORRECTOR_SPEED);
-//						leftMotor.forward();
-//					}
-					
+					// if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
+					// leftMotor.stop();
+					// setSpeeds(CORRECTOR_SPEED);
+					// leftMotor.forward();
+					// }
+
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						stopBoth();
-						turnBy(15, false, true, CORRECTOR_SPEED); 
+						turnBy(15, false, true, CORRECTOR_SPEED);
 						forwardBy(-5);
 						bothForwards();
 						break;
 					}
-					
-//					phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-//					phi = phi > 180 ? 360 - phi : phi;
-//					if (phi > 15) {
-//						rightMotor.stop(true);
-//						leftMotor.stop();
-//						Navigator.turnBy(15, false, true);
-//						forwardBy(-5);
-//						bothForwards();
-//						break;
-//					}
-					
+
+					// phi = Math.abs(odo.getXYT()[2] - theta) % 360;
+					// phi = phi > 180 ? 360 - phi : phi;
+					// if (phi > 15) {
+					// rightMotor.stop(true);
+					// leftMotor.stop();
+					// Navigator.turnBy(15, false, true);
+					// forwardBy(-5);
+					// bothForwards();
+					// break;
+					// }
+
 					oldColorLeft = currentColorLeft;
 					colorLeft.fetchSample(colorBufferLeft, 0);
 					currentColorLeft = colorBufferLeft[0] * 1000;
 					// System.out.println(colorLeft-oldColorLeft);
 				}
 
-				if (ySet) {
+				if (firstSet) {
 					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
-					odo.setX(Ev3Boot.getTileSize() + SENSOR_OFFSET);
-					odo.setTheta(90);
-					xSet = true;
+					switch (corner) {
+					case 0:
+						odo.setX(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(90);
+						Navigator.travelTo(1,1,2,false);
+						Navigator.turnTo(0);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(1.5,1.5,2,false);
+						break;
+					case 1:
+						odo.setY(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(0);
+						Navigator.travelTo(map_x,1,2,false);
+						Navigator.turnTo(0);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(map_x - 0.5,1.5,2,false);	
+						break;
+					case 2:
+						odo.setX(map_x * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(270);
+						Navigator.travelTo(map_x, map_y,2 ,false);
+						Navigator.turnTo(180);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(map_x - 0.5, map_y - 0.5,2,false);
+						break;
+					case 3:
+						odo.setY(map_y * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(180);
+						Navigator.travelTo(1,map_y,2,false);
+						Navigator.turnTo(180);
+						Sound.beep();
+						Sound.beep();
+						Sound.beep();
+						Navigator.travelTo(1.5, map_y-0.5,2,false);
+						break;
+					}
+
+					secondSet = true;
 					break;
 				} else {
 					stopBoth();
 					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
-					odo.setY(Ev3Boot.getTileSize() + SENSOR_OFFSET);
-					odo.setTheta(0);
-					ySet = true;
+					switch (corner) {
+					case 0:
+						odo.setY(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(0);
+						break;
+					case 1:
+						odo.setX(map_x * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(270);
+						break;
+					case 2:
+						odo.setY(map_y * TILE_SIZE - SENSOR_OFFSET);
+						odo.setTheta(180);
+						break;
+					case 3:
+						odo.setX(TILE_SIZE + SENSOR_OFFSET);
+						odo.setTheta(90);
+						break;
+					}
+					firstSet = true;
 				}
 				stopBoth();
 
-				forwardBy(5);
-				turnTo(90);
+				forwardBy(-20);
+				turnBy(90, true, true);
 				bothForwards();
 				oldColorLeft = currentColorLeft;
 
@@ -358,10 +476,7 @@ public class Localizer extends MotorController {
 			}
 
 		}
-		Navigator.travelTo(1.5, 1.5, 3, false);
-		turnTo(0);
 
 	}
-
 
 }
