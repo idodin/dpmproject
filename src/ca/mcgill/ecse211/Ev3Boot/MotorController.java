@@ -9,9 +9,13 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 public abstract class MotorController {
 	public static Odometer odo = null;
-	public static final int FORWARD_SPEED = 225;
-	public static final int TURN_SPEED = 125;
+	public static final int FORWARD_ACCEL = 350;
+	public static final int FORWARD_SPEED = 200;
+	public static final int TURN_SPEED = 170;
+	public static final int LOCALIZER_SPEED = 250;
 	public static final int CORRECTOR_SPEED = 30;
+	public static final int LOCALIZER_ACCELERATION = 1000;
+	public static final double SENSOR_OFFSET = 13.3;
 
 	// Motor Objects, and Robot related parameters
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
@@ -22,7 +26,7 @@ public abstract class MotorController {
 
 	// Configuration Objects
 	public static final double WHEEL_RAD = 2.103;
-	public static final double TRACK = 9.45;
+	public static final double TRACK = 9.60;
 	public static final double TILE_SIZE = 30.48;
 
 	public static void stopBoth() {
@@ -128,7 +132,7 @@ public abstract class MotorController {
 			return;
 		}
 
-		setSpeeds(TURN_SPEED);
+		setSpeedAccel(TURN_SPEED, FORWARD_ACCEL);
 
 		double[] currentPosition = odo.getXYT();
 

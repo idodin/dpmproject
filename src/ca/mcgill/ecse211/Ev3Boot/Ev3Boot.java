@@ -76,7 +76,7 @@ public class Ev3Boot extends MotorController {
 	public static Localizer localizer;
 	public static Display display;
 
-	private static final double COLOR_MIN = 0.0099; // minimum total colour for ring detection
+	private static final double COLOR_MIN = 0.013; // minimum total colour for ring detection
 	public static long demoStart;
 
 	/**
@@ -168,16 +168,22 @@ public class Ev3Boot extends MotorController {
 //					RingGrasp.removeRing();
 					
 //					turnTo(90);
+//					Thread.sleep(1000);
 //					turnTo(180);
+//					Thread.sleep(1000);
 //					turnTo(270);
+//					Thread.sleep(1000);
 //					turnTo(0);
-//					
+					
+					//forwardBy(SENSOR_OFFSET);
+					
+					
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
-					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRingSet_y(), odo.getXYT()[0], odo.getXYT()[1]);
-					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRingSet_y());
-				} catch (OdometerExceptions e) {
+					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRed_Ring_Set_y(), odo.getXYT()[0], odo.getXYT()[1]);
+					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRed_Ring_Set_y());
+				} catch (Exception e) {
 					System.out.println("hello");
 					// donothing;
 				}

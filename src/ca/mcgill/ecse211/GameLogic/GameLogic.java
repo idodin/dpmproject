@@ -30,45 +30,73 @@ public class GameLogic extends MotorController {
 		if (going) {
 			if (tunnelEntryIsLL) {
 				if (tunnel_LL_x - tunnel_UR_x > 1) {
-					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 7);
+					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 8);
 					turnTo(90);
-					forwardBy(-13);
+					forwardBy(-7);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
+	//				turnTo(10);
+					Navigator.travelUntil();
+					//Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
 					//Navigator.travelTo((tunnel_UR_x + 1 - tunnel_LL_x) /2 + tunnel_LL_x, tunnel_UR_y - 0.5, 7,false);
 					Navigator.travelTo(tunnel_UR_x + 0.7, tunnel_UR_y - 0.5, 7,false);
+					Navigator.turnTo(0);
+					Navigator.travelUntil();
+					Navigator.turnBy(90, true, true);
+					forwardBy(-10);
+					Navigator.travelUntil();
 					BigArmHook.rotate(-120);
 
 				} else {
-					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 6);
+					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 8);
 					turnTo(0);
-					forwardBy(-13);
+					forwardBy(-7);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
+					Navigator.turnTo(10);
+					Navigator.travelUntil();
+					//Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
 					//Navigator.travelTo(tunnel_UR_x - 0.5, (tunnel_UR_y + 1 - tunnel_LL_y )/2 + tunnel_LL_y , 7,false);
 					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.7, 7,false);
+					Navigator.turnTo(0);
+					Navigator.travelUntil();
+					Navigator.turnBy(90, true, true);
+					forwardBy(-10);
+					Navigator.travelUntil();
 					BigArmHook.rotate(-120);
 				}
 			} else {
 				if (tunnel_LL_x - tunnel_UR_x > 1) {
-					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 7);
+					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 8);
 					turnTo(270);
-					forwardBy(-13);
+					forwardBy(-7);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
+					Navigator.turnTo(10);
+					Navigator.travelUntil();
+					//Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
 					Navigator.travelTo(tunnel_LL_x - 0.7, tunnel_LL_y + 0.5, 7,false);
+					Navigator.turnTo(0);
+					Navigator.travelUntil();
+					Navigator.turnBy(90, true, true);
+					forwardBy(-10);
+					Navigator.travelUntil();
 					BigArmHook.rotate(-120);
 				} else {
-					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 7);
+					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 8);
 					turnTo(180);
-					forwardBy(-13);
+					forwardBy(-7);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
+					Navigator.turnTo(10);
+					Navigator.travelUntil();
+					//Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
 					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7,false);
+					Navigator.turnTo(0);
+					Navigator.travelUntil();
+					Navigator.turnBy(90, true, true);
+					forwardBy(-10);
+					Navigator.travelUntil();
 					BigArmHook.rotate(-120);
 				}
 			}

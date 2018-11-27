@@ -105,9 +105,11 @@ public class Navigator extends MotorController {
 		}
 
 		// Set wheel accelerations.
-			setSpeedAccel(FORWARD_SPEED, 500);
+		setSpeedAccel(FORWARD_SPEED/2, 500);
 
 		isNavigating = true;
+		
+		System.out.println("Start forward");
 
 		bothForwards();
 
@@ -116,6 +118,7 @@ public class Navigator extends MotorController {
 			correctionStart = System.currentTimeMillis();
 
 			if(checkForLines()) {
+				System.out.println("Lines checked!");
 				stopBoth();
 				isNavigating = false;
 			}
@@ -186,6 +189,19 @@ public class Navigator extends MotorController {
 
 		deltaX = x * TILE_SIZE - currentPosition[0];
 		deltaY = y * TILE_SIZE - currentPosition[1];
+		distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+
+		if (distance < treshHold) {
+			leftMotor.stop(true);
+			rightMotor.stop();
+			isNavigating = false;
+			if (treshHold > 4) {
+				travelTo(x, y, 2, false);
+			}
+			Sound.beepSequence();
+
+			return;
+		}
 
 		if (deltaX == 0 && deltaY != 0) {
 			turnTo(deltaY < 0 ? 180 : 0);

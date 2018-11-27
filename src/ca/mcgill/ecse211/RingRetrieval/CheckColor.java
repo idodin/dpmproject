@@ -32,7 +32,7 @@ public class CheckColor extends MotorController{
 	private static SampleProvider colorSample = Ev3Boot.getColorFront();
 	private static float[] colorBuffer = Ev3Boot.getColorBufferFront();
 	private static double minimum_value = Ev3Boot.getColorMin();
-	private static double approach_dist = 7.5;
+	private static double approach_dist = -5.0;
 	//How often a colour is detected, and at which elevation? 
 	private static int[][] colorCount;
 
@@ -111,15 +111,16 @@ public class CheckColor extends MotorController{
 		
 		restartChecker();
 		
-		//Detect higher elevation first.
-		BigArmHook.setSpeed(100);
-		BigArmHook.rotateTo(40,true);
 		
 		//approach the tree
 		leftMotor.setSpeed(100);
 		rightMotor.setSpeed(100);
 		leftMotor.rotate(Navigator.convertDistance(WHEEL_RAD, approach_dist),true);
 		rightMotor.rotate(Navigator.convertDistance(WHEEL_RAD, approach_dist),false);
+		
+		//Detect higher elevation first.
+		BigArmHook.setSpeed(100);
+		BigArmHook.rotateTo(40);
 		
 		int step = 4; // color detection steps for the robot
 		int elev = 1; // elevation being checked

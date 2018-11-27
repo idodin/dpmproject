@@ -54,10 +54,10 @@ public class RingSearch extends MotorController{
 		}
 
 		positionMap = new HashMap<Integer, double[]>();
-		positionMap.put(0, new double[] { ringSet_x, ringSet_y - 1, 0, ringSet_x, ringSet_y - 0.3 });
-		positionMap.put(1, new double[] { ringSet_x + 1, ringSet_y, 0, ringSet_x + 0.3, ringSet_y });
-		positionMap.put(2, new double[] { ringSet_x, ringSet_y + 1, 0 , ringSet_x, ringSet_y+0.3});
-		positionMap.put(3, new double[] { ringSet_x - 1, ringSet_y, 0, ringSet_x - 0.3, ringSet_y });
+		positionMap.put(0, new double[] { ringSet_x - 0.1 , ringSet_y - 1, 0 });
+		positionMap.put(1, new double[] { ringSet_x + 1, ringSet_y - 0.1, 0 });
+		positionMap.put(2, new double[] { ringSet_x + 0.1, ringSet_y + 1, 0 });
+		positionMap.put(3, new double[] { ringSet_x - 1, ringSet_y + 0.1, 0 });
 
 		int getColor = 0;
 
@@ -76,21 +76,28 @@ public class RingSearch extends MotorController{
 		switch(position)
 		{
 		case 0:
-			Navigator.toStraightNavigator(posArray[0], posArray[1] + 0.5, 7);	
+			Navigator.toStraightNavigator(posArray[0], posArray[1] + 0.5, 8);	
 			break;
 		case 1:
-			Navigator.toStraightNavigator(posArray[0] - 0.5, posArray[1], 7);	
+			Navigator.toStraightNavigator(posArray[0] - 0.5, posArray[1], 8);	
 			break;
 		case 2:
-			Navigator.toStraightNavigator(posArray[0], posArray[1] - 0.5, 7);	
+			Navigator.toStraightNavigator(posArray[0], posArray[1] - 0.5, 8);	
 			break;
 		case 3:
-			Navigator.toStraightNavigator(posArray[0] + 0.5, posArray[1], 7);	
+			Navigator.toStraightNavigator(posArray[0] + 0.5, posArray[1], 8);	
 			break;
 		
 		}
-		Navigator.turnTo((360 - 90 * position) % 360);
+		Navigator.turnTo((360 - 90 * (position+1)) % 360);
 		forwardBy(-10);
+		
+		Navigator.travelUntil();
+		
+		forwardBy(-1 * SENSOR_OFFSET);
+		
+		turnTo((360 - 90 * position) % 360);
+		Navigator.travelUntil();
 		
 		CheckColor.colorDetection();
 		
@@ -150,13 +157,15 @@ public class RingSearch extends MotorController{
 			System.out.println("Going To"+posArray[0] +"," + posArray[1]);
 			
 			// Travel to position
-			Navigator.travelTo(posArray[0], posArray[1] , 7, false);
+			Navigator.travelTo(posArray[0], posArray[1] , 3, false);
+			
+			turnTo((360 - 90 * nextPosition+1) % 360);
+			Navigator.travelUntil();
+			forwardBy(-1 * SENSOR_OFFSET);
 			
 			// Turn towards tree
-			turnTo((360 - 90 * nextPosition) % 360);
-			
+			turnTo((360 - 90 * (nextPosition)) % 360);
 			forwardBy(-10);
-			
 			Navigator.travelUntil();
 			
 			CheckColor.colorDetection();

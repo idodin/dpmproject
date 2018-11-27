@@ -22,8 +22,6 @@ import lejos.robotics.SampleProvider;
  */
 public class Localizer extends MotorController {
 
-	private static final int TURN_ACCELERATION = 600;
-	public static final double SENSOR_OFFSET = 12.5;
 
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
@@ -71,7 +69,7 @@ public class Localizer extends MotorController {
 		int dist, lastdist;
 		dist = lastdist = Integer.MAX_VALUE;
 
-		setSpeedAccel(TURN_SPEED, TURN_ACCELERATION);
+		setSpeedAccel(LOCALIZER_SPEED, LOCALIZER_ACCELERATION);
 
 		// Get Odometer Instance
 		try {
@@ -81,7 +79,7 @@ public class Localizer extends MotorController {
 		}
 
 		// Start turning, this will be stopped when Falling Edges are detected.
-		turnBy(1000, true, false, TURN_SPEED);
+		turnBy(1000, true, false, LOCALIZER_SPEED);
 
 		// Sample from Ultrasonic Sensor
 		usAverage.fetchSample(usData, 0);
@@ -109,7 +107,7 @@ public class Localizer extends MotorController {
 
 		// Turn in opposite direction.
 		stopBoth();
-		turnBy(1000, false, false, TURN_SPEED);
+		turnBy(1000, false, false, LOCALIZER_SPEED);
 
 		// Do nothing until we re-pass previously detected wall.
 		while (dist < faceToTheWallDistance || dist == 0) {
@@ -179,6 +177,7 @@ public class Localizer extends MotorController {
 		boolean firstSet = false;
 		boolean secondSet = false;
 		corner = Wifi.getCorner();
+		setSpeedAccel(FORWARD_SPEED, FORWARD_ACCEL);
 
 		try {
 			odo = Odometer.getOdometer();
@@ -246,7 +245,7 @@ public class Localizer extends MotorController {
 
 				if (firstSet) {
 					stopBoth();
-					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
+					setSpeedAccel(FORWARD_SPEED, FORWARD_ACCEL);
 					switch (corner) {
 					case 0:
 						odo.setX(TILE_SIZE + SENSOR_OFFSET);
@@ -294,7 +293,7 @@ public class Localizer extends MotorController {
 					break;
 				} else {
 					stopBoth();
-					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
+					setSpeedAccel(FORWARD_SPEED, FORWARD_ACCEL);
 					switch (corner) {
 					case 0:
 						odo.setY(TILE_SIZE + SENSOR_OFFSET);
@@ -382,7 +381,7 @@ public class Localizer extends MotorController {
 
 				if (firstSet) {
 					stopBoth();
-					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
+					setSpeedAccel(FORWARD_SPEED, FORWARD_ACCEL);
 					switch (corner) {
 					case 0:
 						odo.setX(TILE_SIZE + SENSOR_OFFSET);
@@ -430,7 +429,7 @@ public class Localizer extends MotorController {
 					break;
 				} else {
 					stopBoth();
-					setSpeedAccel(FORWARD_SPEED, TURN_ACCELERATION);
+					setSpeedAccel(FORWARD_SPEED, FORWARD_ACCEL);
 					switch (corner) {
 					case 0:
 						odo.setY(TILE_SIZE + SENSOR_OFFSET);
