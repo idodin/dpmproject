@@ -23,6 +23,11 @@ public class RingSearch extends MotorController{
 	private static int distance;
 	private static HashMap<Integer, int[]> positionMap;
 	private static Odometer odo;
+	
+	private static int color;
+	private static int elevation;
+	private static int ring_number = 0;
+
 
 	/**
 	 * This method makes the robot turn around the tree. The switch case decides
@@ -66,7 +71,7 @@ public class RingSearch extends MotorController{
 //			Navigator.travelTo(currentPosition[0] + (posArray[0] - currentPosition[0])/2, currentPosition[1] + (posArray[1] - currentPosition[1])/2, 4, true);
 //		}
 		System.out.println(position);
-		System.out.println("Going To"+posArray[0] +"," + posArray[1]);
+		System.out.println("Going To"+ posArray[0] +"," + posArray[1]);
 //		Navigator.toStraightNavigator(posArray[0], posArray[1], 7);	
 		switch(position)
 		{
@@ -87,21 +92,29 @@ public class RingSearch extends MotorController{
 		Navigator.turnTo((360 - 90 * position) % 360);
 		forwardBy(-10);
 		
-		CheckColor.restartChecker();
-		//CheckColor.colorDetection();
-		getColor = CheckColor.getDetectedColor();
-
-		if (getColor != 0) {
-			beepColor(getColor);
-			Navigator.turnTo((360 - 90 * position) % 360);
-			forwardBy(-3);
-			Ev3Boot.getArmHook().rotateTo(-205);
-			Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 : 32, false);
-			forwardBy(5);
-			Ev3Boot.getArmHook().rotateTo(-230);
-			forwardBy(20);
-			return;
+		CheckColor.colorDetection();
+		
+		color = CheckColor.getDetectedColor();
+		elevation = CheckColor.getElevation();
+		
+		RingGrasp.grasp(color, elevation, ring_number);
+		
+		if(color != 0)
+		{
+			ring_number++;
 		}
+
+//		if (getColor != 0) {
+//			beepColor(getColor);
+//			Navigator.turnTo((360 - 90 * position) % 360);
+//			forwardBy(-3);
+//			Ev3Boot.getArmHook().rotateTo(-205);
+//			Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 : 32, false);
+//			forwardBy(5);
+//			Ev3Boot.getArmHook().rotateTo(-230);
+//			forwardBy(20);
+//			return;
+//		}
 
 		if (!travelPosition(position, position, (position + 3) % 4)) {
 			travelPosition(position, position, (position + 5) % 4);
@@ -137,21 +150,33 @@ public class RingSearch extends MotorController{
 			System.out.println("Going To"+posArray[0] +"," + posArray[1]);
 			Navigator.travelTo(posArray[0], posArray[1], 7, false);
 			turnTo((360 - 90 * nextPosition) % 360);
-			CheckColor.restartChecker();
-		//	CheckColor.colorDetection();
-			getColor = CheckColor.getDetectedColor();
-
-			if (getColor != 0) {
-				beepColor(getColor);
-				Navigator.turnTo((360 - 90 * nextPosition) % 360);
-				forwardBy(3);
-				Ev3Boot.getArmHook().rotateTo(-205);
-				Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 :32, false);
-				forwardBy(5);
-				Ev3Boot.getArmHook().rotateTo(-230);
-				forwardBy(20);
-				return true;
+//			CheckColor.restartChecker();
+//		//	CheckColor.colorDetection();
+//			getColor = CheckColor.getDetectedColor();
+			
+			CheckColor.colorDetection();
+			
+			color = CheckColor.getDetectedColor();
+			elevation = CheckColor.getElevation();
+			
+			RingGrasp.grasp(color, elevation, ring_number);
+			
+			if(color != 0)
+			{
+				ring_number++;
 			}
+
+//			if (color != 0) {
+//				beepColor(color);
+//				Navigator.turnTo((360 - 90 * nextPosition) % 360);
+//				forwardBy(3);
+//				Ev3Boot.getArmHook().rotateTo(-205);
+//				Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 :32, false);
+//				forwardBy(5);
+//				Ev3Boot.getArmHook().rotateTo(-230);
+//				forwardBy(20);
+//				return true;
+//			}
 			if (!travelPosition(sequenceStart, nextPosition, currentPosition)) {
 				int[] returnPosArray = positionMap.get(currentPosition);
 				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 7, false);

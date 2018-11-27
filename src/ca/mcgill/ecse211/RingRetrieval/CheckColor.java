@@ -3,13 +3,13 @@ package ca.mcgill.ecse211.RingRetrieval;
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Ev3Boot.MotorController;
 import ca.mcgill.ecse211.Navigation.Navigator;
+import lejos.hardware.Sound;
 
 /**
  * 
  */
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -20,19 +20,19 @@ import lejos.robotics.SampleProvider;
  * @author Hieu Chau Nguyen
  *
  */
-public class CheckColor{
+public class CheckColor extends MotorController{
 
-	private static final EV3LargeRegulatedMotor leftMotor  = Ev3Boot.getLeftmotor();
-	private static final EV3LargeRegulatedMotor rightMotor = Ev3Boot.getRightmotor();
-	private static final EV3LargeRegulatedMotor BigArmHook = Ev3Boot.getBigArmHook();
-	private static final EV3MediumRegulatedMotor armHook    = Ev3Boot.getArmHook();
-	
-	private static double wheelrad = Ev3Boot.getWheelRad();
-	private static double track    = Ev3Boot.getTrack();
+//	private static final EV3LargeRegulatedMotor leftMotor  = Ev3BootGrasping.getLeftmotor();
+//	private static final EV3LargeRegulatedMotor rightMotor = Ev3BootGrasping.getRightmotor();
+//	private static final EV3LargeRegulatedMotor BigArmHook = Ev3BootGrasping.getBigArmHook();
+//	private static final EV3LargeRegulatedMotor armHook    = Ev3BootGrasping.getArmHook();
+//	
+//	private static double wheelrad = Ev3BootGrasping.getWheelRad();
+//	private static double track    = Ev3BootGrasping.getTrack();
 	private static SampleProvider colorSample = Ev3Boot.getColorFront();
 	private static float[] colorBuffer = Ev3Boot.getColorBufferFront();
 	private static double minimum_value = Ev3Boot.getColorMin();
-	
+	private static double approach_dist = 9.0;
 	//How often a colour is detected, and at which elevation? 
 	private static int[][] colorCount;
 
@@ -111,47 +111,50 @@ public class CheckColor{
 		
 		restartChecker();
 		
-		//Detect lower elevation first.
+		//Detect higher elevation first.
 		BigArmHook.setSpeed(100);
-		BigArmHook.rotateTo(115);
+		BigArmHook.rotateTo(40,true);
 		
-		int step = 6; // color detection steps for the robot
-		int elev = 0; // elevation being checked
+		//approach the tree
+		leftMotor.setSpeed(100);
+		rightMotor.setSpeed(100);
+		leftMotor.rotate(Navigator.convertDistance(WHEEL_RAD, approach_dist),true);
+		rightMotor.rotate(Navigator.convertDistance(WHEEL_RAD, approach_dist),false);
+		
+		int step = 4; // color detection steps for the robot
+		int elev = 1; // elevation being checked
 		do {
 
 			fetchColor(elev);
 			
 			// Budging the robot
-			leftMotor.setSpeed(30);
-			rightMotor.setSpeed(30);
+			leftMotor.setSpeed(50);
+			rightMotor.setSpeed(50);
 			
-			// Move forward
-			if(step >4) {
-				leftMotor.rotate (Navigator.convertDistance(wheelrad, 1.5), true);
-				rightMotor.rotate(Navigator.convertDistance(wheelrad, 1.5), false);
+			if(step >= 4) {
+				leftMotor.rotate (-Navigator.convertAngle(WHEEL_RAD, TRACK, 5.0), true);
+				rightMotor.rotate (Navigator.convertAngle(WHEEL_RAD, TRACK, 5.0), false);
 			}
-			// Rotate left
-			else if(step >2) {
-				leftMotor.rotate (-Navigator.convertAngle(wheelrad, track, 5.0), true);
-				rightMotor.rotate (Navigator.convertAngle(wheelrad, track, 5.0), false);
+			else if(step >= 3) {
+				leftMotor.rotate  (Navigator.convertAngle(WHEEL_RAD, TRACK, 30.0), true);
+				rightMotor.rotate(-Navigator.convertAngle(WHEEL_RAD, TRACK, 30.0), false);
 			}
-			// Rotate right
-			else if(step >1) {
-				leftMotor.rotate  (Navigator.convertAngle(wheelrad, track, 15.0), true);
-				rightMotor.rotate(-Navigator.convertAngle(wheelrad, track, 15.0), false);
+			else if(step >= 1) {
+				leftMotor.rotate  (Navigator.convertAngle(WHEEL_RAD, TRACK, 5.0), true);
+				rightMotor.rotate(-Navigator.convertAngle(WHEEL_RAD, TRACK, 5.0), false);
 			}
-			else if(step >0) {
-				leftMotor.rotate  (Navigator.convertAngle(wheelrad, track, 5.0), true);
-				rightMotor.rotate(-Navigator.convertAngle(wheelrad, track, 5.0), false);
-			}
-			// Switch to detecting high elevation.
-			else if(elev == 0){
-				leftMotor.rotate (-Navigator.convertAngle(wheelrad, track, 10.0), true);
-				rightMotor.rotate (Navigator.convertAngle(wheelrad, track, 10.0), true);
-				BigArmHook.rotateTo(65);
+			// Switch to detecting low elevation.
+			else if(elev == 1){
+				leftMotor.rotate (-Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), true);
+				rightMotor.rotate (Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), false);
 				
-				step = 7; 
-				elev = 1;
+
+				leftMotor.rotate (-Navigator.convertDistance(WHEEL_RAD, 1.0), true);
+				rightMotor.rotate(-Navigator.convertDistance(WHEEL_RAD, 1.0), true);
+				BigArmHook.rotateTo(75);
+				
+				step = 5; 
+				elev = 0;
 
 			}
 			
@@ -181,7 +184,7 @@ public class CheckColor{
 		}
 		
 		// Wall detected, where both high and low have the same colour
-		else if(maxHolder[0] == maxHolder[1]) {
+		else if(maxHolder[0] == maxHolder[1] && Math.abs(max[0] - max[1]) <= 6) {
 			detect = 0;
 			elevation = 0;
 		}
@@ -200,7 +203,14 @@ public class CheckColor{
 			elevation = 0;
 		}
 		
+		if(detect != 0) 
+			for(int i = 0; i < (5 - detect); i++)
+				Sound.beep();
 		detected = true;
+		
+		//Realign the robot back to initial position
+		leftMotor.rotate (-Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), true);
+		rightMotor.rotate (Navigator.convertAngle(WHEEL_RAD, TRACK, 35.0), false);
 	}
 	
 	
@@ -211,7 +221,7 @@ public class CheckColor{
 	
 	private static void fetchColor(int elevation) {
 		//Number of samples per fetch
-		int count = 5;
+		int count = 3;
 		int colorFound = 0;
 		long tStart, tEnd;
 		do {

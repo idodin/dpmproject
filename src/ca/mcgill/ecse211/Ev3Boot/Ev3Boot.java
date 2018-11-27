@@ -6,6 +6,7 @@ import ca.mcgill.ecse211.WiFiClient.WifiConnection;
 import ca.mcgill.ecse211.GameLogic.GameLogic;
 import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.RingRetrieval.CheckColor;
+import ca.mcgill.ecse211.RingRetrieval.RingGrasp;
 import ca.mcgill.ecse211.RingRetrieval.RingSearch;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -75,65 +76,7 @@ public class Ev3Boot extends MotorController {
 	public static Localizer localizer;
 	public static Display display;
 
-	// game values
-	private static int redTeam;
-	private static int greenTeam;
-
-	private static int red_Corner;
-	private static int green_Corner;
-
-	private static int red_Zone_LL_x;
-	private static int red_Zone_LL_y;
-
-	private static int red_Zone_UR_x;
-	private static int red_Zone_UR_y;
-
-	private static int green_Zone_LL_x;
-	private static int green_Zone_LL_y;
-
-	private static int green_Zone_UR_x;
-	private static int green_Zone_UR_y;
-
-	private static int island_LL_x;
-	private static int island_LL_y;
-
-	private static int island_UR_x;
-	private static int island_UR_y;
-
-	private static int red_Tunnel_LL_x;
-	private static int red_Tunnel_LL_y;
-
-	private static int red_Tunnel_UR_x;
-	private static int red_Tunnel_UR_y;
-
-	private static int green_Tunnel_LL_x;
-	private static int green_Tunnel_LL_y;
-
-	private static int green_Tunnel_UR_x;
-	private static int green_Tunnel_UR_y;
-
-	private static int red_Ring_Set_x;
-	private static int red_Ring_Set_y;
-
-	private static int green_Ring_Set_x;
-	private static int green_Ring_Set_y;
-
-	// values color dependent
-	private static int corner;
-
-	private static int tunnel_LL_x;
-	private static int tunnel_LL_y;
-	private static int tunnel_UR_x;
-	private static int tunnel_UR_y;
-
-	private static int ringSet_x;
-	private static int ringSet_y;
-	private static boolean tunnelEntryIsLL;
-
-	private static float color;
-	private static float oldColorRight;
-
-	private static final double COLOR_MIN = 0.0113; // minimum total colour for ring detection
+	private static final double COLOR_MIN = 0.0099; // minimum total colour for ring detection
 	public static long demoStart;
 
 	/**
@@ -164,28 +107,12 @@ public class Ev3Boot extends MotorController {
 
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
-
-		// start of random shit
-		red_Zone_LL_x = 2;
-		red_Zone_LL_y = 0;
-
-		red_Zone_UR_x = 8;
-		red_Zone_UR_y = 3;
-
-		tunnel_LL_x = 2;
-		tunnel_LL_y = 3;
-
-		tunnel_UR_x = 3;
-		tunnel_UR_y = 5;
-		ringSet_x = 5;
-		ringSet_y = 6;
-		// end of random shit
 		
 		(new Thread() {
 			public void run() {
 				Wifi.getInfo();
 			}
-		}).start();;
+		}).start();
 
 		(new Thread() {
 			public void run() {
@@ -230,11 +157,26 @@ public class Ev3Boot extends MotorController {
 //						Thread.sleep(2000);
 //					} catch (InterruptedException e) {
 //					}
+					
+//					CheckColor.colorDetection();
+//					
+//					int color = CheckColor.getDetectedColor();
+//					int elevation = CheckColor.getElevation();
+//					int ring_number = 0;
+//					
+//					RingGrasp.grasp(color, elevation, ring_number);
+//					RingGrasp.removeRing();
+					
+//					turnTo(90);
+//					turnTo(180);
+//					turnTo(270);
+//					turnTo(0);
+//					
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
-					int position = GameLogic.closestSideOfTree(ringSet_x, ringSet_y, odo.getXYT()[0], odo.getXYT()[1]);
-					RingSearch.turnAroundTree(position, ringSet_x, ringSet_y);
+					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRingSet_y(), odo.getXYT()[0], odo.getXYT()[1]);
+					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRingSet_y());
 				} catch (OdometerExceptions e) {
 					System.out.println("hello");
 					// donothing;
