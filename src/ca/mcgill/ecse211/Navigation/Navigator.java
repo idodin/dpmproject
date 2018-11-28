@@ -273,8 +273,9 @@ public class Navigator extends MotorController {
 
 		if (colorLeft - oldColorLeft > 19) {
 			// If both sensors on line or black line was falsely detected.
-			if (colorRight - oldColorRight > 19 || !pollMultiple(false)) {
-				return pollMultiple(false);
+
+			if (colorRight - oldColorRight > 19 || !pollMultiple(false, 15)) {
+				return false;
 			}
 
 			leftMotor.stop(true);
@@ -346,7 +347,8 @@ public class Navigator extends MotorController {
 			}
 
 		} else if (colorRight - oldColorRight > 19) {
-			if (colorLeft - oldColorLeft > 19 || !pollMultiple(true)) {
+
+			if (colorLeft - oldColorLeft > 19 || !pollMultiple(true,15)) {
 				return false;
 			}
 
@@ -439,8 +441,8 @@ public class Navigator extends MotorController {
 		travelTo(x, y, threshold, true);
 	}
 
-	public static boolean pollMultiple(Boolean isRight) {
-		int sampleCount = 15;
+	public static boolean pollMultiple(Boolean isRight, int sampleCount) {
+//		int sampleCount = 15;
 		float sum = 0;
 		SampleProvider sample = isRight ? colorSensorRight : colorSensorLeft;
 		float[] buffer = isRight ? colorRightBuffer : colorLeftBuffer;

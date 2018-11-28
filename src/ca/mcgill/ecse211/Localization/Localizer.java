@@ -40,6 +40,20 @@ public class Localizer extends MotorController {
 
 	private static double phi;
 
+	// var for cirlce localization
+	private static int counter;
+	private static float color;
+	private static float lastColor;
+	private static double temp;
+
+	private static double firstLine;
+	private static double secondLine;
+	private static double thirdLine;
+	private static double fourthLine;
+
+	private static double xOrigin;
+	private static double yOrigin;
+
 	/**
 	 * This method execute Falling Edge Localization using the Ultrasonic Sensor.
 	 * 
@@ -207,7 +221,7 @@ public class Localizer extends MotorController {
 
 			// COPY START
 
-			if (currentColorLeft - oldColorLeft > 19 && Navigator.pollMultiple(false)) {
+			if (currentColorLeft - oldColorLeft > 19 && Navigator.pollMultiple(false, 15)) {
 
 				leftMotor.stop(true);
 				double theta = odo.getXYT()[2];
@@ -220,6 +234,7 @@ public class Localizer extends MotorController {
 					// setSpeeds(CORRECTOR_SPEED);
 					// rightMotor.forward();
 					// }
+
 
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						stopBoth();
@@ -337,7 +352,7 @@ public class Localizer extends MotorController {
 				}
 				continue;
 
-			} else if (currentColorRight - oldColorRight > 19 && Navigator.pollMultiple(true)) {
+			} else if (currentColorRight - oldColorRight > 19 && Navigator.pollMultiple(true, 15)) {
 				// System.out.println("Right line detected:\n" + (currentColorRight -
 				// oldColorRight));
 
@@ -348,11 +363,13 @@ public class Localizer extends MotorController {
 						// setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
 					}
 
+
 					// if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
 					// leftMotor.stop();
 					// setSpeeds(CORRECTOR_SPEED);
 					// leftMotor.forward();
 					// }
+
 
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						stopBoth();
@@ -372,6 +389,7 @@ public class Localizer extends MotorController {
 					// bothForwards();
 					// break;
 					// }
+
 
 					oldColorLeft = currentColorLeft;
 					colorLeft.fetchSample(colorBufferLeft, 0);
@@ -478,4 +496,74 @@ public class Localizer extends MotorController {
 
 	}
 
+	public static void circleLocalize(double x, double y) {
+		
+		double newSensorOffset = -1 * SENSOR_OFFSET;
+
+		try {
+			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+		} catch (OdometerExceptions e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		turnTo(60);
+		
+		
+		colorRight.fetchSample(colorBufferRight, 0);
+		color = colorBufferRight[0] * 1000;
+
+		counter = 1;
+
+		setSpeeds(TURN_SPEED);
+		rightMotor.rotate(Navigator.convertAngle(WHEEL_RAD, TRACK, 450), true);
+		leftMotor.rotate(-Navigator.convertAngle(WHEEL_RAD, TRACK, 450), true);
+
+		while (counter <= 4) {
+			lastColor = color;
+
+			colorRight.fetchSample(colorBufferRight, 0);
+			color = colorBufferRight[0] * 1000;
+			if (color - lastColor > 5 && Navigator.pollMultiple(true,1)) {
+				temp = Ev3Boot.odo.getXYT()[2];
+				// System.out.println(temp);
+				Sound.beep();
+				if (counter == 1) {
+					firstLine = temp;
+				} else if (counter == 2) {
+					secondLine = temp;
+				} else if (counter == 3) {
+					thirdLine = temp;
+				} else if (counter == 4) {
+					leftMotor.stop(true);
+					rightMotor.stop(false);
+					fourthLine = temp;
+				}
+				counter++;
+			}
+		}
+
+		System.out.println("[" + odo.getXYT()[0] + "," + odo.getXYT()[1] + "]");
+
+		// we are to the right
+		if (Math.abs(secondLine - firstLine) > Math.abs(fourthLine - firstLine)) {
+			System.out.println("im to the right");
+			newSensorOffset = -1 * newSensorOffset;
+		}
+
+		xOrigin = ((x * TILE_SIZE))
+				+ (newSensorOffset * Math.cos(Math.toRadians(Math.abs(firstLine - thirdLine)) / 2));
+		yOrigin = (y * TILE_SIZE)
+				+ (-1 * SENSOR_OFFSET * Math.cos(Math.toRadians(Math.abs(secondLine - fourthLine)) / 2));
+
+		System.out.println("Corrected Co-ord: [" + xOrigin + "," + yOrigin + "]");
+
+		odo.setX(xOrigin);
+		odo.setY(yOrigin);
+
+		Navigator.travelTo(x, y, 2, false);
+//		Navigator.turnTo(((((secondLine + fourthLine) / 2)) % 360));
+		turnTo(0);
+		
+	}
 }

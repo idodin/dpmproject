@@ -198,4 +198,23 @@ public class GameLogic extends MotorController {
 
 		return position;
 	}
+	
+	public static boolean isLandBorder(int x, int y)
+	{
+		int x1 = Wifi.getIsland_LL_x();
+		int y1 = Wifi.getIsland_LL_y();
+		int x2 = Wifi.getIsland_UR_x();
+		int y2 = Wifi.getIsland_UR_y();
+		
+		//on x border
+		if(x == x1 || x == x2)
+		{
+			return true;
+		}
+		if(y == y1 || y == y2)
+		{
+			return true;
+		}
+		return false;
+	}
 }

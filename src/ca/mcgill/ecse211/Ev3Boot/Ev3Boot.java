@@ -172,12 +172,17 @@ public class Ev3Boot extends MotorController {
 //					turnTo(180);
 //					Thread.sleep(1000);
 //					turnTo(270);
-//					Thread.sleep(1000);
-//					turnTo(0);
-					
-					//forwardBy(SENSOR_OFFSET);
-					
-					
+
+//					turnTo(0);				
+////					
+//					Localizer.circleLocalize(1, 1);
+//					try {
+//						Thread.sleep(1000);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
