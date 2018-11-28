@@ -137,36 +137,50 @@ public class Wifi {
 
 			green_Ring_Set_x = ((Long) data.get("TG_x")).intValue();
 			green_Ring_Set_y = ((Long) data.get("TG_y")).intValue();
+			
+			corner = 0;
+			tunnel_LL_x = 2;
+			tunnel_LL_y = 3;
+			tunnel_UR_x = 3;
+			tunnel_UR_y = 5;
+			ringSet_x = 5;
+			ringSet_y = 7;
+			team_zone_LL_x = 2;
+			team_zone_LL_y = 0;
+			team_zone_UR_x = 8;
+			team_zone_UR_y = 3;
+			tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
+					red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
 
-			if (redTeam == 21) {
-				corner = red_Corner;
-				tunnel_LL_x = red_Tunnel_LL_x;
-				tunnel_LL_y = red_Tunnel_LL_y;
-				tunnel_UR_x = red_Tunnel_UR_x;
-				tunnel_UR_y = red_Tunnel_UR_y;
-				ringSet_x = red_Ring_Set_x;
-				ringSet_y = red_Ring_Set_y;
-				team_zone_LL_x = red_Zone_LL_x;
-				team_zone_LL_y = red_Zone_LL_y;
-				team_zone_UR_x = red_Zone_UR_x;
-				team_zone_UR_y = red_Zone_UR_y;
-				tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
-						red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
-			} else {
-				corner = green_Corner;
-				tunnel_LL_x = green_Tunnel_LL_x;
-				tunnel_LL_y = green_Tunnel_LL_y;
-				tunnel_UR_x = green_Tunnel_UR_x;
-				tunnel_UR_y = green_Tunnel_UR_y;
-				ringSet_x = green_Ring_Set_x;
-				ringSet_y = green_Ring_Set_y;
-				team_zone_LL_x = green_Zone_LL_x;
-				team_zone_LL_y = green_Zone_LL_y;
-				team_zone_UR_x = green_Zone_UR_x;
-				team_zone_UR_y = green_Zone_UR_y;
-				tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
-						green_Zone_LL_x, green_Zone_LL_y, green_Zone_UR_x, green_Zone_UR_y);
-			}
+//			if (redTeam == 21) {
+//				corner = red_Corner;
+//				tunnel_LL_x = red_Tunnel_LL_x;
+//				tunnel_LL_y = red_Tunnel_LL_y;
+//				tunnel_UR_x = red_Tunnel_UR_x;
+//				tunnel_UR_y = red_Tunnel_UR_y;
+//				ringSet_x = red_Ring_Set_x;
+//				ringSet_y = red_Ring_Set_y;
+//				team_zone_LL_x = red_Zone_LL_x;
+//				team_zone_LL_y = red_Zone_LL_y;
+//				team_zone_UR_x = red_Zone_UR_x;
+//				team_zone_UR_y = red_Zone_UR_y;
+//				tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
+//						red_Zone_LL_x, red_Zone_LL_y, red_Zone_UR_x, red_Zone_UR_y);
+//			} else {
+//				corner = green_Corner;
+//				tunnel_LL_x = green_Tunnel_LL_x;
+//				tunnel_LL_y = green_Tunnel_LL_y;
+//				tunnel_UR_x = green_Tunnel_UR_x;
+//				tunnel_UR_y = green_Tunnel_UR_y;
+//				ringSet_x = green_Ring_Set_x;
+//				ringSet_y = green_Ring_Set_y;
+//				team_zone_LL_x = green_Zone_LL_x;
+//				team_zone_LL_y = green_Zone_LL_y;
+//				team_zone_UR_x = green_Zone_UR_x;
+//				team_zone_UR_y = green_Zone_UR_y;
+//				tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
+//						green_Zone_LL_x, green_Zone_LL_y, green_Zone_UR_x, green_Zone_UR_y);
+//			}
 
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());

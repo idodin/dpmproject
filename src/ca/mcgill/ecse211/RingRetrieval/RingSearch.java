@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import ca.mcgill.ecse211.Ev3Boot.Ev3Boot;
 import ca.mcgill.ecse211.Ev3Boot.MotorController;
+import ca.mcgill.ecse211.Localization.Localizer;
 import ca.mcgill.ecse211.Navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -89,14 +90,21 @@ public class RingSearch extends MotorController{
 			break;
 		
 		}
-		Navigator.turnTo((360 - 90 * (position+1)) % 360);
-		forwardBy(-10);
+//		Navigator.turnTo((360 - 90 * (position+1)) % 360);
+//		forwardBy(-10);
+//		
+//		Navigator.travelUntil();
 		
-		Navigator.travelUntil();
-		
-		forwardBy(-1 * SENSOR_OFFSET);
-		
+				
 		turnTo((360 - 90 * position) % 360);
+//		forwardBy(-1 * SENSOR_OFFSET);
+		
+		forwardBy(-0.5 * TILE_SIZE);
+		
+		Localizer.circleLocalize(posArray[0], posArray[1]);
+		
+		
+
 		Navigator.travelUntil();
 		
 		CheckColor.colorDetection();

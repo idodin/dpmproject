@@ -183,6 +183,9 @@ public class Ev3Boot extends MotorController {
 //						e.printStackTrace();
 //					}
 
+					
+					
+					
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
