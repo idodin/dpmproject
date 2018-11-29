@@ -160,7 +160,7 @@ public class Localizer extends MotorController {
 		// lastColor = color;
 		// SColor.fetchSample(data, 0);
 		// color = data[0] * 1000;
-		// System.out.println(color);
+		// tem.out.println(color);
 		// if (color - lastColor > 6500) {
 		// leftMotor.stop(true);
 		// rightMotor.stop();
@@ -185,8 +185,8 @@ public class Localizer extends MotorController {
 	}
 
 	public static void localizeColor() throws OdometerExceptions {
-		int map_x = 7;
-		int map_y = 7;
+		int map_x = 14;
+		int map_y = 8;
 		
 		boolean firstSet = false;
 		boolean secondSet = false;
@@ -331,7 +331,7 @@ public class Localizer extends MotorController {
 				}
 				stopBoth();
 
-				forwardBy(-20);
+				forwardBy(-25);
 				turnBy(90, true, true);
 				bothForwards();
 				oldColorLeft = currentColorLeft;
@@ -353,7 +353,7 @@ public class Localizer extends MotorController {
 				continue;
 
 			} else if (currentColorRight - oldColorRight > 19 && Navigator.pollMultiple(true, 15)) {
-				// System.out.println("Right line detected:\n" + (currentColorRight -
+				// tem.out.println("Right line detected:\n" + (currentColorRight -
 				// oldColorRight));
 
 				rightMotor.stop(true);
@@ -394,7 +394,7 @@ public class Localizer extends MotorController {
 					oldColorLeft = currentColorLeft;
 					colorLeft.fetchSample(colorBufferLeft, 0);
 					currentColorLeft = colorBufferLeft[0] * 1000;
-					// System.out.println(colorLeft-oldColorLeft);
+					// tem.out.println(colorLeft-oldColorLeft);
 				}
 
 				if (firstSet) {
@@ -526,7 +526,7 @@ public class Localizer extends MotorController {
 			color = colorBufferRight[0] * 1000;
 			if (color - lastColor > 5 && Navigator.pollMultiple(true,1)) {
 				temp = Ev3Boot.odo.getXYT()[2];
-				// System.out.println(temp);
+				// tem.out.println(temp);
 				Sound.beep();
 				if (counter == 1) {
 					firstLine = temp;
@@ -543,11 +543,11 @@ public class Localizer extends MotorController {
 			}
 		}
 
-		System.out.println("[" + odo.getXYT()[0] + "," + odo.getXYT()[1] + "]");
+		//tem.out.println("[" + odo.getXYT()[0] + "," + odo.getXYT()[1] + "]");
 
 		// we are to the right
 		if (Math.abs(secondLine - firstLine) > Math.abs(fourthLine - firstLine)) {
-			System.out.println("im to the right");
+		//	tem.out.println("im to the right");
 			newSensorOffset = -1 * newSensorOffset;
 		}
 
@@ -556,14 +556,14 @@ public class Localizer extends MotorController {
 		yOrigin = (y * TILE_SIZE)
 				+ (-1 * SENSOR_OFFSET * Math.cos(Math.toRadians(Math.abs(secondLine - fourthLine)) / 2));
 
-		System.out.println("Corrected Co-ord: [" + xOrigin + "," + yOrigin + "]");
+		//tem.out.println("Corrected Co-ord: [" + xOrigin + "," + yOrigin + "]");
 
 		odo.setX(xOrigin);
 		odo.setY(yOrigin);
 
 		Navigator.travelTo(x, y, 2, false);
 //		Navigator.turnTo(((((secondLine + fourthLine) / 2)) % 360));
-		turnTo(0);
+		//turnTo(0);
 		
 	}
 }

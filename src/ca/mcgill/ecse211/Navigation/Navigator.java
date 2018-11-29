@@ -105,10 +105,10 @@ public class Navigator extends MotorController {
 		}
 
 		// Set wheel accelerations.
-		setSpeedAccel(FORWARD_SPEED/2, 500);
+		setSpeedAccel(FORWARD_SPEED / 2, 500);
 
 		isNavigating = true;
-		
+
 		System.out.println("Start forward");
 
 		bothForwards();
@@ -117,12 +117,44 @@ public class Navigator extends MotorController {
 
 			correctionStart = System.currentTimeMillis();
 
-			if(checkForLines()) {
+			if (checkForLines()) {
 				System.out.println("Lines checked!");
 				stopBoth();
-				isNavigating = false;
-			}
 
+				int yInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
+				int xInc = Math.round((float) Math.sin(Math.toRadians(currentPosition[2])));
+
+				if (updatePosition) {
+
+					if (xInc < 0) {
+						newX = roundToNearestTileSize(currentPosition[0] + Localizer.SENSOR_OFFSET)
+								- Localizer.SENSOR_OFFSET;
+						newTheta = 270;
+					} else if (xInc > 0) {
+						newX = roundToNearestTileSize(currentPosition[0] - Localizer.SENSOR_OFFSET)
+								+ Localizer.SENSOR_OFFSET;
+						newTheta = 90;
+					} else {
+						newX = currentPosition[0];
+					}
+
+					if (yInc < 0) {
+						newY = roundToNearestTileSize(currentPosition[1] + Localizer.SENSOR_OFFSET)
+								- Localizer.SENSOR_OFFSET;
+						newTheta = 180;
+					} else if (yInc > 0) {
+						newY = roundToNearestTileSize(currentPosition[1] - Localizer.SENSOR_OFFSET)
+								+ Localizer.SENSOR_OFFSET;
+						newTheta = 0;
+					} else {
+						newY = currentPosition[1];
+					}
+
+					odo.setXYT(newX, newY, newTheta);
+
+					isNavigating = false;
+				}
+			}
 
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
@@ -195,10 +227,6 @@ public class Navigator extends MotorController {
 			leftMotor.stop(true);
 			rightMotor.stop();
 			isNavigating = false;
-			if (treshHold > 4) {
-				travelTo(x, y, 2, false);
-			}
-			Sound.beepSequence();
 
 			return;
 		}
@@ -214,7 +242,8 @@ public class Navigator extends MotorController {
 			}
 
 			// OdometerCorrection.isCorrecting = false;
-			turnTo(baseAngle + adjustAngle);
+			turnTo((((baseAngle + adjustAngle + (distance > TILE_SIZE ? 5 : 0) ) % 360) + 360) % 360);
+			odo.setTheta(baseAngle + adjustAngle);
 			// OdometerCorrection.isCorrecting = true;
 
 		}
@@ -241,7 +270,6 @@ public class Navigator extends MotorController {
 				if (treshHold > 4) {
 					travelTo(x, y, 2, false);
 				}
-				Sound.beepSequence();
 
 				return;
 			}
@@ -308,7 +336,6 @@ public class Navigator extends MotorController {
 			}
 
 			bothForwards();
-			Sound.beep();
 			currentPosition = odo.getXYT();
 
 			// How much do you increment by?
@@ -342,13 +369,13 @@ public class Navigator extends MotorController {
 				}
 
 				odo.setXYT(newX, newY, newTheta);
-				
+
 				return true;
 			}
 
 		} else if (colorRight - oldColorRight > 19) {
 
-			if (colorLeft - oldColorLeft > 19 || !pollMultiple(true,15)) {
+			if (colorLeft - oldColorLeft > 19 || !pollMultiple(true, 15)) {
 				return false;
 			}
 
@@ -381,9 +408,7 @@ public class Navigator extends MotorController {
 				// System.out.println(colorLeft-oldColorLeft);
 			}
 
-			Sound.beep();
 			bothForwards();
-
 			currentPosition = odo.getXYT();
 
 			// How much do you increment by?
@@ -420,7 +445,7 @@ public class Navigator extends MotorController {
 
 				odo.setXYT(newX, newY, newTheta);
 				// System.out.println("New co-ordinates: " + newX + " , " + newY);
-				
+
 				return true;
 			}
 
@@ -442,7 +467,7 @@ public class Navigator extends MotorController {
 	}
 
 	public static boolean pollMultiple(Boolean isRight, int sampleCount) {
-//		int sampleCount = 15;
+		// int sampleCount = 15;
 		float sum = 0;
 		SampleProvider sample = isRight ? colorSensorRight : colorSensorLeft;
 		float[] buffer = isRight ? colorRightBuffer : colorLeftBuffer;

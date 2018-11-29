@@ -14,7 +14,7 @@ public class GameLogic extends MotorController {
 	// start of random shit
 
 	public static void travelToTunnel(boolean going) {
-		
+
 		int tunnel_LL_x = Wifi.getTunnel_LL_x();
 		int tunnel_LL_y = Wifi.getTunnel_LL_y();
 		int tunnel_UR_x = Wifi.getTunnel_UR_x();
@@ -23,81 +23,235 @@ public class GameLogic extends MotorController {
 		int team_Zone_LL_y = Wifi.getTeam_zone_LL_y();
 		int team_Zone_UR_x = Wifi.getTeam_zone_UR_x();
 		int team_Zone_UR_y = Wifi.getTeam_zone_UR_y();
-		
+
 		boolean tunnelEntryIsLL = isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y, team_Zone_LL_x,
 				team_Zone_LL_y, team_Zone_UR_x, team_Zone_UR_y);
 
 		if (going) {
 			if (tunnelEntryIsLL) {
-				if (tunnel_LL_x - tunnel_UR_x > 1) {
-					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 8);
-					turnTo(90);
-					forwardBy(-7);
+				// If traversing tunnel horizontally to the right
+				if (tunnel_UR_x - tunnel_LL_x > 1) {
+					System.out.println("Horizontal Right");
+					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+					// Go to entry
+					Navigator.toStraightNavigator(tunnel_LL_x - 0.2, tunnel_LL_y + 0.5, 8);
+					//Readjust and prepare arm
+					turnTo(100);
+					forwardBy(-15);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-	//				turnTo(10);
 					Navigator.travelUntil();
-					//Navigator.travelTo(tunnel_LL_x , tunnel_LL_y + 0.5, 3 ,true);
-					//Navigator.travelTo((tunnel_UR_x + 1 - tunnel_LL_x) /2 + tunnel_LL_x, tunnel_UR_y - 0.5, 7,false);
-					Navigator.travelTo(tunnel_UR_x + 0.7, tunnel_UR_y - 0.5, 7,false);
-					Navigator.turnTo(0);
-					Navigator.travelUntil();
-					Navigator.turnBy(90, true, true);
-					forwardBy(-10);
-					Navigator.travelUntil();
+					// Go to exit
+					Navigator.travelTo(tunnel_UR_x + 0.7, tunnel_UR_y - 0.5, 7, false);
 					BigArmHook.rotate(-120);
 
+				} else if (tunnel_UR_x - tunnel_LL_x == 1 && tunnel_UR_y - tunnel_LL_y == 1) {
+					// entry is vertical
+					if (isPointOnZone(tunnel_LL_x + 1, tunnel_LL_y, team_Zone_LL_x, team_Zone_LL_y, team_Zone_UR_x,
+							team_Zone_UR_y)) {
+						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+						//Go to entry
+						Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.2, 8);
+						turnTo(0);
+						//Readjust and prepare arm
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.turnTo(10);
+						Navigator.travelUntil();
+						// Go to exit
+						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.7, 7, false);
+						BigArmHook.rotate(-120);
+					// Traverse tunnel horizontally to the right
+					} else {
+						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+						// Go to Entry
+						Navigator.toStraightNavigator(tunnel_LL_x - 0.2, tunnel_LL_y + 0.5, 8);
+						turnTo(100);
+						//Readjust and prepare arm
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						turnTo(100);
+						Navigator.travelUntil();
+						// Go to exit
+						Navigator.travelTo(tunnel_UR_x + 0.7, tunnel_UR_y - 0.5, 7, false);
+						BigArmHook.rotate(-120);
+					}
+				// traverse vertically up
 				} else {
-					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 8);
+					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+					System.out.println("Vertically Up");
+					// Go to Entry
+					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.2, 8);
 					turnTo(0);
-					forwardBy(-7);
+					// Readjust and prepare arm
+					forwardBy(-15);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
 					Navigator.turnTo(10);
 					Navigator.travelUntil();
-					//Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y, 3,true);
-					//Navigator.travelTo(tunnel_UR_x - 0.5, (tunnel_UR_y + 1 - tunnel_LL_y )/2 + tunnel_LL_y , 7,false);
-					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.7, 7,false);
-					Navigator.turnTo(0);
-					Navigator.travelUntil();
-					Navigator.turnBy(90, true, true);
-					forwardBy(-10);
-					Navigator.travelUntil();
+					// Go to exit
+					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.7, 7, false);
+					System.out.println("Current:" + odo.getXYT()[0] + "," + odo.getXYT()[1] + "," + odo.getXYT()[2]);
 					BigArmHook.rotate(-120);
 				}
 			} else {
-				if (tunnel_LL_x - tunnel_UR_x > 1) {
+				// Traverse horizontally to the left
+				if (tunnel_UR_x - tunnel_LL_x > 1) {
+					System.out.println("Horizontal Left");
+					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+					// Go to entry
+					Navigator.toStraightNavigator(tunnel_UR_x + 0.2, tunnel_UR_y - 0.5, 8);
+					turnTo(280);
+					// Readjust and prepare arm
+					forwardBy(-15);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
+					Navigator.turnTo(10);
+					Navigator.travelUntil();
+					// Go to exit
+					Navigator.travelTo(tunnel_LL_x - 0.7, tunnel_LL_y + 0.5, 7, false);
+					BigArmHook.rotate(-120);
+				} else if (tunnel_UR_x - tunnel_LL_x == 1 && tunnel_UR_y - tunnel_LL_y == 1) {
+					// entry is vertical
+					if (isPointOnZone(tunnel_UR_x - 1, tunnel_UR_y, team_Zone_LL_x, team_Zone_LL_y, team_Zone_UR_x,
+							team_Zone_UR_y)) {
+						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+						// Go to entry
+						Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.2, 8);
+						turnTo(180);
+						// Readjust and prepare arm
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.turnTo(190);
+						Navigator.travelUntil();
+						// Go to exit
+						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7, false);
+						BigArmHook.rotate(-120);
+					// entry is horizontal
+					} else {
+						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+						// Go to entry
+						Navigator.toStraightNavigator(tunnel_UR_x + 0.2, tunnel_UR_y - 0.5, 8);
+						turnTo(280);
+						// Readjust and prepare arm
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.turnTo(280);
+						Navigator.travelUntil();
+						// Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
+						// Go to exit
+						Navigator.travelTo(tunnel_LL_x - 0.7, tunnel_LL_y + 0.5, 7, false);
+						BigArmHook.rotate(-120);
+					}
+				// Traverse tunnel vertically downwards
+				} else {
+					System.out.println("Vertical Down");
+					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
+					// Go to entry
+					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.2, 8);
+					turnTo(190);
+					// Readjust and prepare arm
+					forwardBy(-15);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
+					Navigator.turnTo(190);
+					Navigator.travelUntil();
+					// Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
+					// Go to exit
+					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7, false);
+					BigArmHook.rotate(-120);
+				}
+			}
+		}
+
+		// coming back
+		else {
+			// go to ur then go to ll
+			if (tunnelEntryIsLL) {
+				if (tunnel_UR_x - tunnel_LL_x > 1) {
 					Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 8);
 					turnTo(270);
-					forwardBy(-7);
+					forwardBy(-15);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.turnTo(10);
 					Navigator.travelUntil();
-					//Navigator.travelTo(tunnel_UR_x , tunnel_UR_y - 0.5, 7, true);
-					Navigator.travelTo(tunnel_LL_x - 0.7, tunnel_LL_y + 0.5, 7,false);
-					Navigator.turnTo(0);
-					Navigator.travelUntil();
-					Navigator.turnBy(90, true, true);
-					forwardBy(-10);
-					Navigator.travelUntil();
-					BigArmHook.rotate(-120);
-				} else {
+					Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5, false);
+
+				}
+				else if (tunnel_UR_x - tunnel_LL_x == 1 && tunnel_UR_y - tunnel_LL_y == 1) {
+					// entry is vertical
+					if (isPointOnZone(tunnel_LL_x + 1, tunnel_LL_y, team_Zone_LL_x, team_Zone_LL_y, team_Zone_UR_x,
+							team_Zone_UR_y)) {
+						Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 8);
+						turnTo(180);
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.travelUntil();
+						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5, false);
+					} else {
+						Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 8);
+						turnTo(270);
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.travelUntil();
+						Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5, false);
+					}
+				}
+
+				else {
 					Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 8);
 					turnTo(180);
-					forwardBy(-7);
+					forwardBy(-15);
 					BigArmHook.setSpeed(80);
 					BigArmHook.rotate(120);
-					Navigator.turnTo(10);
 					Navigator.travelUntil();
-					//Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
-					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7,false);
-					Navigator.turnTo(0);
+					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5, false);
+				}
+			}
+			// go to ll thhen go to ll
+			else {
+				if (tunnel_UR_x - tunnel_LL_x > 1) {
+					Navigator.toStraightNavigator(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5);
+					turnTo(90);
+					forwardBy(-15);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
 					Navigator.travelUntil();
-					Navigator.turnBy(90, true, true);
-					forwardBy(-10);
+					Navigator.travelTo(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 5, false);
+				} else if (tunnel_UR_x - tunnel_LL_x == 1 && tunnel_UR_y - tunnel_LL_y == 1) {
+					// entry is vertical
+					if (isPointOnZone(tunnel_UR_x - 1, tunnel_UR_y, team_Zone_LL_x, team_Zone_LL_y, team_Zone_UR_x,
+							team_Zone_UR_y)) {
+						Navigator.toStraightNavigator(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 8);
+						turnTo(180);
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.travelUntil();
+						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5, false);
+					} else {
+						Navigator.toStraightNavigator(tunnel_UR_x + 0.5, tunnel_UR_y - 0.5, 8);
+						turnTo(270);
+						forwardBy(-15);
+						BigArmHook.setSpeed(80);
+						BigArmHook.rotate(120);
+						Navigator.travelUntil();
+						Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5, false);
+					}
+				} else {
+					Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.5, 5);
+					turnTo(0);
+					forwardBy(-15);
+					BigArmHook.setSpeed(80);
+					BigArmHook.rotate(120);
 					Navigator.travelUntil();
-					BigArmHook.rotate(-120);
+					Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.5, 5, false);
 				}
 			}
 		}
@@ -137,7 +291,7 @@ public class GameLogic extends MotorController {
 		// lower left x is in the zone
 		if (tunnel_ll_x >= zone_ll_x && tunnel_ll_x <= zone_ur_x) {
 			// lower left y is in the zone
-			if (tunnel_ll_y >= zone_ll_y && tunnel_ll_y <= zone_ur_x) {
+			if (tunnel_ll_y >= zone_ll_y && tunnel_ll_y <= zone_ur_y) {
 				return true;
 			}
 		}
@@ -198,22 +352,30 @@ public class GameLogic extends MotorController {
 
 		return position;
 	}
-	
-	public static boolean isLandBorder(int x, int y)
-	{
+
+	public static boolean isLandBorder(int x, int y) {
 		int x1 = Wifi.getIsland_LL_x();
 		int y1 = Wifi.getIsland_LL_y();
 		int x2 = Wifi.getIsland_UR_x();
 		int y2 = Wifi.getIsland_UR_y();
-		
-		//on x border
-		if(x == x1 || x == x2)
-		{
+
+		// on x border
+		if (x == x1 || x == x2) {
 			return true;
 		}
-		if(y == y1 || y == y2)
-		{
+		if (y == y1 || y == y2) {
 			return true;
+		}
+		return false;
+	}
+
+	public static boolean isPointOnZone(int x, int y, int zone_ll_x, int zone_ll_y, int zone_ur_x, int zone_ur_y) {
+		// lower left x is in the zone
+		if (x >= zone_ll_x && x <= zone_ur_x) {
+			// lower left y is in the zone
+			if (y >= zone_ll_y && y <= zone_ur_y) {
+				return true;
+			}
 		}
 		return false;
 	}

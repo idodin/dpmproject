@@ -108,25 +108,11 @@ public class Ev3Boot extends MotorController {
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
 		
+
 		(new Thread() {
 			public void run() {
 				Wifi.getInfo();
-			}
-		}).start();
 
-		(new Thread() {
-			public void run() {
-
-				int buttonChoice;
-				do {
-					// // clear the display
-					// lcd.clear();
-					//
-					// // ask the user whether the motors should drive in a square or float
-					// lcd.drawString("Awaiting Input ", 0, 0);
-
-					buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
-				} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
 
 				try {
 					demoStart = System.currentTimeMillis();
@@ -189,8 +175,44 @@ public class Ev3Boot extends MotorController {
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
-					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRed_Ring_Set_y(), odo.getXYT()[0], odo.getXYT()[1]);
-					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRed_Ring_Set_y());
+					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRingSet_y(), odo.getXYT()[0], odo.getXYT()[1]);
+					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRingSet_y() );
+					
+					GameLogic.travelToTunnel(false);
+					
+					int map_x = 14;
+					int map_y = 8;
+					
+					switch(Wifi.getCorner()) {
+					case 0:
+						Navigator.toStraightNavigator(1, 1, 8);
+						for(int i =0; i<5; i++) {
+							Sound.beep();
+						}
+						break;
+					case 1:
+						Navigator.toStraightNavigator(map_x, 1, 8);
+						for(int i=0; i<5; i++) {
+							Sound.beep();
+						}
+						break;
+					case 2:
+						Navigator.toStraightNavigator(map_x, map_y, 8);
+						for(int i=0; i<5; i++) {
+							Sound.beep();
+						}
+						break;
+					case 3:
+						Navigator.toStraightNavigator(1, map_y, 8);
+						for(int i=0; i<5; i++) {
+							Sound.beep();
+						}
+						break;
+						
+					}
+					
+					RingGrasp.removeRing();
+					
 				} catch (Exception e) {
 					System.out.println("hello");
 					// donothing;
