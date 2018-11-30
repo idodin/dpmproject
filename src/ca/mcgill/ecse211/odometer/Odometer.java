@@ -6,7 +6,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
  * This class is used to keep track of the robot's position and heading, by
- * using it's motors' tacho counts. This class implements runnable, ans is run
+ * using it's motors' tacho counts. This class implements runnable, and is run
  * in parallel as long as the motor is travelling.
  * 
  */
@@ -25,7 +25,7 @@ public class Odometer extends OdometerData implements Runnable {
 	private double distL;
 	private double distR;
 
-	private double WHEEL_RAD = Ev3Boot.getWheelRad();
+	private double WHEEL_RAD = Ev3Boot.WHEEL_RAD;
 
 	private double dX;
 	private double dY;
@@ -36,16 +36,16 @@ public class Odometer extends OdometerData implements Runnable {
 	private double theta;
 
 	private static final long ODOMETER_PERIOD = 25; // odometer update period in ms
-	private double TRACK = Ev3Boot.getTrack();
+	private double TRACK = Ev3Boot.TRACK;
 
 	/**
 	 * This is the default constructor of this class. It initiates all motors and
 	 * variables.It cannot be accessed externally.
 	 * 
-	 * @param leftMotor
-	 * @param rightMotor
-	 * @param TRACK      the wheel base of the robot
-	 * @param WHEEL_RAD  the wheel radius
+	 * @param leftMotor: Ev3 left motor
+	 * @param rightMotor: Ev3 right motor
+	 * @param TRACK: the wheel base of the robot
+	 * @param WHEEL_RAD: the wheel radius
 	 * @throws OdometerExceptions
 	 */
 	private Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, final double TRACK,

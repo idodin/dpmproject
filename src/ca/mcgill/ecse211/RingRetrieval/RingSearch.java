@@ -13,9 +13,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This is the classes's constructor. Inside this class is implemented the
- * searching method, which makes the robot turn around the tree until it detects
- * a ring.
+ * Inside this class is implemented the searching method, which makes the robot
+ * travel to and around the tree until it detects a ring. Also contains method
+ * to make the robot beep according to the color of the ring grabbed.
+ * 
+ * This class extends "MotorController" to facilitate all the motor logic.
  */
 public class RingSearch extends MotorController {
 
@@ -40,12 +42,9 @@ public class RingSearch extends MotorController {
 	 * detected color is the one with the highest value it attempts to grasp the
 	 * ring, otherwise it keeps turning around the tree to find a higher value ring.
 	 * 
-	 * @param position:
-	 *            Which tree side is the closest side to the robot
-	 * @param ringSet_x:
-	 *            The tree's x coordinate
-	 * @param ringSet_y:
-	 *            The tree's y coordinate
+	 * @param position: Which tree side is the closest side to the robot
+	 * @param ringSet_x: The tree's x coordinate
+	 * @param ringSet_y: The tree's y coordinate
 	 */
 	public static void turnAroundTree(int position, int ringSet_x, int ringSet_y) {
 		// Initialize Hash Map with tree search positions and integer indicating visits.
@@ -56,18 +55,18 @@ public class RingSearch extends MotorController {
 		}
 
 		positionMap = new HashMap<Integer, double[]>();
-		positionMap.put(0, new double[] { ringSet_x , ringSet_y - 1.5, 0 });
-		positionMap.put(1, new double[] { ringSet_x + 1.5, ringSet_y , 0 });
-		positionMap.put(2, new double[] { ringSet_x , ringSet_y + 1.5, 0 });
-		positionMap.put(3, new double[] { ringSet_x - 1.5, ringSet_y , 0 });
+		positionMap.put(0, new double[] { ringSet_x, ringSet_y - 1.5, 0 });
+		positionMap.put(1, new double[] { ringSet_x + 1.5, ringSet_y, 0 });
+		positionMap.put(2, new double[] { ringSet_x, ringSet_y + 1.5, 0 });
+		positionMap.put(3, new double[] { ringSet_x - 1.5, ringSet_y, 0 });
 
 		int getColor = 0;
 
 		double[] posArray = positionMap.get(position);
 		double[] odoPosition = odo.getXYT();
 		int[] currentPosition = new int[3];
-		currentPosition[0] = (int) Math.round(odoPosition[0] / Ev3Boot.getTileSize());
-		currentPosition[1] = (int) Math.round(odoPosition[1] / Ev3Boot.getTileSize());
+		currentPosition[0] = (int) Math.round(odoPosition[0] / TILE_SIZE);
+		currentPosition[1] = (int) Math.round(odoPosition[1] / TILE_SIZE);
 
 		System.out.println(position);
 		System.out.println("Going To" + posArray[0] + "," + posArray[1]);
@@ -104,8 +103,6 @@ public class RingSearch extends MotorController {
 		Localizer.circleLocalize(posArray[0], posArray[1]);
 		turnTo((360 - 90 * position) % 360);
 		Navigator.travelUntil();
-		
-		
 
 		CheckColor.colorDetection();
 
@@ -117,7 +114,7 @@ public class RingSearch extends MotorController {
 		if (color != 0) {
 			ring_number++;
 		}
-		
+
 		switch (position) {
 		case 0:
 			Navigator.toStraightNavigator(posArray[0], posArray[1] + 0.5, 8);
@@ -132,27 +129,19 @@ public class RingSearch extends MotorController {
 			Navigator.toStraightNavigator(posArray[0] + 0.5, posArray[1], 8);
 			break;
 		}
-
-		// if (getColor != 0) {
-		// beepColor(getColor);
-		// Navigator.turnTo((360 - 90 * position) % 360);
-		// forwardBy(-3);
-		// Ev3Boot.getArmHook().rotateTo(-205);
-		// Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 : 32,
-		// false);
-		// forwardBy(5);
-		// Ev3Boot.getArmHook().rotateTo(-230);
-		// forwardBy(20);
-		// return;
-		// }
-
-		//if (!travelPosition(position, position, (position + 3) % 4)) {
-		//	travelPosition(position, position, (position + 5) % 4);
-		//	return;
-		//}
-
 	}
 
+	/**
+	 * Method called to travel to the next side of the tree. Calls itself
+	 * recursively until all visitable side are visited. It correct itself on each
+	 * side of the tree and call the method to detect rings and grab it if there is
+	 * one.
+	 * 
+	 * @param sequenceStart: first side of tree visited
+	 * @param currentPosition: current side of the tree
+	 * @param previousPosition: previous side of the tree
+	 * @return
+	 */
 	public static boolean travelPosition(int sequenceStart, int currentPosition, int previousPosition) {
 		System.out.println("Travelling");
 		int i = ((currentPosition == 0 ? 4 : currentPosition) - previousPosition) == 1 ? 1 : -1;
@@ -181,26 +170,15 @@ public class RingSearch extends MotorController {
 
 			// Travel to position
 			Navigator.travelTo(posArray[0], posArray[1], 3, false);
-			//forwardBy(-0.5 * TILE_SIZE);
 			turnTo((360 - 90 * currentPosition) % 360);
 			Localizer.circleLocalize(posArray[0], posArray[1]);
 			turnTo((360 - 90 * currentPosition) % 360);
 			forwardBy(-20);
 			Navigator.travelUntil();
 			System.out.println("Before turn " + odo.getXYT()[2]);
-			System.out.println("Coordinates before :" + odo.getXYT()[0] +"," + odo.getXYT()[1]);
+			System.out.println("Coordinates before :" + odo.getXYT()[0] + "," + odo.getXYT()[1]);
 			System.out.println("After turn" + odo.getXYT()[2]);
-			System.out.println("Coordinates after :" + odo.getXYT()[0] +"," + odo.getXYT()[1]);
-			//Navigator.travelUntil();
-
-			// turnTo((360 - 90 * nextPosition+1) % 360);
-			// Navigator.travelUntil();
-			// forwardBy(-1 * SENSOR_OFFSET);
-			//
-			// // Turn towards tree
-			// turnTo((360 - 90 * (nextPosition)) % 360);
-			// forwardBy(-10);
-			// Navigator.travelUntil();
+			System.out.println("Coordinates after :" + odo.getXYT()[0] + "," + odo.getXYT()[1]);
 
 			CheckColor.colorDetection();
 
@@ -213,18 +191,6 @@ public class RingSearch extends MotorController {
 				ring_number++;
 			}
 
-			// if (color != 0) {
-			// beepColor(color);
-			// Navigator.turnTo((360 - 90 * nextPosition) % 360);
-			// forwardBy(3);
-			// Ev3Boot.getArmHook().rotateTo(-205);
-			// Ev3Boot.getBigArmHook().rotateTo(CheckColor.getElevation() == 1 ? 102 :32,
-			// false);
-			// forwardBy(5);
-			// Ev3Boot.getArmHook().rotateTo(-230);
-			// forwardBy(20);
-			// return true;
-			// }
 			if (!travelPosition(sequenceStart, nextPosition, currentPosition)) {
 				double[] returnPosArray = positionMap.get(currentPosition);
 				Navigator.travelTo(returnPosArray[0], returnPosArray[1], 7, false);
@@ -239,6 +205,11 @@ public class RingSearch extends MotorController {
 		}
 	}
 
+	/**
+	 * beep once we detect a ring. 1: orange 2: yellow 3: green 4: blue
+	 * 
+	 * @param color: amount of time to beep
+	 */
 	public static void beepColor(int color) {
 		for (int i = 0; i < 5 - color; i++)
 			Sound.beep();

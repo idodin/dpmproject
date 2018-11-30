@@ -24,10 +24,19 @@ import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
 /**
- * This is the constructor of the boot class,it intializes the needed fields for
- * the used motors and sensors. This class's main method contains the method
- * calls which define the game logic, including lightLocalize, localizeFE and
- * travelTo.
+ * This is the constructor of the boot class,it initializes the needed fields
+ * for the used sensors. This class's main method contains the method calls to
+ * receive the game parameters, localize, travel to specified point, detect
+ * rings, grab ring and drop rings
+ * 
+ * This class extends "MotorController" to facilitate all the motor logic.
+ * 
+ * This class also creates all the 4 threads, one for the display on
+ * information, one for the odometry, one that calls sequentially all the method
+ * used to accomplish the game logic.
+ * 
+ * Furthermore, sensor ports initializations are located in this class along
+ * with their getters.
  * 
  * @author Imad Dodin
  * @author An Khang Chau
@@ -35,28 +44,15 @@ import lejos.robotics.filter.MeanFilter;
  * @author Ai Di Wang
  * @author Umar Tahir
  * @author Hieu Chau Nguyen
- *
  */
 
 public class Ev3Boot extends MotorController {
 
 	// ** Set these as appropriate for your team and current situation **
-
-	
-
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	private static final Port colorPortLeft = LocalEV3.get().getPort("S1");
 	private static final Port colorPortFront = LocalEV3.get().getPort("S3");
-
 	private static final Port colorPortRight = LocalEV3.get().getPort("S2");
-
-	// Sensor Objects
-	// public static EV3GyroSensor colorRightSensor = new
-	// EV3GyroSensor(colorPortRight);
-	// public static EV3GyroSensor colorLeftSensor = new
-	// EV3GyroSensor(colorPortLeft);
-	// public static EV3GyroSensor colorfrontSensor = new
-	// EV3GyroSensor(colorPortFront);
 
 	private static SampleProvider usDistance = new EV3UltrasonicSensor(usPort).getMode("Distance");
 	private static SampleProvider colorLeft = new EV3ColorSensor(colorPortLeft).getMode("Red");
@@ -71,26 +67,21 @@ public class Ev3Boot extends MotorController {
 
 	public static Odometer odo;
 	public static Navigator navigator;
-	// public static RingGrasp grasping;
-	// public static RingSearch searching;
 	public static Localizer localizer;
 	public static Display display;
 
-	private static final double COLOR_MIN = 0.013; // minimum total colour for ring detection
 	public static long demoStart;
 
 	/**
-	 * The main method establishes the connection with the Dpm server using the
-	 * WifiConnection class, and gets the necessary information about the field
-	 * (corner, red_Team...) It also initializes and runs threads for odometry and
-	 * LCD Display, Inside this method, the localizeFE and lightLocalize methods are
-	 * called which make the robot localize. It also calls the travelTo method from
-	 * the Navigator class, to make the robot first travel to the tunnel, through it
-	 * and to the ring set. Once the robot is at the ring set, a call is made to the
-	 * turnAroundTree from the RingSearch class to detect and retreive the rings.
+	 * The main method initializes and runs threads for odometry and LCD Display.
+	 * This method also create a thread that calls all the method needed to
+	 * accomplish the tasks. First it calls "getInfo()" to receive the game
+	 * parameters, then calls "localizeFE()" and "localizeColor()" to make the robot
+	 * localize, it also calls "travelToTunnel()" to that makes the robot cross the
+	 * tunnel from starting zone to land or the other way around. This tread also
+	 * calls "turnAroundTree()" which navigate to and around the tree, detects and
+	 * grab rings. Finally it calls "removeRing()" to drop the ring at the end.
 	 */
-
-	// @SuppressWarnings("rawtypes")
 	public static void main(String[] args) throws OdometerExceptions {
 		try {
 			odo = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
@@ -107,112 +98,56 @@ public class Ev3Boot extends MotorController {
 
 		Thread odoDisplayThread = new Thread(display);
 		odoDisplayThread.start();
-		
 
 		(new Thread() {
 			public void run() {
 				Wifi.getInfo();
 
-
 				try {
 					demoStart = System.currentTimeMillis();
-//					Navigator.toStraightNavigator(4.5, 4.5, 7);
-//					Navigator.toStraightNavigator(0.5, 0.5, 7);
-//					turnBy(90, true, false, TURN_SPEED);
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//					}
-//					turnBy(90, true, false, TURN_SPEED);
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//					}
-//					turnBy(90, true, false, TURN_SPEED);
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//					}
-//					turnBy(90, true, false, TURN_SPEED);
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//					}
-//					forwardBy(TILE_SIZE);
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//					}
-					
-//					CheckColor.colorDetection();
-//					
-//					int color = CheckColor.getDetectedColor();
-//					int elevation = CheckColor.getElevation();
-//					int ring_number = 0;
-//					
-//					RingGrasp.grasp(color, elevation, ring_number);
-//					RingGrasp.removeRing();
-					
-//					turnTo(90);
-//					Thread.sleep(1000);
-//					turnTo(180);
-//					Thread.sleep(1000);
-//					turnTo(270);
 
-//					turnTo(0);				
-////					
-//					Localizer.circleLocalize(1, 1);
-//					try {
-//						Thread.sleep(1000);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-
-					
-					
-					
 					Localizer.localizeFE();
 					Localizer.localizeColor();
 					GameLogic.travelToTunnel(true);
-					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRingSet_y(), odo.getXYT()[0], odo.getXYT()[1]);
-					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRingSet_y() );
-					
+					int position = GameLogic.closestSideOfTree(Wifi.getRingSet_x(), Wifi.getRingSet_y(),
+							odo.getXYT()[0], odo.getXYT()[1]);
+					RingSearch.turnAroundTree(position, Wifi.getRingSet_x(), Wifi.getRingSet_y());
+
 					GameLogic.travelToTunnel(false);
-					
+
 					int map_x = 14;
 					int map_y = 8;
-					
-					switch(Wifi.getCorner()) {
+
+					switch (Wifi.getCorner()) {
 					case 0:
 						Navigator.toStraightNavigator(1, 1, 8);
-						for(int i =0; i<5; i++) {
+						for (int i = 0; i < 5; i++) {
 							Sound.beep();
 						}
 						break;
 					case 1:
 						Navigator.toStraightNavigator(map_x, 1, 8);
-						for(int i=0; i<5; i++) {
+						for (int i = 0; i < 5; i++) {
 							Sound.beep();
 						}
 						break;
 					case 2:
 						Navigator.toStraightNavigator(map_x, map_y, 8);
-						for(int i=0; i<5; i++) {
+						for (int i = 0; i < 5; i++) {
 							Sound.beep();
 						}
 						break;
 					case 3:
 						Navigator.toStraightNavigator(1, map_y, 8);
-						for(int i=0; i<5; i++) {
+						for (int i = 0; i < 5; i++) {
 							Sound.beep();
 						}
 						break;
-						
+
 					}
-					
+
 					RingGrasp.removeRing();
-					
+
 				} catch (Exception e) {
 					System.out.println("hello");
 					// donothing;
@@ -220,16 +155,6 @@ public class Ev3Boot extends MotorController {
 			}
 		}).start();
 
-
-	}
-
-	/**
-	 * Returns the Wheel Radius of the Robot
-	 * 
-	 * @return: Wheel radius
-	 */
-	public static double getWheelRad() {
-		return WHEEL_RAD;
 	}
 
 	/**
@@ -251,15 +176,6 @@ public class Ev3Boot extends MotorController {
 	}
 
 	/**
-	 * Returns the Track (Wheelbase) of the Robot
-	 * 
-	 * @return: wheel base
-	 */
-	public static double getTrack() {
-		return TRACK;
-	}
-
-	/**
 	 * Returns the Ultrasonic Sample Provider
 	 * 
 	 * @return: US Sample Provider
@@ -271,7 +187,7 @@ public class Ev3Boot extends MotorController {
 	/**
 	 * Returns the Color Sensor's Sample Provider
 	 * 
-	 * @return
+	 * @return Color Sensor's Sample Provider
 	 */
 	public static SampleProvider getColorLeft() {
 		return colorLeft;
@@ -280,37 +196,10 @@ public class Ev3Boot extends MotorController {
 	/**
 	 * Returns the Color Sensor's Data Buffer
 	 * 
-	 * @return
+	 * @return Color Sensor's Data Buffer
 	 */
 	public static float[] getColorLeftBuffer() {
 		return colorLeftBuffer;
-	}
-
-	/**
-	 * Returns the left motor
-	 * 
-	 * @return: left motor
-	 */
-//	public static EV3LargeRegulatedMotor getLeftmotor() {
-//		return leftMotor;
-//	}
-//
-//	/**
-//	 * Returns right motor
-//	 * 
-//	 * @return: right motor
-//	 */
-//	public static EV3LargeRegulatedMotor getRightmotor() {
-//		return rightMotor;
-//	}
-
-	/**
-	 * Returns the tile size
-	 * 
-	 * @return: Tile size
-	 */
-	public static double getTileSize() {
-		return TILE_SIZE;
 	}
 
 	/**
@@ -332,46 +221,20 @@ public class Ev3Boot extends MotorController {
 	}
 
 	/**
-	 * Get the minimum total color distance for the rind detection
+	 * Returns the color buffer of the light sensor located on the right
 	 * 
-	 * @return minimum color distance
+	 * @return  color buffer of the light sensor located on the right
 	 */
-	public static double getColorMin() {
-		return COLOR_MIN;
-	}
-
-	/**
-	 * Return big arm motor
-	 * 
-	 * @return
-	 */
-	public static EV3LargeRegulatedMotor getBigArmHook() {
-		return BigArmHook;
-	}
-
-	/**
-	 * Return small arm motor
-	 * 
-	 * @return
-	 */
-	public static EV3MediumRegulatedMotor getArmHook() {
-		return armHook;
-	}
-
 	public static float[] getColorRightBuffer() {
 		return colorRightBuffer;
 	}
 
-	public static void setColorRightBuffer(float[] colorRightBuffer) {
-		Ev3Boot.colorRightBuffer = colorRightBuffer;
-	}
-
+	/**
+	 * return the sample provider of the right light sensor
+	 * 
+	 * @return sample provider of the right light sensor
+	 */
 	public static SampleProvider getColorRight() {
 		return colorRight;
 	}
-
-	public static void setColorRight(SampleProvider colorRight) {
-		Ev3Boot.colorRight = colorRight;
-	}
-
 }

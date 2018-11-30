@@ -5,6 +5,16 @@ import java.util.Map;
 import ca.mcgill.ecse211.GameLogic.GameLogic;
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
 
+/**
+ * Class which takes care of receiving game parameters and interpret them.
+ * 
+ * Initialize every game parameters and set them to the value needed according
+ * to the data received Contains getter for all game parameters.
+ * 
+ * Contains variable which are dependent on the team you are.
+ *
+ * Class called by Ev3Boot class to receive useful parameters.
+ */
 public class Wifi {
 
 	private static final String SERVER_IP = "192.168.2.2";
@@ -14,7 +24,6 @@ public class Wifi {
 	private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
 
 	private static int redTeam;
-
 	private static int greenTeam;
 
 	private static int red_Corner;
@@ -74,29 +83,16 @@ public class Wifi {
 
 	private static boolean tunnelEntryIsLL;
 
+	/**
+	 * Class that establish connection with the wifi with corresponding "SERVER_IP".
+	 * Then get the data from the connection. Then it assigns data to game
+	 * parameters used. Finally, depending on the color the robot's team is, assign
+	 * color dependent values to corresponding data.
+	 * 
+	 * This method is the first method called by Ev3Boot class.
+	 */
 	public static void getInfo() {
-		
-//		corner = 1;
-//		tunnel_LL_x = 2;
-//		tunnel_LL_y = 3;
-//		tunnel_UR_x = 3;
-//		tunnel_UR_y = 5;
-//		ringSet_x = 5;
-//		ringSet_y = 7;
-//		team_zone_LL_x = 2;
-//		team_zone_LL_y = 0;
-//		team_zone_UR_x = 8;
-//		team_zone_UR_y = 3;
-//		tunnelEntryIsLL = GameLogic.isTunnelEntryLL(tunnel_LL_x, tunnel_LL_y, tunnel_UR_x, tunnel_UR_y,
-//				team_zone_LL_x, team_zone_LL_y, team_zone_UR_x, team_zone_UR_y);
-		
-//		try {
-//			Thread.sleep(9999999);
-//		} catch (InterruptedException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-		
+
 		WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT);
 
 		// Connect to server and get the data, catching any errors that might occur
@@ -159,7 +155,6 @@ public class Wifi {
 
 			green_Ring_Set_x = ((Long) data.get("TG_x")).intValue();
 			green_Ring_Set_y = ((Long) data.get("TG_y")).intValue();
-			
 
 			if (redTeam == 21) {
 				corner = red_Corner;
@@ -196,166 +191,148 @@ public class Wifi {
 		}
 	}
 
+	/**
+	 * returns robot's team zone lower left x-coordinate
+	 * 
+	 * @return robot's team zone lower left x-coordinate
+	 */
 	public static int getTeam_zone_LL_x() {
 		return team_zone_LL_x;
 	}
 
+	/**
+	 * returns robot's team zone lower left y-coordinate
+	 * 
+	 * @return robot's team zone lower left y-coordinate
+	 */
 	public static int getTeam_zone_LL_y() {
 		return team_zone_LL_y;
 	}
 
+	/**
+	 * returns robot's team zone upper right x-coordinate
+	 * 
+	 * @return robot's team zone upper right x-coordinate
+	 */
 	public static int getTeam_zone_UR_x() {
 		return team_zone_UR_x;
 	}
 
+	/**
+	 * returns robot's team zone upper right y-coordinate
+	 * 
+	 * @return robot's team zone upper right y-coordinate
+	 */
 	public static int getTeam_zone_UR_y() {
 		return team_zone_UR_y;
 	}
 
+	/**
+	 * returns robot's starting corner
+	 * 
+	 * @return robot's starting corner
+	 */
 	public static int getCorner() {
 		return corner;
 	}
 
-	public static void setCorner(int corner) {
-		Wifi.corner = corner;
-	}
-
-	public static int getRedTeam() {
-		return redTeam;
-	}
-
-	public static int getGreenTeam() {
-		return greenTeam;
-	}
-
-	public static int getRed_Corner() {
-		return red_Corner;
-	}
-
-	public static int getGreen_Corner() {
-		return green_Corner;
-	}
-
-	public static int getRed_Zone_LL_x() {
-		return red_Zone_LL_x;
-	}
-
-	public static int getRed_Zone_LL_y() {
-		return red_Zone_LL_y;
-	}
-
-	public static int getRed_Zone_UR_x() {
-		return red_Zone_UR_x;
-	}
-
-	public static int getRed_Zone_UR_y() {
-		return red_Zone_UR_y;
-	}
-
-	public static int getGreen_Zone_LL_x() {
-		return green_Zone_LL_x;
-	}
-
-	public static int getGreen_Zone_LL_y() {
-		return green_Zone_LL_y;
-	}
-
-	public static int getGreen_Zone_UR_x() {
-		return green_Zone_UR_x;
-	}
-
-	public static int getGreen_Zone_UR_y() {
-		return green_Zone_UR_y;
-	}
-
+	/**
+	 * return island lower left x-coordinate
+	 * 
+	 * @return island lower left x-coordinate
+	 */
 	public static int getIsland_LL_x() {
 		return island_LL_x;
 	}
 
+	/**
+	 * return island lower left y-coordinate
+	 * 
+	 * @return island lower left y-coordinate
+	 */
 	public static int getIsland_LL_y() {
 		return island_LL_y;
 	}
 
+	/**
+	 * return island upper right x-coordinate
+	 * 
+	 * @return island upper right x-coordinate
+	 */
 	public static int getIsland_UR_x() {
 		return island_UR_x;
 	}
 
+	/**
+	 * return island upper right y-coordinate
+	 * 
+	 * @return island upper right y-coordinate
+	 */
 	public static int getIsland_UR_y() {
 		return island_UR_y;
 	}
 
-	public static int getRed_Tunnel_LL_x() {
-		return red_Tunnel_LL_x;
-	}
-
-	public static int getRed_Tunnel_LL_y() {
-		return red_Tunnel_LL_y;
-	}
-
-	public static int getRed_Tunnel_UR_x() {
-		return red_Tunnel_UR_x;
-	}
-
-	public static int getRed_Tunnel_UR_y() {
-		return red_Tunnel_UR_y;
-	}
-
-	public static int getGreen_Tunnel_LL_x() {
-		return green_Tunnel_LL_x;
-	}
-
-	public static int getGreen_Tunnel_LL_y() {
-		return green_Tunnel_LL_y;
-	}
-
-	public static int getGreen_Tunnel_UR_x() {
-		return green_Tunnel_UR_x;
-	}
-
-	public static int getGreen_Tunnel_UR_y() {
-		return green_Tunnel_UR_y;
-	}
-
-	public static int getRed_Ring_Set_x() {
-		return red_Ring_Set_x;
-	}
-
-	public static int getRed_Ring_Set_y() {
-		return red_Ring_Set_y;
-	}
-
-	public static int getGreen_Ring_Set_x() {
-		return green_Ring_Set_x;
-	}
-
-	public static int getGreen_Ring_Set_y() {
-		return green_Ring_Set_y;
-	}
-
+	/**
+	 * return robot's team lower left x-coordinate of the tunnel
+	 * 
+	 * @return
+	 */
 	public static int getTunnel_LL_x() {
 		return tunnel_LL_x;
 	}
 
+	/**
+	 * return robot's team lower left y-coordinate of the tunnel
+	 * 
+	 * @return
+	 */
 	public static int getTunnel_LL_y() {
 		return tunnel_LL_y;
 	}
 
+	/**
+	 * return robot's team upper right x-coordinate of the tunnel
+	 * 
+	 * @return robot's team upper right x-coordinate of the tunnel
+	 */
 	public static int getTunnel_UR_x() {
 		return tunnel_UR_x;
 	}
 
+	/**
+	 * return robot's team upper right y-coordinate of the tunnel
+	 * 
+	 * @return robot's team upper right y-coordinate of the tunnel
+	 */
 	public static int getTunnel_UR_y() {
 		return tunnel_UR_y;
 	}
 
+	/**
+	 * return robot's team ring set x-coordinate
+	 * 
+	 * @returnrobot's team ring set x-coordinate
+	 */
 	public static int getRingSet_x() {
 		return ringSet_x;
 	}
 
+	/**
+	 * return robot's team ring set y-coordinate
+	 * 
+	 * @return robot's team ring set y-coordinate
+	 */
 	public static int getRingSet_y() {
 		return ringSet_y;
 	}
 
+	/**
+	 * return true if lower left is part of the tunnel entry return false if lower
+	 * left is not part of the tunnel entry
+	 * 
+	 * @return true if lower left is part of the tunnel entry return false if lower
+	 *         left is not part of the tunnel entry
+	 */
 	public static boolean isTunnelEntryIsLL() {
 		return tunnelEntryIsLL;
 	}

@@ -8,11 +8,26 @@ import ca.mcgill.ecse211.Navigation.Navigator;
 /**
  * This class contains helper method to facilitate game logic. Contains methods
  * to determine which tunnel entry to choose and which side of the ring set to
- * navigate to first.
+ * navigate to first. Also contains methods that calls successive travel method
+ * to go to the bridge and cross it.
+ * 
+ * Methods inside this class are called by Ev3Boot class to execute game tasks
+ * 
+ * This class extends "MotorController" to facilitate all the motor logic.
  */
 public class GameLogic extends MotorController {
-	// start of random shit
 
+	/**
+	 * Method used to travel from current position to the tunnel and cross it. It
+	 * can be use to cross the bridge from starting zone or from island. It also
+	 * make sure the arm is in a position where it is possible to cross the bridge
+	 * 
+	 * Methods get tunnel, starting zone and island coordinates to determine the
+	 * dimension of the tunnel, its orientation and where is the entry.
+	 * 
+	 * @param going: true if the robot wants to cross the bridge from staring land
+	 *        false if the robot wants to cross the bridge from island
+	 */
 	public static void travelToTunnel(boolean going) {
 
 		int tunnel_LL_x = Wifi.getTunnel_LL_x();
@@ -35,7 +50,7 @@ public class GameLogic extends MotorController {
 					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
 					// Go to entry
 					Navigator.toStraightNavigator(tunnel_LL_x - 0.2, tunnel_LL_y + 0.5, 8);
-					//Readjust and prepare arm
+					// Readjust and prepare arm
 					turnTo(100);
 					forwardBy(-15);
 					BigArmHook.setSpeed(80);
@@ -50,10 +65,10 @@ public class GameLogic extends MotorController {
 					if (isPointOnZone(tunnel_LL_x + 1, tunnel_LL_y, team_Zone_LL_x, team_Zone_LL_y, team_Zone_UR_x,
 							team_Zone_UR_y)) {
 						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
-						//Go to entry
+						// Go to entry
 						Navigator.toStraightNavigator(tunnel_LL_x + 0.5, tunnel_LL_y - 0.2, 8);
 						turnTo(0);
-						//Readjust and prepare arm
+						// Readjust and prepare arm
 						forwardBy(-15);
 						BigArmHook.setSpeed(80);
 						BigArmHook.rotate(120);
@@ -62,13 +77,13 @@ public class GameLogic extends MotorController {
 						// Go to exit
 						Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y + 0.7, 7, false);
 						BigArmHook.rotate(-120);
-					// Traverse tunnel horizontally to the right
+						// Traverse tunnel horizontally to the right
 					} else {
 						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
 						// Go to Entry
 						Navigator.toStraightNavigator(tunnel_LL_x - 0.2, tunnel_LL_y + 0.5, 8);
 						turnTo(100);
-						//Readjust and prepare arm
+						// Readjust and prepare arm
 						forwardBy(-15);
 						BigArmHook.setSpeed(80);
 						BigArmHook.rotate(120);
@@ -78,7 +93,7 @@ public class GameLogic extends MotorController {
 						Navigator.travelTo(tunnel_UR_x + 0.7, tunnel_UR_y - 0.5, 7, false);
 						BigArmHook.rotate(-120);
 					}
-				// traverse vertically up
+					// traverse vertically up
 				} else {
 					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
 					System.out.println("Vertically Up");
@@ -130,7 +145,7 @@ public class GameLogic extends MotorController {
 						// Go to exit
 						Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7, false);
 						BigArmHook.rotate(-120);
-					// entry is horizontal
+						// entry is horizontal
 					} else {
 						System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
 						// Go to entry
@@ -147,7 +162,7 @@ public class GameLogic extends MotorController {
 						Navigator.travelTo(tunnel_LL_x - 0.7, tunnel_LL_y + 0.5, 7, false);
 						BigArmHook.rotate(-120);
 					}
-				// Traverse tunnel vertically downwards
+					// Traverse tunnel vertically downwards
 				} else {
 					System.out.println("Vertical Down");
 					System.out.println("Going to:" + tunnel_LL_x + "," + tunnel_LL_y);
@@ -160,7 +175,6 @@ public class GameLogic extends MotorController {
 					BigArmHook.rotate(120);
 					Navigator.turnTo(190);
 					Navigator.travelUntil();
-					// Navigator.travelTo(tunnel_UR_x - 0.5, tunnel_UR_y, 3, true);
 					// Go to exit
 					Navigator.travelTo(tunnel_LL_x + 0.5, tunnel_LL_y - 0.7, 7, false);
 					BigArmHook.rotate(-120);
@@ -181,8 +195,7 @@ public class GameLogic extends MotorController {
 					Navigator.travelUntil();
 					Navigator.travelTo(tunnel_LL_x - 0.5, tunnel_LL_y + 0.5, 5, false);
 
-				}
-				else if (tunnel_UR_x - tunnel_LL_x == 1 && tunnel_UR_y - tunnel_LL_y == 1) {
+				} else if (tunnel_UR_x - tunnel_LL_x == 1 && tunnel_UR_y - tunnel_LL_y == 1) {
 					// entry is vertical
 					if (isPointOnZone(tunnel_LL_x + 1, tunnel_LL_y, team_Zone_LL_x, team_Zone_LL_y, team_Zone_UR_x,
 							team_Zone_UR_y)) {
@@ -265,24 +278,16 @@ public class GameLogic extends MotorController {
 	 * Compute which entry is on or within the border of the current land to decide
 	 * which entry to take.
 	 *
-	 * Method is called by the Ev3Boot class.
+	 * Method is called by travelToTunnel method.
 	 * 
-	 * @param tunnel_ll_x:
-	 *            tunnel lower left x coordinate
-	 * @param tunnel_ll_y:
-	 *            tunnel lower left y coordinate
-	 * @param tunnel_ur_x:
-	 *            tunnel upper right x coordinate
-	 * @param tunnel_ur_y:
-	 *            tunnel upper right y coordinate
-	 * @param zone_ll_x:
-	 *            current zone lower left x coordinate
-	 * @param zone_ll_y:
-	 *            current zone lower left y coordinate
-	 * @param zone_ur_x:
-	 *            current zone upper right x coordinate
-	 * @param zone_ur_y:
-	 *            current zone upper right y coordinate
+	 * @param tunnel_ll_x: tunnel lower left x coordinate
+	 * @param tunnel_ll_y: tunnel lower left y coordinate
+	 * @param tunnel_ur_x: tunnel upper right x coordinate
+	 * @param tunnel_ur_y: tunnel upper right y coordinate
+	 * @param zone_ll_x: zone lower left x coordinate
+	 * @param zone_ll_y: zone lower left y coordinate
+	 * @param zone_ur_x: zone upper right x coordinate
+	 * @param zone_ur_y: zone upper right y coordinate
 	 * @return true if entry to take is lower left, false if entry to take is upper
 	 *         right
 	 */
@@ -308,15 +313,11 @@ public class GameLogic extends MotorController {
 	 * 
 	 * Method is called by the Ev3Boot class.
 	 * 
-	 * @param ring_x:
-	 *            ring x coordinate
-	 * @param ring_y:
-	 *            ring y coordinate
-	 * @param robot_x:
-	 *            current x position
-	 * @param robot_y:
-	 *            current y position
-	 * @return 0 or 1 or 2 or 3 0 = bottom 1 = right 2 = top 3 = left
+	 * @param ring_x: ring x coordinate
+	 * @param ring_y: ring y coordinate
+	 * @param robot_x: current x position
+	 * @param robot_y: current y position
+	 * @return 0 or 1 or 2 or 3, 0 = bottom 1 = right 2 = top 3 = left
 	 */
 	public static int closestSideOfTree(int ring_x, int ring_y, double robot_x, double robot_y) {
 		double smallestDist = 999999;
@@ -353,6 +354,18 @@ public class GameLogic extends MotorController {
 		return position;
 	}
 
+	/**
+	 * Method that look if a point is on the border of island. Used to determine if
+	 * a side of a tree is visitable, the only cas it is not if it is on island
+	 * border.
+	 * 
+	 * return true if it is on island border. return false if it is not on island.
+	 * border
+	 * 
+	 * @param x: x coordinate of point to check if it is on island border
+	 * @param y: y coordinate of point to check if it is on island border
+	 * @return
+	 */
 	public static boolean isLandBorder(int x, int y) {
 		int x1 = Wifi.getIsland_LL_x();
 		int y1 = Wifi.getIsland_LL_y();
@@ -369,6 +382,22 @@ public class GameLogic extends MotorController {
 		return false;
 	}
 
+	/**
+	 * Method used to check if a point is located inside or on the border of the
+	 * stating island. Used by travelToTunnel method to know where is the entry
+	 * located in the case the tunnel is of dimension 1x1.
+	 * 
+	 * return true if point is on starting zone. return false if point is not on
+	 * starting zone
+	 * 
+	 * @param x: x-coordinate of point to check if it is on starting land
+	 * @param y: y-coordinate of point to check if it is on starting land
+	 * @param zone_ll_x: starting zone lower left x-coordinate
+	 * @param zone_ll_y: starting zone lower left y-coordinate
+	 * @param zone_ur_x: starting zone upper right x-coordinate
+	 * @param zone_ur_y: starting zone upper right y-cooridnate
+	 * @return
+	 */
 	public static boolean isPointOnZone(int x, int y, int zone_ll_x, int zone_ll_y, int zone_ur_x, int zone_ur_y) {
 		// lower left x is in the zone
 		if (x >= zone_ll_x && x <= zone_ur_x) {

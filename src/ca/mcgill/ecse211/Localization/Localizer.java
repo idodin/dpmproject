@@ -12,9 +12,18 @@ import lejos.robotics.SampleProvider;
 
 /**
  * This class role is to localize the robots position using the ultrasonic
- * sensor assuming it is in a corner.
+ * sensor and light sensor assuming it is in a corner. This class is also used
+ * to correct heading and postion assuming it is close from a line intersection.
  * 
- * This class contains methods to execute Falling Edge Ultrasonic.
+ * This class contains methods to execute Falling Edge Ultrasonic, light
+ * localization and circle localization.
+ * 
+ * This class extends "MotorController" to facilitate all the motor logic.
+ * 
+ * Methods in this class are called by the Ev3Boot class to execute
+ * localization. Also called by turnAroundTree method to relocalize at an
+ * intersection before trying to detect rings to make sure it is in a good
+ * position.
  * 
  * @author Imad Dodin
  * @author An Khang Chau
@@ -22,17 +31,19 @@ import lejos.robotics.SampleProvider;
  */
 public class Localizer extends MotorController {
 
-
 	private static SampleProvider usAverage = Ev3Boot.getUSAverage();
 	private static float[] usData = Ev3Boot.getUSData();
+
 	private static SampleProvider colorLeft = Ev3Boot.getColorLeft();
 	private static float[] colorBufferLeft = Ev3Boot.getColorLeftBuffer();
 	private static float currentColorLeft;
 	private static float oldColorLeft;
+
 	private static SampleProvider colorRight = Ev3Boot.getColorRight();
 	private static float[] colorBufferRight = Ev3Boot.getColorRightBuffer();
 	private static float currentColorRight;
 	private static float oldColorRight;
+
 	private static int corner;
 
 	private static int fallingDistance = 40;
@@ -61,16 +72,16 @@ public class Localizer extends MotorController {
 	 * the heading of the robot. A more precise heading correction will be done
 	 * after.
 	 * 
-	 * First, the robot turns clockwise until distance is greater than d + k +
-	 * rfalling. This ensure that if the robot start facing the wall, it only start
+	 * First, the robot turns clockwise until distance is greater than faceToWallD *
+	 * distance. This ensure that if the robot start facing the wall, it only start
 	 * looking for falling edge after turning away from the wall. Then the robot
 	 * continue turning clockwise until 2 consecutive readings of distance is
-	 * smaller than d + 5 + k. Stop the motors when the first falling edge is found
-	 * and record the angle as angle "a". Then the robot start turning counter
-	 * clockwise until 2 consecutive readings of distance is smaller than d + 5 + k.
-	 * Stop the motors and record the angle as angle "b". Using "a" and "b", compute
-	 * the angle correction to determine current angle. Finally, turn to the 0
-	 * degree heading.
+	 * smaller than fallingDistance. Stop the motors when the first falling edge is
+	 * found and record the angle as angle "a". Then the robot start turning counter
+	 * clockwise until 2 consecutive readings of distance is smaller than
+	 * fallingDistance. Stop the motors and record the angle as angle "b". Using "a"
+	 * and "b", compute the angle correction to determine current angle. Finally,
+	 * turn to the 0 degree heading.
 	 * 
 	 * @throws OdometerExceptions
 	 */
@@ -150,26 +161,6 @@ public class Localizer extends MotorController {
 
 		setSpeeds(FORWARD_SPEED);
 
-		// leftMotor.forward();
-		// rightMotor.forward();
-
-		// SColor.fetchSample(data, 0);
-		// color = data[0] * 1000;
-
-		// while (true) {
-		// lastColor = color;
-		// SColor.fetchSample(data, 0);
-		// color = data[0] * 1000;
-		// tem.out.println(color);
-		// if (color - lastColor > 6500) {
-		// leftMotor.stop(true);
-		// rightMotor.stop();
-		// leftMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10), true);
-		// rightMotor.rotate(-Navigator.convertDistance(WHEEL_RADIUS, 10), false);
-		// break;
-		// }
-		// }
-
 		// Correct theta and orientate to 0.
 		if (a < b) {
 			correction = 45 - (a + b) / 2;
@@ -184,10 +175,22 @@ public class Localizer extends MotorController {
 
 	}
 
+	/**
+	 * This method is used to correct the robots x and y. The robot starts at a 0
+	 * degree angle and it goes forward until it detects a line. The odometer's y
+	 * value is then corrected using the offset between the sensors and the
+	 * wheelbase as well as the starting corner. Once the first line is detected the
+	 * method rotates the robot by 90 degree using the turnBy method from the
+	 * Navigator class and makes the robot go forward again until it detects a line,
+	 * then the odometer's x is then corrected using the offset between the sensors
+	 * and the wheelbase as well as the starting corner.
+	 * 
+	 * @throws OdometerExceptions
+	 */
 	public static void localizeColor() throws OdometerExceptions {
 		int map_x = 14;
 		int map_y = 8;
-		
+
 		boolean firstSet = false;
 		boolean secondSet = false;
 		corner = Wifi.getCorner();
@@ -219,22 +222,11 @@ public class Localizer extends MotorController {
 			colorRight.fetchSample(colorBufferRight, 0);
 			currentColorRight = colorBufferRight[0] * 1000;
 
-			// COPY START
-
 			if (currentColorLeft - oldColorLeft > 19 && Navigator.pollMultiple(false, 15)) {
 
 				leftMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorRight - oldColorRight <= 19) {
-					if (rightMotor.getSpeed() != CORRECTOR_SPEED || leftMotor.getSpeed() != CORRECTOR_SPEED) {
-						// setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
-					}
-					// if (rightMotor.getSpeed() != CORRECTOR_SPEED) {
-					// rightMotor.stop();
-					// setSpeeds(CORRECTOR_SPEED);
-					// rightMotor.forward();
-					// }
-
 
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						stopBoth();
@@ -242,17 +234,6 @@ public class Localizer extends MotorController {
 						bothForwards();
 						break;
 					}
-					// phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-					// phi = phi > 180 ? 360 - phi : phi;
-					// if (phi > 15) {
-					// rightMotor.stop(true);
-					// leftMotor.stop();
-					// Navigator.turnBy(15, true, true);
-					// forwardBy(-5);
-					// bothForwards();
-					// break;
-					// }
-
 					oldColorRight = currentColorRight;
 					colorRight.fetchSample(colorBufferRight, 0);
 					currentColorRight = colorBufferRight[0] * 1000;
@@ -265,42 +246,42 @@ public class Localizer extends MotorController {
 					case 0:
 						odo.setX(TILE_SIZE + SENSOR_OFFSET);
 						odo.setTheta(90);
-						Navigator.travelTo(1,1,2,false);
+						Navigator.travelTo(1, 1, 2, false);
 						Navigator.turnTo(0);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(1.5,1.5,2,false);
+						Navigator.travelTo(1.5, 1.5, 2, false);
 						break;
 					case 1:
 						odo.setY(TILE_SIZE + SENSOR_OFFSET);
 						odo.setTheta(0);
-						Navigator.travelTo(map_x,1,2,false);
+						Navigator.travelTo(map_x, 1, 2, false);
 						Navigator.turnTo(0);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(map_x - 0.5,1.5,2,false);	
+						Navigator.travelTo(map_x - 0.5, 1.5, 2, false);
 						break;
 					case 2:
 						odo.setX(map_x * TILE_SIZE - SENSOR_OFFSET);
 						odo.setTheta(270);
-						Navigator.travelTo(map_x, map_y,2 ,false);
+						Navigator.travelTo(map_x, map_y, 2, false);
 						Navigator.turnTo(180);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(map_x - 0.5, map_y - 0.5,2,false);
+						Navigator.travelTo(map_x - 0.5, map_y - 0.5, 2, false);
 						break;
 					case 3:
 						odo.setY(map_y * TILE_SIZE - SENSOR_OFFSET);
 						odo.setTheta(180);
-						Navigator.travelTo(1,map_y,2,false);
+						Navigator.travelTo(1, map_y, 2, false);
 						Navigator.turnTo(180);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(1.5, map_y-0.5,2,false);
+						Navigator.travelTo(1.5, map_y - 0.5, 2, false);
 						break;
 					}
 
@@ -353,23 +334,10 @@ public class Localizer extends MotorController {
 				continue;
 
 			} else if (currentColorRight - oldColorRight > 19 && Navigator.pollMultiple(true, 15)) {
-				// tem.out.println("Right line detected:\n" + (currentColorRight -
-				// oldColorRight));
 
 				rightMotor.stop(true);
 				double theta = odo.getXYT()[2];
 				while (currentColorLeft - oldColorLeft <= 19) {
-					if (rightMotor.getSpeed() != CORRECTOR_SPEED || leftMotor.getSpeed() != CORRECTOR_SPEED) {
-						// setSpeedAccel(CORRECTOR_SPEED, TURN_ACCELERATION);
-					}
-
-
-					// if (leftMotor.getSpeed() != CORRECTOR_SPEED) {
-					// leftMotor.stop();
-					// setSpeeds(CORRECTOR_SPEED);
-					// leftMotor.forward();
-					// }
-
 
 					if (angleDiff(odo.getXYT()[2], theta) > 25) {
 						stopBoth();
@@ -378,18 +346,6 @@ public class Localizer extends MotorController {
 						bothForwards();
 						break;
 					}
-
-					// phi = Math.abs(odo.getXYT()[2] - theta) % 360;
-					// phi = phi > 180 ? 360 - phi : phi;
-					// if (phi > 15) {
-					// rightMotor.stop(true);
-					// leftMotor.stop();
-					// Navigator.turnBy(15, false, true);
-					// forwardBy(-5);
-					// bothForwards();
-					// break;
-					// }
-
 
 					oldColorLeft = currentColorLeft;
 					colorLeft.fetchSample(colorBufferLeft, 0);
@@ -404,42 +360,42 @@ public class Localizer extends MotorController {
 					case 0:
 						odo.setX(TILE_SIZE + SENSOR_OFFSET);
 						odo.setTheta(90);
-						Navigator.travelTo(1,1,2,false);
+						Navigator.travelTo(1, 1, 2, false);
 						Navigator.turnTo(0);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(1.5,1.5,2,false);
+						Navigator.travelTo(1.5, 1.5, 2, false);
 						break;
 					case 1:
 						odo.setY(TILE_SIZE + SENSOR_OFFSET);
 						odo.setTheta(0);
-						Navigator.travelTo(map_x,1,2,false);
+						Navigator.travelTo(map_x, 1, 2, false);
 						Navigator.turnTo(0);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(map_x - 0.5,1.5,2,false);	
+						Navigator.travelTo(map_x - 0.5, 1.5, 2, false);
 						break;
 					case 2:
 						odo.setX(map_x * TILE_SIZE - SENSOR_OFFSET);
 						odo.setTheta(270);
-						Navigator.travelTo(map_x, map_y,2 ,false);
+						Navigator.travelTo(map_x, map_y, 2, false);
 						Navigator.turnTo(180);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(map_x - 0.5, map_y - 0.5,2,false);
+						Navigator.travelTo(map_x - 0.5, map_y - 0.5, 2, false);
 						break;
 					case 3:
 						odo.setY(map_y * TILE_SIZE - SENSOR_OFFSET);
 						odo.setTheta(180);
-						Navigator.travelTo(1,map_y,2,false);
+						Navigator.travelTo(1, map_y, 2, false);
 						Navigator.turnTo(180);
 						Sound.beep();
 						Sound.beep();
 						Sound.beep();
-						Navigator.travelTo(1.5, map_y-0.5,2,false);
+						Navigator.travelTo(1.5, map_y - 0.5, 2, false);
 						break;
 					}
 
@@ -496,8 +452,25 @@ public class Localizer extends MotorController {
 
 	}
 
+	/**
+	 * This method is used to perform the circle localization. For this type of
+	 * localization to succeed, the method assumes that the robot is close enough to
+	 * a grid intersection. First, the robot rotates 360 degrees while detecting the
+	 * black line it crosses. At each crossed line, it records its angle using the
+	 * theta value from the odometer. It stores the angles in four different
+	 * variables, firstLine, secondLine, thirdLine, fourhtLine, which each represent
+	 * the intersection with the positive and negative x and y axis. For the logic
+	 * of this method to work the order of the encountered lines is important, so we
+	 * chose to rotate counter clockwise and start at a 45-degree heading
+	 * consistently. Once it has encountered all four lines, it corrects the
+	 * coordinates of the robot using the x and y passed in to the method and the
+	 * recorded angles
+	 * 
+	 * @param x: x-coordinate of the intersection we are correcting to
+	 * @param y: x-coordinate of the intersection we are correcting to
+	 */
 	public static void circleLocalize(double x, double y) {
-		
+
 		double newSensorOffset = -1 * SENSOR_OFFSET;
 
 		try {
@@ -508,8 +481,7 @@ public class Localizer extends MotorController {
 		}
 
 		turnTo(60);
-		
-		
+
 		colorRight.fetchSample(colorBufferRight, 0);
 		color = colorBufferRight[0] * 1000;
 
@@ -524,9 +496,8 @@ public class Localizer extends MotorController {
 
 			colorRight.fetchSample(colorBufferRight, 0);
 			color = colorBufferRight[0] * 1000;
-			if (color - lastColor > 5 && Navigator.pollMultiple(true,1)) {
+			if (color - lastColor > 5 && Navigator.pollMultiple(true, 1)) {
 				temp = Ev3Boot.odo.getXYT()[2];
-				// tem.out.println(temp);
 				Sound.beep();
 				if (counter == 1) {
 					firstLine = temp;
@@ -543,27 +514,18 @@ public class Localizer extends MotorController {
 			}
 		}
 
-		//tem.out.println("[" + odo.getXYT()[0] + "," + odo.getXYT()[1] + "]");
-
 		// we are to the right
 		if (Math.abs(secondLine - firstLine) > Math.abs(fourthLine - firstLine)) {
-		//	tem.out.println("im to the right");
 			newSensorOffset = -1 * newSensorOffset;
 		}
 
-		xOrigin = ((x * TILE_SIZE))
-				+ (newSensorOffset * Math.cos(Math.toRadians(Math.abs(firstLine - thirdLine)) / 2));
+		xOrigin = ((x * TILE_SIZE)) + (newSensorOffset * Math.cos(Math.toRadians(Math.abs(firstLine - thirdLine)) / 2));
 		yOrigin = (y * TILE_SIZE)
 				+ (-1 * SENSOR_OFFSET * Math.cos(Math.toRadians(Math.abs(secondLine - fourthLine)) / 2));
-
-		//tem.out.println("Corrected Co-ord: [" + xOrigin + "," + yOrigin + "]");
 
 		odo.setX(xOrigin);
 		odo.setY(yOrigin);
 
 		Navigator.travelTo(x, y, 2, false);
-//		Navigator.turnTo(((((secondLine + fourthLine) / 2)) % 360));
-		//turnTo(0);
-		
 	}
 }

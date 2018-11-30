@@ -13,11 +13,14 @@ import lejos.robotics.SampleProvider;
 
 /**
  * This class contains methods to allow the robot to navigate to specified
- * waypoint, or to turn to specific angle.
+ * waypoint, to turn to specific angle, travel until a line is detected and
+ * correct its orientation.
  * 
- * It is mainly called by the Ev3Boot class to navigate to strategic point. It
- * is also called by other LightLocalization class to navigate to a line
- * intersection.
+ * It is mainly called by the Ev3Boot and GameLogic class to navigate to
+ * strategic point. It is also called by other LightLocalization class to
+ * navigate to a line intersection.
+ * 
+ * This class extends "MotorController" to facilitate all the motor logic.
  * 
  * @author Imad Dodin
  * @author An Khang Chau
@@ -29,7 +32,6 @@ public class Navigator extends MotorController {
 	private static final int BLACK = 300;
 	private static final int errorMargin = 150;
 
-	// private static final double TILE_SIZE = Ev3Boot.getTileSize();
 	private static final int TURN_ERROR = 1;
 	private static SampleProvider colorSensorLeft = Ev3Boot.getColorLeft();
 	private static SampleProvider colorSensorRight = Ev3Boot.getColorRight();
@@ -69,27 +71,12 @@ public class Navigator extends MotorController {
 	private static double phi;
 
 	/**
-	 * 
-	 * This method execute navigation to a specific point, if wanted it can light
-	 * localize upon arrival.
-	 * 
-	 * This method causes the robot to travel to an intermediate waypoint in the
-	 * case of diagonal travel. The method continuously polls the 2 rear light
-	 * sensors. In the case that a line is detected by one of them, its respective
-	 * motor is stopped until the robot corrects its heading (the second light
-	 * sensor detects a line). In a loop calculate distance between current position
-	 * and arrival point, if the distance is smaller than treshHold, stop the
-	 * motors. When the distance from arrival point is acceptable stop the motors
-	 * and light localize if specified.
-	 * 
-	 * @param x:
-	 *            x coordinate to navigate to
-	 * @param y:
-	 *            y coordinate to navigate to
-	 * @param treshHold:
-	 *            acceptable error distance
-	 * @param localizing:
-	 *            should to robot localize upon arrival
+	 * This method makes the robot go forward until it detects a line. To detect the
+	 * line it uses the checkLines method. Once it has detected a line, it uses the
+	 * cosine and sine of the robot’s heading to decide which coordinate has to be
+	 * modified. We only modify one coordinate at a time because our robot only
+	 * performs straight traveling. It corrects the x or y coordinate to the closest
+	 * line.
 	 */
 	public static void travelUntil() {
 		long currentTime = System.currentTimeMillis();
@@ -171,26 +158,19 @@ public class Navigator extends MotorController {
 
 	/**
 	 * 
-	 * This method execute navigation to a specific point, if wanted it can light
-	 * localize upon arrival.
+	 * This method execute navigation to a specific point. The method continuously
+	 * polls the 2 rear light sensors. In the case that a line is detected by one of
+	 * them, its respective motor is stopped until the robot corrects its heading
+	 * (the second light sensor detects a line). In a loop calculate distance
+	 * between current position and arrival point, if the distance is smaller than
+	 * treshHold, stop the motors. When the distance from arrival point is
+	 * acceptable stop the motors and light localize if specified. When a line is
+	 * crossed the robot corrects its odometry,
 	 * 
-	 * This method causes the robot to travel to an intermediate waypoint in the
-	 * case of diagonal travel. The method continuously polls the 2 rear light
-	 * sensors. In the case that a line is detected by one of them, its respective
-	 * motor is stopped until the robot corrects its heading (the second light
-	 * sensor detects a line). In a loop calculate distance between current position
-	 * and arrival point, if the distance is smaller than treshHold, stop the
-	 * motors. When the distance from arrival point is acceptable stop the motors
-	 * and light localize if specified.
-	 * 
-	 * @param x:
-	 *            x coordinate to navigate to
-	 * @param y:
-	 *            y coordinate to navigate to
-	 * @param treshHold:
-	 *            acceptable error distance
-	 * @param localizing:
-	 *            should to robot localize upon arrival
+	 * @param x: x coordinate to navigate to
+	 * @param y: y coordinate to navigate to
+	 * @param treshHold: acceptable error distance
+	 * @param checkLine: should the robot detect line to correct itself or not
 	 */
 	public static void travelTo(double x, double y, int treshHold, boolean checkLine) {
 		long currentTime = System.currentTimeMillis();
@@ -242,7 +222,7 @@ public class Navigator extends MotorController {
 			}
 
 			// OdometerCorrection.isCorrecting = false;
-			turnTo((((baseAngle + adjustAngle + (distance > TILE_SIZE ? 5 : 0) ) % 360) + 360) % 360);
+			turnTo((((baseAngle + adjustAngle + (distance > TILE_SIZE ? 5 : 0)) % 360) + 360) % 360);
 			odo.setTheta(baseAngle + adjustAngle);
 			// OdometerCorrection.isCorrecting = true;
 
@@ -287,6 +267,21 @@ public class Navigator extends MotorController {
 
 	}
 
+	/**
+	 * This method starts by fetching samples from the two light sensors, for each
+	 * sensor it uses a differential filter, it fetches two samples and computes
+	 * their difference which it then compares to a threshold. When crossing a line,
+	 * If the two sensors are i.e both sensors detect the line, the method returns
+	 * true. Otherwise it attempts to correct the robot’s heading. When only one of
+	 * the sensors detects a line it stops the corresponding wheel, which makes the
+	 * motor rotate in place. The robot keeps rotating until the other sensor
+	 * detects the line as well, which brings the robot to a 0 degree heading. To
+	 * limit the errors caused by crossing a vertical side line, the method stops
+	 * both motors after turning more than 25 degrees and rotates back to the
+	 * initial heading.
+	 * 
+	 * @return
+	 */
 	public static boolean checkForLines() {
 		// Take previously retrieved values for colours as old colour values.
 		oldColorLeft = colorLeft;
@@ -332,7 +327,6 @@ public class Navigator extends MotorController {
 				oldColorRight = colorRight;
 				colorSensorRight.fetchSample(colorRightBuffer, 0);
 				colorRight = colorRightBuffer[0] * 1000;
-				// System.out.println(colorRight-oldColorRight);
 			}
 
 			bothForwards();
@@ -379,8 +373,6 @@ public class Navigator extends MotorController {
 				return false;
 			}
 
-			// System.out.println("Right line detected:\n" + (colorRight - oldColorRight));
-
 			rightMotor.stop(true);
 			double theta = odo.getXYT()[2];
 			while (colorLeft - oldColorLeft <= 19) {
@@ -405,7 +397,6 @@ public class Navigator extends MotorController {
 				oldColorLeft = colorLeft;
 				colorSensorLeft.fetchSample(colorLeftBuffer, 0);
 				colorLeft = colorLeftBuffer[0] * 1000;
-				// System.out.println(colorLeft-oldColorLeft);
 			}
 
 			bothForwards();
@@ -444,7 +435,6 @@ public class Navigator extends MotorController {
 				}
 
 				odo.setXYT(newX, newY, newTheta);
-				// System.out.println("New co-ordinates: " + newX + " , " + newY);
 
 				return true;
 			}
@@ -453,8 +443,17 @@ public class Navigator extends MotorController {
 		return false;
 	}
 
+	/**
+	 * This method is used to make the robot travel in straight lines. It calls the
+	 * travelTo method twice to first make the robot cover the distance on the y
+	 * axis, then it calls the same method to cover the needed distance on the x
+	 * axis.
+	 * 
+	 * @param x: x coordinate to navigate to
+	 * @param y: y coordinate to navigate to
+	 * @param threshold: acceptable distance error from final point
+	 */
 	public static void toStraightNavigator(double x, double y, int threshold) {
-		// System.out.println("coord: (" + x + ", " + y + ")");
 		try {
 			odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -466,6 +465,18 @@ public class Navigator extends MotorController {
 		travelTo(x, y, threshold, true);
 	}
 
+	/**
+	 * This method is used to sample the sensors. It takes in an input boolean
+	 * isRight which decides which sensor to sample. Then it uses the second
+	 * parameter passed, the sampleCount, inside a loop to sample the sensors. After
+	 * performing all the samples, it computes their average and compares it to
+	 * check if it’s within the error margin. This method returns true if a line has
+	 * been detected, false otherwise.
+	 * 
+	 * @param isRight: true to poll right sensor, false to poll left sensor
+	 * @param sampleCount: sample amount to be polled
+	 * @returntrue if a line has been detected, false otherwise.
+	 */
 	public static boolean pollMultiple(Boolean isRight, int sampleCount) {
 		// int sampleCount = 15;
 		float sum = 0;
@@ -486,6 +497,13 @@ public class Navigator extends MotorController {
 
 	}
 
+	/**
+	 * This method takes in a parameter value which it rounds to the closer tile
+	 * size value.
+	 * 
+	 * @param value: value to be rounded
+	 * @return value of closest tile size
+	 */
 	public static double roundToNearestTileSize(double value) {
 		return TILE_SIZE * (Math.round(value / TILE_SIZE));
 	}
